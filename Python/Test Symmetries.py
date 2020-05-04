@@ -16,6 +16,15 @@ min_p = 0
 max_p = 2 * np.pi
 #######################
 
+# if max_f > n / 2:
+#   print(f"Max frequency allowed with {n} samples is {n/2}")
+#   max_f = n/2
+
+# df = (max_f - min_f) / res_f
+
+# (min_f - 0) / (max_f - min_f) = 
+
+
 res = max(res_f, res_p)
 
 F = np.linspace(0, n, res)
