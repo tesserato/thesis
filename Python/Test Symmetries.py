@@ -9,7 +9,7 @@ n = 400
 t = 5
 
 res_f = 60
-res_p = 200
+res_p = 100
 min_f = 15
 max_f = 20
 min_p = 0
@@ -36,7 +36,7 @@ print(A.shape[0], U.shape[0])
 
 dp = 2 * np.pi / (res - 1)
 df = n / (res - 1)
-step = res_f // res_p
+step = max(1, res_f // res_p)
 
 c = int(np.ceil(res / step))
 print(len(range(0, res-1, step)), c)
@@ -71,7 +71,7 @@ fig.add_trace(
   go.Scatter(
     name= "Amplitudes",
     x= X,
-    y= Y,    
+    y= Y,
     # legendgroup="Normal",
     customdata=FP.flatten('C'),
     hovertemplate='phase:%{x:.3f}<br>frequency:%{y:.3f}<br>amplitude: %{customdata:.3f} ',
