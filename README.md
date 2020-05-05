@@ -1,5 +1,5 @@
-# thesis
-Carlos Tarjano PhD thesis WIP
+# Thesis
+Carlos Tarjano PhD thesis - WIP
 
 ---
 
@@ -10,7 +10,7 @@ Carlos Tarjano PhD thesis WIP
 - decide prominent feature: (speed, ability to identify frequencies of low res samples, linearity)
 
 ## 18 / 05 / 2020 
-- "The Interference transform - an alternative to the FFT algorithm"; mathematical focused article proposing the method and comparing with other transforms (FFT, Wavelet Transform, Short time fourier transform"
+- "The Interference transform - an alternative to the FFT algorithm"; mathematical focused article proposing the method and comparing with other transforms (FFT, Wavelet Transform, Short time Fourier transform)
 - Draft of a thesis chapter with same theme.
 
 ## 25 / 05 / 2020 
