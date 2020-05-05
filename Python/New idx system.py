@@ -5,14 +5,14 @@ from plotly.subplots import make_subplots
 
 #######################
 #######################
-n = 400
-t = 365
+n = 40
+t = 36
 local_res_f = 20
-local_res_p = 18
-local_min_f = 20
-local_max_f = 350
-min_p = np.pi / 4
-max_p = 2 * np.pi / 3
+local_res_p = 20
+local_min_f = 0
+local_max_f = 20
+min_p = 0
+max_p = 2 * np.pi
 #######################
 #######################
 
@@ -21,14 +21,14 @@ assert min_p < max_p, f"min_p={round(min_p, 3)} >= max_p={round(max_p, 3)}"
 assert local_min_f < local_max_f, f"local_min_f={round(local_min_f, 3)} >= local_max_f={round(local_max_f, 3)}"
 
 preliminar_df = (local_max_f - local_min_f) / local_res_f
-global_res_f = int(round(n / preliminar_df))
+global_res_f = int(np.ceil(n / preliminar_df))
 
 preliminar_dp = (max_p - min_p) / local_res_p
-global_res_p = int(round(2 * np.pi / preliminar_dp))
+global_res_p = int(np.ceil(2 * np.pi / preliminar_dp))
 
 res = max(global_res_f, global_res_p)
 
-print(f"n={n} | resolution f={global_res_f} | resolution p={global_res_p} | resolution={res}")
+print(f"n={n} | Global Resolution f={global_res_f} | Global Resolution p={global_res_p} | Resolution={res}")
 
 F = np.linspace(0, n, res)
 P = np.linspace(0, 2 * np.pi, res)
@@ -43,7 +43,7 @@ for i in range(res):
 
 U = np.unique(np.round(FP.flatten('C'), 3))[::-1]
 A = np.round(np.cos(np.linspace(0, 2 * np.pi, res)), 3)[0:-1]
-print(f"Unique amplitudes={U.shape[0]} | Predicted Sinusoid Resolution ={res-1} | Sinusoid Resolution ={A.shape[0]}")
+print(f"Unique amplitudes={U.shape[0]} | Predicted Sinusoid Resolution={res-1} | Sinusoid Resolution={A.shape[0]}")
 
 try:
   print(f"{np.allclose(U, A[:(res + 1)//2])}: Predicted sinusoid == Calculated sinusoid")
@@ -52,35 +52,34 @@ except:
 
 ######
 
-dp = 2 * np.pi / (res - 1)
+dp = (2 * np.pi) / (res - 1)
 df = n / (res - 1)
 
-i_i = int(np.floor(local_min_f * res / n))
-i_f = int(np.ceil(local_max_f * res / n))
-j_i = int(np.floor(min_p * res / (2 * np.pi)))
-j_f = int(np.ceil(max_p * res / (2 * np.pi)))
+i_i = int(np.round(local_min_f / df))
+i_f = int(np.round(local_max_f / df))
+i_s = max(1, int(np.round((i_f - i_i) / local_res_f)))
 
-step = max(1, int(np.ceil((j_f - j_i) / local_res_p)))
+j_i = int(np.round(min_p / dp))
+j_f = int(np.round(max_p / dp))
+j_s = max(1, int(np.round((j_f - j_i) / local_res_p)))
 
-print(f"i_i={i_i} | i_f={i_f} | j_i={j_i} | j_f={j_f} | Step={step}")
+print(f"i_i={i_i}, i_f={i_f}, i_s={i_s} | j_i={j_i}, j_f={j_f}, j_s={j_s}")
 
-c = int(np.ceil((j_f - j_i) / step))
-l = i_f - i_i
-print(f"Lines={l} | Columns={c}")
+l = int(np.round((i_f - i_i) / i_s))
+c = int(np.round((j_f - j_i) / j_s))
+print(f"Lines={l}, Columns={c}")
 FPs = np.zeros((l , c))
 Xs, Ys = [], []
-for i in range(i_i, i_f):
-  for j in range(j_i, j_f, step):
-    idx = (i * t + j) % (res - 1)
+for i in range(l):
+  for j in range(c):
+    idx = ((i_i + i * i_s) * t + j_i + j * j_s) % (res - 1)
     assert(idx >= 0)
-    idxi= i - i_i
-    idxj= (j // step) - j_i
-    FPs[idxi, idxj] = A[idx]
-    print(f"idxi={idxi} | idxj={idxj} | idx={idx}")
-    Xs.append(j * dp)
-    Ys.append(i * df)
+    FPs[i, j] = A[idx]
+    # print(f"idxi={i} | idxj={j} | idx={idx}")
+    Xs.append((j_i + j * j_s) * dp)
+    Ys.append((i_i + i * i_s) * df)
 
-naive = np.round(FP[i_i : i_f , j_i : j_f : step], 3)
+naive = np.round(FP[i_i : i_f : i_s , j_i : j_f : j_s], 3)
 try:
   print(f"{np.allclose(FPs, naive)}: Naive == Symmetries")
 except:
