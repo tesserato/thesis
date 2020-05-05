@@ -3,17 +3,17 @@ from collections import deque
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-
+#######################
 #######################
 n = 400
-t = 300
-
-local_res_f = 21
-local_res_p = 2
+t = 365
+local_res_f = 20
+local_res_p = 30
 local_min_f = 20
 local_max_f = 350
 min_p = np.pi / 4
 max_p = 2 * np.pi / 3
+#######################
 #######################
 
 assert min_p < max_p, f"min_p={round(min_p, 3)} >= max_p={round(max_p, 3)}"
@@ -50,33 +50,33 @@ try:
 except:
   print(f"FALSE: Predicted sinusoid != Calculated sinusoid")
 
-# exit()
-
-
 ######
 
 dp = 2 * np.pi / (res - 1)
 df = n / (res - 1)
-step = max(1, global_res_f // global_res_p)
-# c = int(np.ceil(res / step))
-
-# print(len(range(0, res-1, step)), c)
 
 i_i = int(np.floor(local_min_f * res / n))
 i_f = int(np.ceil(local_max_f * res / n))
 j_i = int(np.floor(min_p * res / (2 * np.pi)))
 j_f = int(np.ceil(max_p * res / (2 * np.pi)))
 
+step = max(1, int(np.ceil((j_f - j_i) / local_res_p)))
+
+print(f"i_i={i_i} | i_f={i_f} | j_i={j_i} | j_f={j_f} | Step={step}")
 
 c = int(np.ceil((j_f - j_i) / step))
-print(c)
-FPs = np.zeros((i_f - i_i , c))
+l = i_f - i_i
+print(f"Lines={l} | Columns={c}")
+FPs = np.zeros((l , c))
 Xs, Ys = [], []
 for i in range(i_i, i_f):
   for j in range(j_i, j_f, step):
     idx = (i * t + j) % (res - 1)
     assert(idx >= 0)
-    FPs[i - i_i, j // step - j_i] = A[idx]
+    idxi= i - i_i
+    idxj= (j // step) - 1
+    FPs[idxi, idxj] = A[idx]
+    print(f"idxi={idxi} | idxj={idxj} | idx={idx}")
     Xs.append(j * dp)
     Ys.append(i * df)
 
@@ -85,10 +85,11 @@ try:
   print(f"{np.allclose(FPs, naive)}: Naive == Symmetries")
 except:
   print(f"FALSE: Naive != Symmetries")
-  print(f"Naive shape={naive.shape} | Symmetries shape={FPs.shape}")
-# exit()
+print(f"Naive shape={naive.shape} | Symmetries shape={FPs.shape}")
 
+####################################################
 ####################### DRAW #######################
+####################################################
 
 fig = go.Figure()
 fig.update_xaxes(tickvals=P)
@@ -109,9 +110,7 @@ fig.add_trace(
         colorscale='Bluered', # one of plotly colorscales
         showscale=False
     )
-  )
-)
-
+  ))
 
 fig.add_trace(
   go.Scatter(
@@ -133,7 +132,17 @@ fig.add_trace(
                 width=4
       )
     )
-  )
-)
+  ))
+
+fig.add_trace(
+  go.Scatter(
+    name= "Lines",
+    x= [0, 2 * np.pi, None, 0, 2 * np.pi, None, min_p, min_p, None, max_p, max_p],
+    y= [local_min_f, local_min_f, None, local_max_f, local_max_f, None, 0, n, None, 0, n],
+    customdata=FP.flatten('C'),
+    hovertemplate='phase:%{x:.3f}<br>frequency:%{y:.3f}<br>amplitude: %{customdata:.3f} ',
+    mode='lines',
+    line=go.scatter.Line(color="gray")
+  ))
 
 fig.show()
