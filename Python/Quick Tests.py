@@ -8,13 +8,17 @@ from plotly.subplots import make_subplots
 n = 400
 t = 300
 
-local_res_f = 20
-local_res_p = 10
+local_res_f = 21
+local_res_p = 2
 local_min_f = 20
 local_max_f = 350
-min_p = np.pi
-max_p = 2 * np.pi
+min_p = np.pi / 4
+max_p = 2 * np.pi / 3
 #######################
+
+assert min_p < max_p, f"min_p={round(min_p, 3)} >= max_p={round(max_p, 3)}"
+
+assert local_min_f < local_max_f, f"local_min_f={round(local_min_f, 3)} >= local_max_f={round(local_max_f, 3)}"
 
 preliminar_df = (local_max_f - local_min_f) / local_res_f
 global_res_f = int(round(n / preliminar_df))
@@ -64,9 +68,10 @@ j_i = int(np.floor(min_p * res / (2 * np.pi)))
 j_f = int(np.ceil(max_p * res / (2 * np.pi)))
 
 
-print(i_i, i_f)
-FPs = np.zeros((i_f - i_i, j_f - j_i))
-Xs, Ys, Zs = [], [], []
+c = int(np.ceil((j_f - j_i) / step))
+print(c)
+FPs = np.zeros((i_f - i_i , c))
+Xs, Ys = [], []
 for i in range(i_i, i_f):
   for j in range(j_i, j_f, step):
     idx = (i * t + j) % (res - 1)
@@ -74,12 +79,13 @@ for i in range(i_i, i_f):
     FPs[i - i_i, j // step - j_i] = A[idx]
     Xs.append(j * dp)
     Ys.append(i * df)
-    Zs.append(A[idx])
 
+naive = np.round(FP[i_i : i_f , j_i : j_f : step], 3)
 try:
-  print(np.allclose(np.array(Zs), FPs.flatten('C')))
+  print(f"{np.allclose(FPs, naive)}: Naive == Symmetries")
 except:
-  print("oops!")
+  print(f"FALSE: Naive != Symmetries")
+  print(f"Naive shape={naive.shape} | Symmetries shape={FPs.shape}")
 # exit()
 
 ####################### DRAW #######################
@@ -106,23 +112,24 @@ fig.add_trace(
   )
 )
 
+
 fig.add_trace(
   go.Scatter(
     name= "Predicted Amplitudes",
     x= Xs,
     y= Ys,
     # legendgroup="Normal",
-    customdata=Zs,
+    customdata=FPs.flatten('C'),
     hovertemplate='phase:%{x:.3f}<br>frequency:%{y:.3f}<br>amplitude: %{customdata:.3f} ',
     mode='markers',
     marker_symbol="circle-open",
     marker=dict(
       size=18,
-      color=Zs, #set color equal to a variable
+      color=FPs.flatten('C'), #set color equal to a variable
       colorscale='Bluered', # one of plotly colorscales
       showscale=False,
       line=dict(
-                color=Zs,
+                color=FPs.flatten('C'),
                 width=4
       )
     )
