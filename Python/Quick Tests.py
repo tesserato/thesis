@@ -6,24 +6,27 @@ from plotly.subplots import make_subplots
 
 #######################
 n = 400
-t = 5
+t = 300
 
-res_f = 41
-res_p = 30
-min_f = 15
-max_f = 20
-min_p = 0
+local_res_f = 20
+local_res_p = 10
+local_min_f = 20
+local_max_f = 350
+min_p = np.pi
 max_p = 2 * np.pi
 #######################
 
-df = (max_f - min_f) / res_f
+preliminar_df = (local_max_f - local_min_f) / local_res_f
+global_res_f = int(round(n / preliminar_df))
 
+preliminar_dp = (max_p - min_p) / local_res_p
+global_res_p = int(round(2 * np.pi / preliminar_dp))
 
-res = max(res_f, res_p)
+res = max(global_res_f, global_res_p)
 
-n = max_f
+print(f"n={n} | resolution f={global_res_f} | resolution p={global_res_p} | resolution={res}")
 
-F = np.linspace(min_f, max_f, res)
+F = np.linspace(0, n, res)
 P = np.linspace(0, 2 * np.pi, res)
 FP = np.zeros((res, res))
 
@@ -34,36 +37,49 @@ for i in range(res):
     X.append(P[j])
     Y.append(F[i])
 
-# U = np.unique(np.round(FP.flatten('C'), 3))[::-1]
-# A = np.round(np.cos(np.linspace(0, 2 * np.pi, res)), 3)[0:-1]
-# print(A.shape[0], U.shape[0])
-# ####
+U = np.unique(np.round(FP.flatten('C'), 3))[::-1]
+A = np.round(np.cos(np.linspace(0, 2 * np.pi, res)), 3)[0:-1]
+print(f"Unique amplitudes={U.shape[0]} | Predicted Sinusoid Resolution ={res-1} | Sinusoid Resolution ={A.shape[0]}")
 
-# dp = 2 * np.pi / (res - 1)
-# df = n / (res - 1)
-# step = max(1, res_f // res_p)
+try:
+  print(f"{np.allclose(U, A[:(res + 1)//2])}: Predicted sinusoid == Calculated sinusoid")
+except:
+  print(f"FALSE: Predicted sinusoid != Calculated sinusoid")
 
+# exit()
+
+
+######
+
+dp = 2 * np.pi / (res - 1)
+df = n / (res - 1)
+step = max(1, global_res_f // global_res_p)
 # c = int(np.ceil(res / step))
+
 # print(len(range(0, res-1, step)), c)
 
-# i_f = min((res + 1) // 2, int(np.ceil(max_f * res / n)))
-# i_i = int(np.floor(min_f * res / n))
-# print(i_i, i_f)
-# FPs = np.zeros((i_f - i_i, c))
-# Xs, Ys, Zs = [], [], []
-# for i in range(i_i, i_f):
-#   for j in range(0, res - 1, step):
-#     idx = (i * t + j) % (res - 1)
-#     assert(idx >= 0)
-#     FPs[i - i_i, j // step] = A[idx]
-#     Xs.append(j * dp)
-#     Ys.append(i * df)
-#     Zs.append(A[idx])
+i_i = int(np.floor(local_min_f * res / n))
+i_f = int(np.ceil(local_max_f * res / n))
+j_i = int(np.floor(min_p * res / (2 * np.pi)))
+j_f = int(np.ceil(max_p * res / (2 * np.pi)))
 
-# try:
-#   print(np.allclose(np.array(Zs), FPs.flatten('C')))
-# except:
-#   print("oops!")
+
+print(i_i, i_f)
+FPs = np.zeros((i_f - i_i, j_f - j_i))
+Xs, Ys, Zs = [], [], []
+for i in range(i_i, i_f):
+  for j in range(j_i, j_f, step):
+    idx = (i * t + j) % (res - 1)
+    assert(idx >= 0)
+    FPs[i - i_i, j // step - j_i] = A[idx]
+    Xs.append(j * dp)
+    Ys.append(i * df)
+    Zs.append(A[idx])
+
+try:
+  print(np.allclose(np.array(Zs), FPs.flatten('C')))
+except:
+  print("oops!")
 # exit()
 
 ####################### DRAW #######################
@@ -90,27 +106,27 @@ fig.add_trace(
   )
 )
 
-# fig.add_trace(
-#   go.Scatter(
-#     name= "Predicted Amplitudes",
-#     x= Xs,
-#     y= Ys,
-#     # legendgroup="Normal",
-#     customdata=Zs,
-#     hovertemplate='phase:%{x:.3f}<br>frequency:%{y:.3f}<br>amplitude: %{customdata:.3f} ',
-#     mode='markers',
-#     marker_symbol="circle-open",
-#     marker=dict(
-#       size=18,
-#       color=Zs, #set color equal to a variable
-#       colorscale='Bluered', # one of plotly colorscales
-#       showscale=False,
-#       line=dict(
-#                 color=Zs,
-#                 width=4
-#       )
-#     )
-#   )
-# )
+fig.add_trace(
+  go.Scatter(
+    name= "Predicted Amplitudes",
+    x= Xs,
+    y= Ys,
+    # legendgroup="Normal",
+    customdata=Zs,
+    hovertemplate='phase:%{x:.3f}<br>frequency:%{y:.3f}<br>amplitude: %{customdata:.3f} ',
+    mode='markers',
+    marker_symbol="circle-open",
+    marker=dict(
+      size=18,
+      color=Zs, #set color equal to a variable
+      colorscale='Bluered', # one of plotly colorscales
+      showscale=False,
+      line=dict(
+                color=Zs,
+                width=4
+      )
+    )
+  )
+)
 
 fig.show()
