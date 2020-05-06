@@ -5,6 +5,7 @@ Carlos Tarjano PhD thesis - WIP
 # ToDo
 - test Intel MKL 
 - pragma loop hint parallel
+- negative module
 
 ---
 

@@ -5,10 +5,10 @@ from Helper import read_wav
 
 #######################
 #######################
-local_res_f = 20
-local_res_p = 10
-local_min_f = 1
-local_max_f = 3
+res_f = 20
+res_p = 10
+min_f = 1
+max_f = 3
 min_p = 0
 max_p = 1#2 * np.pi
 path = "Python\local_f=2.wav"
@@ -21,12 +21,12 @@ n = W.shape[0]
 
 assert min_p < max_p, f"min_p={round(min_p, 3)} >= max_p={round(max_p, 3)}"
 
-assert local_min_f < local_max_f, f"local_min_f={round(local_min_f, 3)} >= local_max_f={round(local_max_f, 3)}"
+assert min_f < max_f, f"local_min_f={round(min_f, 3)} >= local_max_f={round(max_f, 3)}"
 
-preliminar_df = (local_max_f - local_min_f) / local_res_f
+preliminar_df = (max_f - min_f) / res_f
 global_res_f = int(np.ceil(n / preliminar_df))
 
-preliminar_dp = (max_p - min_p) / local_res_p
+preliminar_dp = (max_p - min_p) / res_p
 global_res_p = int(np.ceil(2 * np.pi / preliminar_dp))
 
 res = max(global_res_f, global_res_p)
@@ -38,18 +38,18 @@ A = np.round(np.cos(np.linspace(0, 2 * np.pi, res)), 3)[0:-1]
 dp = (2 * np.pi) / (res - 1)
 df = n / (res - 1)
 
-i_i = int(np.round(local_min_f / df))
-i_f = int(np.round(local_max_f / df))
-i_s = max(1, int(np.round((i_f - i_i) / local_res_f)))
+f_idx_ini = int(np.round(min_f / df))
+f_idx_fin = int(np.round(max_f / df))
+f_step = max(1, int(np.round((f_idx_fin - f_idx_ini) / res_f)))
 
-j_i = int(np.round(min_p / dp))
-j_f = int(np.round(max_p / dp))
-j_s = max(1, int(np.round((j_f - j_i) / local_res_p)))
+p_idx_ini = int(np.round(min_p / dp))
+p_idx_fin = int(np.round(max_p / dp))
+p_step = max(1, int(np.round((p_idx_fin - p_idx_ini) / res_p)))
 
-print(f"i_i={i_i}, i_f={i_f}, i_s={i_s} | j_i={j_i}, j_f={j_f}, j_s={j_s}")
+print(f"i_i={f_idx_ini}, i_f={f_idx_fin}, i_s={f_step} | j_i={p_idx_ini}, j_f={p_idx_fin}, j_s={p_step}")
 
-l = int(np.round((i_f - i_i) / i_s))
-c = int(np.round((j_f - j_i) / j_s))
+l = int(np.round((f_idx_fin - f_idx_ini) / f_step))
+c = int(np.round((p_idx_fin - p_idx_ini) / p_step))
 print(f"Lines={l}, Columns={c}")
 FP = np.zeros((l , c))
 
@@ -58,7 +58,7 @@ FP = np.zeros((l , c))
 for t in range(n):
   for i in range(l):
     for j in range(c):
-      idx = ((i_i + i * i_s) * t + j_i + j * j_s) % (res - 1)
+      idx = ((f_idx_ini + i * f_step) * t + p_idx_ini + j * p_step) % (res - 1)
       # assert(idx >= 0)
       FP[i, j] += A[idx] * W[t]
 
@@ -66,8 +66,8 @@ FP = FP * 2 / n
 
 ind_f, ind_p = np.unravel_index(np.argmax(FP, axis=None), FP.shape)
 
-max_p = np.round((j_i + ind_p) * dp, 2)
-max_f = np.round((i_i + ind_f) * df, 2)
+max_p = np.round((p_idx_ini + ind_p * p_step) * dp, 2)
+max_f = np.round((f_idx_ini + ind_f * f_step) * df, 2)
 
 print(f"f={max_f}, p={max_p}")
 
@@ -75,8 +75,8 @@ print(f"f={max_f}, p={max_p}")
 
 fig = go.Figure()
 
-X = np.arange(j_i, j_f, j_s) * dp
-Y = np.arange(i_i, i_f, i_s) * df
+X = np.arange(p_idx_ini, p_idx_fin, p_step) * dp
+Y = np.arange(f_idx_ini, f_idx_fin, f_step) * df
 fig.add_trace(go.Heatmap(z=FP, x=X, y=Y))
 
 fig.update_xaxes(tickvals=X)
