@@ -2,6 +2,11 @@
 Carlos Tarjano PhD thesis - WIP
 
 ---
+# ToDo
+ [ ] test intel mdk
+ [ ] pragma loop hint parallel
+
+---
 
 # Calendar
 
