@@ -3,3 +3,33 @@ Text/Thesis.fdb_latexmk
 Text/Thesis.fls
 Text/Thesis.log
 Text/Thesis.synctex.gz
+.vs/ProjectSettings.json
+.vs/slnx.sqlite
+.vs/VSWorkspaceState.json
+Cpp/.vs/Interference Transform/v16/.suo
+Cpp/.vs/Interference Transform/v16/Browse.VC.db
+Cpp/.vs/Interference Transform/v16/Solution.VC.db
+Cpp/.vs/Interference Transform/v16/ipch/AutoPCH/409f0d6c765418b3/MAIN.ipch
+Cpp/.vs/Interference Transform/v16/ipch/AutoPCH/92664d5e7e642580/MAIN.ipch
+Cpp/.vs/Interference Transform/v16/ipch/AutoPCH/f4a9572aa95a593/MAIN.ipch
+Cpp/Configurations/.vs/Interference Transform/v16/.suo
+Cpp/Configurations/.vs/Interference Transform/v16/Browse.VC.db
+Cpp/Execs/Debug x64 Interference Transform.ilk
+Cpp/Execs/Debug x64 Interference Transform.pdb
+Cpp/Execs/x64 Interference Transform.iobj
+Cpp/Execs/x64 Interference Transform.ipdb
+Cpp/Execs/x64 Interference Transform.pdb
+Cpp/Intermediary/Interfer.935BAB5A.tlog/CL.command.1.tlog
+Cpp/Intermediary/Interfer.935BAB5A.tlog/CL.read.1.tlog
+Cpp/Intermediary/Interfer.935BAB5A.tlog/CL.write.1.tlog
+Cpp/Intermediary/Interfer.935BAB5A.tlog/Interference Transform.lastbuildstate
+Cpp/Intermediary/Interfer.935BAB5A.tlog/Interference Transform.write.1u.tlog
+Cpp/Intermediary/Interfer.935BAB5A.tlog/link.command.1.tlog
+Cpp/Intermediary/Interfer.935BAB5A.tlog/link.read.1.tlog
+Cpp/Intermediary/Interfer.935BAB5A.tlog/link.write.1.tlog
+Cpp/Intermediary/Debug x64 Interference Transform.Build.CppClean.log
+Cpp/Intermediary/Interference Transform.log
+Cpp/Intermediary/Interference Transform.vcxproj.FileListAbsolute.txt
+Cpp/Intermediary/Main.obj
+Cpp/Intermediary/vc142.idb
+Cpp/Intermediary/vc142.pdb
