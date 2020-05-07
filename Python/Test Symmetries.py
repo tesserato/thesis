@@ -26,7 +26,7 @@ global_res_f = int(np.ceil(n / preliminar_df))
 preliminar_dp = (max_p - min_p) / local_res_p
 global_res_p = int(np.ceil(2 * np.pi / preliminar_dp))
 
-res = max(global_res_f, global_res_p)
+res = max(global_res_f, global_res_p) + 1
 
 print(f"n={n} | Global Resolution f={global_res_f} | Global Resolution p={global_res_p} | Resolution={res}")
 

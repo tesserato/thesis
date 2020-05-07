@@ -34,3 +34,8 @@ Cpp/Intermediary/Main.obj
 Cpp/Intermediary/vc142.idb
 Cpp/Intermediary/vc142.pdb
 Cpp/Execs/FP.csv
+Cpp/Intermediary/Main.nativecodeanalysis.sarif
+Cpp/Intermediary/Main.nativecodeanalysis.xml
+Cpp/Intermediary/NativeCodeAnalysis.read.1.tlog
+Cpp/Intermediary/vc.nativecodeanalysis.all.xml
+Cpp/Execs/x64 Interference Transform.exe.lastcodeanalysissucceeded
