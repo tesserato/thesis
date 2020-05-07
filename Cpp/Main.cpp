@@ -5,10 +5,14 @@ int main() {
 	Wav WA = read_wav("Wavs/local_f=2.wav");
 	auto W = WA.get_samples();
 
-	auto FP = interf_trans(W, 2000, 500);
+	auto FT = rfft_n(W);
 
-	write_2d_vector(FP, "FP.csv");
+	get_f_and_p(FT);
 
+	//auto FP = interf_trans(W, 2000, 500);
+	//write_2d_vector(FP, "FP.csv");
+
+	//std::cout << "----------";
 	char dummy;
 	std::cin.get(dummy);
 
