@@ -3,10 +3,10 @@ Carlos Tarjano PhD thesis - WIP
 
 ---
 # ToDo
-- test Intel MKL 
-- pragma loop hint parallel
+- ~~test Intel MKL~~ no effect; only works in vectorized code, probably
+- ~~pragma loop hint parallel~~ seems to slow the code
 - negative module
-
+- update python imp to reflect C++
 ---
 
 # Calendar
