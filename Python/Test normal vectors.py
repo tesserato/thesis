@@ -1,0 +1,130 @@
+# import plotly.express as px
+import plotly.graph_objects as go
+import numpy as np
+
+
+#######################
+n = 10
+X = np.arange(n)
+
+f = 2
+p = 2 * np.pi
+W = np.cos(p + 2 * np.pi * f * X / n)
+#######################
+
+fig = go.Figure()
+
+fig.update_xaxes(tickvals=[0, np.pi / 2, np.pi, 3 * np.pi / 2, 2 * np.pi])
+fig.update_yaxes(tickvals=[i for i in range(n)])
+
+fig.update_layout(
+    # width = 2 * np.pi * 220,
+    # height = n * 220,
+    # yaxis = dict(scaleanchor = "x", scaleratio = 1),
+    title=f"n = {n}",
+    xaxis_title="Phase",
+    yaxis_title="Frequency",
+    font=dict(
+        family="Courier New, monospace",
+        size=18,
+        color="#7f7f7f"
+    )
+)
+sum_p_vec = 0
+sum_f_vec = 0
+for t in range(n):
+  X_lines=[]
+  Y_lines=[]
+
+  # for k in range(1, t + 1):
+  #   f0 = n * k / t
+  #   f2pi = n * k / t - n * 2 * np.pi / (2 * np.pi * t)
+  #   X_lines.append(0)
+  #   X_lines.append(2 * np.pi)
+  #   X_lines.append(np.nan)
+  #   Y_lines.append(f0)
+  #   Y_lines.append(f2pi)
+  #   Y_lines.append(np.nan)
+
+  p_vec = (2 * np.pi * n**2) / (n**2 + 4 * np.pi**2 * t**2)
+  f_vec = (4 * np.pi**2 * n * t) / (n**2 + 4 * np.pi**2 * t**2)
+  md = np.sqrt(p_vec**2 + f_vec**2)
+  sum_p_vec += p_vec * W[t] / md
+  sum_f_vec += f_vec * W[t] / md
+  X_lines.append(0)
+  Y_lines.append(0)
+  X_lines.append(p_vec)
+  Y_lines.append(f_vec)
+
+  fig.add_trace(
+    go.Scatter(
+      x=X_lines, 
+      y=Y_lines,
+      hoverinfo=f"all",
+      name=f"t={t}, a={W[t]:.2f}", 
+      mode='lines',
+      line=go.scatter.Line(
+        width=max(1, W[t]**2 * 10),
+        dash="solid" if W[t]>0 else "dash"
+        )
+    )
+  )
+
+fig.add_trace(
+  go.Scatter(
+    x=[p], 
+    y=[f],
+    name=f"max", 
+    mode='markers',
+    marker=dict(
+        size=8,
+        color="black", #set color equal to a variable
+        showscale=False
+    )
+  )
+)
+
+fig.add_annotation(
+  ax=0, 
+  ay=0, 
+  x=sum_p_vec, 
+  y=sum_f_vec, 
+  showarrow=True, 
+  text = "",
+  xref="x",
+  yref="y",
+  axref = "x", 
+  ayref = "y",
+  arrowhead=2,
+  arrowsize=1,
+  arrowwidth=2,
+  hovertext= "Sum",
+  arrowcolor="black"
+)
+
+r = np.array([[0, 1],[-1, 0]]) @ np.array([[sum_p_vec], [sum_f_vec]])
+
+print(r)
+
+fig.add_annotation(
+  ax=0, 
+  ay=0, 
+  x=r[0,0], 
+  y=r[1,0], 
+  showarrow=True, 
+  text = "",
+  xref="x",
+  yref="y",
+  axref = "x", 
+  ayref = "y",
+  arrowhead=2,
+  arrowsize=1,
+  arrowwidth=2,
+  hovertext= "Sum R",
+  arrowcolor="blue"
+)
+
+fig.show(config=dict({'scrollZoom': False}))
+
+
+
