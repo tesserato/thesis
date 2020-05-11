@@ -2,17 +2,21 @@
 
 int main() {
 
-	Wav WA = read_wav("Wavs/local_f=2.wav");
+	Wav WA = read_wav("Wavs/local_f=2-p=0-n=1000.wav");
 	auto W = WA.get_samples();
 
-	auto FT = rfft_n(W);
+	auto IT = interf_trans(W);
 
-	get_f_and_p(FT);
+	auto ITn = interf_trans_n(W);
 
-	//auto FP = interf_trans(W, 2000, 500);
-	//write_2d_vector(FP, "FP.csv");
+	//auto IT = interf_trans(W, 1000, 100);
 
-	//std::cout << "----------";
+	//auto ITn = interf_trans_n(W, 1000, 100);
+
+	auto FT = rfft(W);
+
+	auto FTn = rfft_n(W);
+
 	char dummy;
 	std::cin.get(dummy);
 

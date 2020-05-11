@@ -56,7 +56,7 @@ public:
 				a = std::abs(W[i]);
 			}
 		}
-		std::cout << "Amplitude: " << a << " n: " << n << " fps: " << fps << "\n";
+		std::cout << "Amplitude: " << a << " n: " << n << " fps: " << fps << "\n\n";
 	}
 	int get_size() {
 		return n;
@@ -107,7 +107,7 @@ Wav read_wav(std::string path) {
 	static int n = file.frames();
 	//int fmt = file.format();
 	//int pcm = sf_command(NULL, SFC_GET_FORMAT_SUBTYPE,&fmt, sizeof(fmt));
-	std::cout << "Successfully opened file at:" << path << "\n";
+	std::cout << "Successfully opened file at:" << path << "\n\n";
 	//std::cout << "\n  fps:" << fps;
 	//std::cout << "\n  pcm:" << pcm;
 	//std::cout << "\n  len:" << n << "\n";
@@ -222,7 +222,8 @@ std::vector<std::vector<float>> interf_trans(const std::vector<float> & W, int r
 	const float p = float(p_idx_ini + (p_idx * p_step)) * dp;
 	const float f = float(f_idx_ini + (f_idx * f_step)) * df;
 	std::cout << "f=" << f << ", i=" << f_idx << ", p=" << p << ", j=" << p_idx << "\n";
-	tp.stop("Time: ");
+	tp.stop("Interference Transform Time: ");
+	std::cout << "\n";
 
 	return FP;
 }
@@ -275,46 +276,10 @@ std::vector<std::vector<float>> interf_trans_n(const std::vector<float>& W, int 
 	f = min_f + float(f_idx) * df;
 	p = min_p + float(p_idx) * dp;
 	std::cout << "f=" << f << ", i=" << f_idx << ", p=" << p << ", j=" << p_idx << "\n";
-	tp.stop("Time: ");
+	tp.stop("Interference Transform Naive Time: ");
+	std::cout << "\n";
 
 	return FP;
-}
-
-std::vector<std::complex<float>> rfft(std::vector<float>& in) {
-	auto tp = Chronograph();
-
-	std::vector<std::complex<float>> out(in.size());
-
-	DFTI_DESCRIPTOR_HANDLE descriptor;
-	MKL_LONG status;
-
-	status = DftiCreateDescriptor(&descriptor, DFTI_SINGLE, DFTI_REAL, 1, in.size()); //Specify size and precision
-	status = DftiSetValue(descriptor, DFTI_PLACEMENT, DFTI_NOT_INPLACE); //Out of place FFT
-	status = DftiCommitDescriptor(descriptor); //Finalize the descriptor
-	status = DftiComputeForward(descriptor, in.data(), out.data()); //Compute the Forward FFT
-	status = DftiFreeDescriptor(&descriptor); //Free the descriptor
-
-	tp.stop("Time: ");
-	return out;
-}
-
-std::vector<std::complex<float>> rfft_n(std::vector<float>& in) {
-	auto tp = Chronograph();
-	float n = float(in.size());
-	std::vector<std::complex<float>> out((in.size() + 1) / 2);
-	std::fill(out.begin(), out.end(), 0);
-	
-
-	float k;
-	for (size_t f = 0; f < out.size(); f++) {
-		for (size_t t = 0; t < in.size(); t++) {
-			k = 2.0 * PI * f * t / n;
-			out[f] += {in[t] * std::cos(k), in[t] * std::sin(k) };
-		}
-	}
-
-	tp.stop("Time: ");
-	return out;
 }
 
 void get_f_and_p(std::vector<std::complex<float>>& FT) {
@@ -337,4 +302,47 @@ void get_f_and_p(std::vector<std::complex<float>>& FT) {
 	outfile.close();
 	std::cout << "n=" << n << ", f=" << std::to_string(f) << ", p=" << std::to_string(p) << "\n";
 
+}
+
+std::vector<std::complex<float>> rfft(std::vector<float>& in) {
+	auto tp = Chronograph();
+	int n = (in.size() + 1) / 2;
+	std::vector<std::complex<float>> out(n);
+
+	DFTI_DESCRIPTOR_HANDLE descriptor;
+	MKL_LONG status;
+
+	status = DftiCreateDescriptor(&descriptor, DFTI_SINGLE, DFTI_REAL, 1, in.size()); //Specify size and precision
+	status = DftiSetValue(descriptor, DFTI_PLACEMENT, DFTI_NOT_INPLACE); //Out of place FFT
+	status = DftiCommitDescriptor(descriptor); //Finalize the descriptor
+	status = DftiComputeForward(descriptor, in.data(), out.data()); //Compute the Forward FFT
+	status = DftiFreeDescriptor(&descriptor); //Free the descriptor
+
+	get_f_and_p(out);
+
+	tp.stop("FFT Time: ");
+	std::cout << "\n";
+	return out;
+}
+
+std::vector<std::complex<float>> rfft_n(std::vector<float>& in) {
+	auto tp = Chronograph();
+	float n = float(in.size());
+	std::vector<std::complex<float>> out((in.size() + 1) / 2);
+	std::fill(out.begin(), out.end(), 0);
+	
+
+	float k;
+	for (size_t f = 0; f < out.size(); f++) {
+		for (size_t t = 0; t < in.size(); t++) {
+			k = 2.0 * PI * f * t / n;
+			out[f] += {in[t] * std::cos(k), in[t] * std::sin(k) };
+		}
+	}
+
+	get_f_and_p(out);
+
+	tp.stop("FFT naive Time: ");
+	std::cout << "\n";
+	return out;
 }

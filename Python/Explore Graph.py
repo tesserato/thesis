@@ -6,8 +6,8 @@ import numpy as np
 #######################
 n = 7
 t = 3
-res_f = 6
-res_p = 6
+res_f = 10
+res_p = 10
 min_f = 0
 max_f = n
 #######################
