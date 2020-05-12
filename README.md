@@ -2,8 +2,21 @@
 Carlos Tarjano PhD thesis - WIP
 
 ---
+
+# Potential Journals
+
+## Tools to find journals
+[Edanz Journal Selector](https://en-author-services.edanzgroup.com/)
+
+Journal | JCR 2018 | Acceptance time (days)
+--------|:--------:|:---------------------:
+[Signal Processing](https://www.journals.elsevier.com/signal-processing)      |4.086|40
+[Journal of Signal Processing Systems](https://www.springer.com/journal/11265)|1.035|318
+
+
+---
 # ToDo
-- ~~test Intel MKL~~ no effect; only works in vectorized code, probably
+- ~~test Intel MKL~~ no effect; only works on vectorized code, probably
 - ~~pragma loop hint parallel~~ seems to slow the code
 - negative module
 - update python imp to reflect C++
