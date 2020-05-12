@@ -7,8 +7,8 @@ import numpy as np
 n = 10
 X = np.arange(n)
 
-f = 2
-p = 2 * np.pi
+f = 4
+p = 0
 W = np.cos(p + 2 * np.pi * f * X / n)
 #######################
 
@@ -28,29 +28,29 @@ fig.update_layout(
         family="Courier New, monospace",
         size=18,
         color="#7f7f7f"
-    )
-)
+    ))
+
 sum_p_vec = 0
 sum_f_vec = 0
 for t in range(n):
   X_lines=[]
   Y_lines=[]
-
-  # for k in range(1, t + 1):
-  #   f0 = n * k / t
-  #   f2pi = n * k / t - n * 2 * np.pi / (2 * np.pi * t)
-  #   X_lines.append(0)
-  #   X_lines.append(2 * np.pi)
-  #   X_lines.append(np.nan)
-  #   Y_lines.append(f0)
-  #   Y_lines.append(f2pi)
-  #   Y_lines.append(np.nan)
+  
+  '''for k in range(1, t + 1):
+    f0 = n * k / t
+    f2pi = n * k / t - n * 2 * np.pi / (2 * np.pi * t)
+    X_lines.append(0)
+    X_lines.append(2 * np.pi)
+    X_lines.append(np.nan)
+    Y_lines.append(f0)
+    Y_lines.append(f2pi)
+    Y_lines.append(np.nan)'''
 
   p_vec = (2 * np.pi * n**2) / (n**2 + 4 * np.pi**2 * t**2)
   f_vec = (4 * np.pi**2 * n * t) / (n**2 + 4 * np.pi**2 * t**2)
   md = np.sqrt(p_vec**2 + f_vec**2)
-  sum_p_vec += p_vec * W[t] / md
-  sum_f_vec += f_vec * W[t] / md
+  sum_p_vec += p_vec / n * abs(W[t])**2
+  sum_f_vec += f_vec / n * abs(W[t])**2
   X_lines.append(0)
   Y_lines.append(0)
   X_lines.append(p_vec)
@@ -81,8 +81,7 @@ fig.add_trace(
         color="black", #set color equal to a variable
         showscale=False
     )
-  )
-)
+  ))
 
 fig.add_annotation(
   ax=0, 
@@ -99,12 +98,9 @@ fig.add_annotation(
   arrowsize=1,
   arrowwidth=2,
   hovertext= "Sum",
-  arrowcolor="black"
-)
+  arrowcolor="black")
 
 r = np.array([[0, 1],[-1, 0]]) @ np.array([[sum_p_vec], [sum_f_vec]])
-
-print(r)
 
 fig.add_annotation(
   ax=0, 
@@ -121,8 +117,7 @@ fig.add_annotation(
   arrowsize=1,
   arrowwidth=2,
   hovertext= "Sum R",
-  arrowcolor="blue"
-)
+  arrowcolor="blue")
 
 fig.show(config=dict({'scrollZoom': False}))
 
