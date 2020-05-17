@@ -40,3 +40,8 @@ Cpp/Intermediary/NativeCodeAnalysis.read.1.tlog
 Cpp/Intermediary/vc.nativecodeanalysis.all.xml
 Cpp/Execs/x64 Interference Transform.exe.lastcodeanalysissucceeded
 *.wav
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.gz

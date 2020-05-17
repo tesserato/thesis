@@ -2,6 +2,8 @@
 Carlos Tarjano PhD thesis - WIP
 
 ---
+# Instructions: 
+[Guide to Publish](https://tesserato.gitlab.io/guide_to_publish/) 
 
 # Potential Journals
 
