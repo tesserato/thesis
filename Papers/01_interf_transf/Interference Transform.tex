@@ -5,14 +5,26 @@
 
 \title{Interference Transform: Estimating the frequency and phase of low resolution samples}
 \author{Carlos Tarjano}
+\author{Valdecy Pereira}
 
 \begin{document}
 
 \maketitle
 
-\begin{abstract}
-  
-
+\begin{abstract} % 250 words
+  % background
+  The Fourier Transform, naturally due to the context and time in which it was idealized, was formulated without regard to discrete waves or computational complexity.
+  Some developments, such as the Discrete Fourier Transform and the Fast Fourier Transform algorithm updated the theory to the digital, discrete era.
+  % motivation
+  Some shortcomings were introduced with those methods, such as diminishing resolution in dealing with a small number of os samples.
+  % objective
+  In this paper we propose a transform specifically designed for the discrete case, optimizing the inference of frequency and amplitude from whatever sampled points are available.
+  % methods
+  The algorithm is based on the representation of the set of samples in a frequency versus phase space and the investigation of the interference pattern thus generated. Each sample defines a sinusoidal planar wave in this space, with a particular amplitude, direction and frequency. The determination of the point in which maximum constructive interference occurs translates to the determination of the most accurate sinusoidal description of the whole set of samples.
+  % results
+  TODO: improvement of the naive algorithm. better accuracy
+  % implications
+  TODO: an alternative to wavelet and short-time Fourier transform
 \end{abstract}
 
 {\bf Keywords:}
