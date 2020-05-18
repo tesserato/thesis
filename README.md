@@ -14,7 +14,7 @@ Carlos Tarjano PhD thesis - WIP
 
 ## Potential Journals (in order of preference)
 
-Journal | JCR 2018 | Acceptance time (days)| Obs
+Journal | JCR 2018 | Acceptance time (days)| Obs.
 --------|:--------:|:---------------------:|-----
 [Signal Processing](https://www.journals.elsevier.com/signal-processing)      |4.086|40|
 [Wave Motion](https://www.journals.elsevier.com/wave-motion)                  |1.576|56|
@@ -29,7 +29,9 @@ Journal | JCR 2018 | Acceptance time (days)| Obs
 - ~~test Intel MKL~~ no effect; only works on vectorized code, probably
 - ~~pragma loop hint parallel~~ seems to slow the code
 - negative module
-- update python imp to reflect C++
+- update python implementation to reflect C++
+- set .eps to same font as latex
+- fix line thickness issues in .eps
 ---
 
 # Calendar
