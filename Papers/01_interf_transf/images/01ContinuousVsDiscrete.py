@@ -30,10 +30,19 @@ fig.update_layout(
     xaxis_title="Time (seconds)",
     yaxis_title="Amplitude",
     legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
-    margin=dict(l=5, r=5, b=5, t=5))
+    margin=dict(l=5, r=5, b=5, t=5),
+    font=dict(
+    family="Computer Modern",
+    color="black",
+    size=18
+    ))
 
+fig.update_xaxes(
+  gridwidth=1, 
+  gridcolor='silver'
+)
 
-fig.update_yaxes(tickvals=np.linspace(-1, 1, 21), zerolinewidth=2, zerolinecolor='black')
+fig.update_yaxes(tickvals=np.linspace(-1, 1, 11), zerolinewidth=2, zerolinecolor='gray')
 
 fig.add_trace(go.Scatter(name= "Continuous Wave",
   x=X,
@@ -61,5 +70,4 @@ fig.add_trace(go.Scatter(name= "Discrete Wave",
   )))
 
 # fig.show()
-fig.write_image("./01ContinuousVsDiscrete.png", width=800, height=400, scale=10)
-fig.write_image("./01ContinuousVsDiscrete.eps", width=800, height=400, scale=10)
+fig.write_image("./01ContinuousVsDiscrete.pdf", width=800, height=400, scale=1)

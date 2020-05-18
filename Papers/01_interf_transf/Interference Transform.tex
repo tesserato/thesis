@@ -44,7 +44,7 @@
 
   \begin{figure}[h!]
     \centering
-      \includegraphics[width=0.8\linewidth]{images/01ContinuousVsDiscrete.eps}
+      \includegraphics[width=0.8\linewidth]{images/01ContinuousVsDiscrete.pdf}
     \caption{Discrete samples (black points) from a continuous wave (grey line). Note that the amplitude is also truncated}
     \label{fig:ContinuousVsDiscrete}
   \end{figure}
@@ -53,7 +53,7 @@
   $ W[i] \in \mathbb{R} \  \forall \  i \in \mathbb{N}, 0 \le i < n $
   $ S(t) \in \mathbb{R} \  \forall \  t \in \mathbb{R}, 0 \le t < t_f $ where $ t_f=\frac{n}{\textrm{fps}} $.
 
-  The relationship is better illustrated comparing two equivalent simple sinusoids, being one continuous and its discrete counterpart. Those can be described, respectively as 
+  The relationship is better illustrated comparing two equivalent simple sinusoids; a continuous one and its discrete counterpart. Those can be described, respectively as 
   $$ S(t) = a \cos \left( \phi + 2 \pi \mathcal{F} t \right) $$
   and
   $$ W[i] = a \cos \left( \phi + 2 \pi f \frac{i}{n} \right) $$
@@ -75,24 +75,30 @@
 
   $ a \in \mathbb{R}^+ $, amplitude;
 
-  $ \phi \in \mathbb{R}^+, 0 \le \phi < 2 \pi $, phase;
+  $ \phi \in \mathbb{R}^+, 0 \le \phi < 2 \pi $, phase; \\
 
-  \begin{figure}[h!]
-    \centering
-      \includegraphics[width=0.8\linewidth]{images/02ContinuousVsDiscreteSinusoid.eps}
-    \caption{Continuous sinusoid (grey line) and the correspondent Discrete sinusoid (black points) illustrating the correspondence between frames i and time t}
-    \label{fig:ContinuousVsDiscreteSinusoid}
-  \end{figure}
-
+  Figure \ref{fig:ContinuousVsDiscreteSinusoid} illustrates the relationship between the two. The values for the amplitude of both coincide, in contrast with the sampled example, as the case here is conceptually different: both sinusoids were constructed from identical parameters.
   
   \begin{figure}[h!]
     \centering
-      \includegraphics[width=0.8\linewidth]{images/03OptSinusoids.eps}
+      \includegraphics[width=0.8\linewidth]{images/02ContinuousVsDiscreteSinusoid.pdf}
+    \caption{Continuous sinusoid (grey line) and the correspondent Discrete sinusoid (black points) illustrating the correspondence between frames i and time t}
+    \label{fig:ContinuousVsDiscreteSinusoid}
+  \end{figure}
+  
+  So it's easy to see for each frame of a given discrete wave $W[i]$, there exists an infinite family of continuous sinusoids that pass exactly through the point defined by $i$ and $W[i]$. In fact, almost any sinusoid of the form $a \cos \left( \phi + 2 \pi f \frac{i}{n} \right)$ can be forced to contain the point $(i, W[i])$, given a suitable choice of $a$, with the exception of the particular case where $W[i] \ne 0$ and $\cos \left( \phi + 2 \pi \mathcal{F} \frac{i}{\textrm{fps}} \right)$. Of interest to this work are those sinusoids, as shown in Figure \ref{fig:OptSinusoids}, that have one of their infinite extrema, either maximum or minimum, coinciding with the abscissa $i$ or, setting $a=W[t]$, coincident with the point $(i, W[i])$.
+  
+  \begin{figure}[h!]
+    \centering
+      \includegraphics[width=0.8\linewidth]{images/03OptSinusoids.pdf}
     \caption{Sinusoids with maximum coinciding with sampled points i=3 and i=28 }
     \label{fig:OptSinusoids}
   \end{figure}
 
+  One can define, for each frame, those waves mathematically as the family of continuous sinusoids that satisfy the equality $\cos \left( \phi + 2 \pi \mathcal{F} t \right) = \textrm{sgn}(W[t])$ or, in terms of discrete sinusoids, $\cos \left( \phi + 2 \pi f \frac{i}{n} \right) = \textrm{sgn}(W[t])$ where the sign function is defined as 
+  $ \textrm{sgn}(x) = \{ -1 \  \textrm{if} \ x < 0, \  0  \  \textrm{if} \ x = 0, \  1  \  \textrm{if} \ x > 0\}$.
 
+  
 \section{Results}
 
 \section{Discussion + Conclusion}

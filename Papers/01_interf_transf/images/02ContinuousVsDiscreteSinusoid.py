@@ -23,19 +23,23 @@ fig = go.Figure()
 fig.layout.template ="plotly_white"
 
 fig.update_layout(
-    xaxis_title="Frame number, Time (seconds)",
-    yaxis_title="Amplitude",
-    legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
-    margin=dict(l=5, r=5, b=5, t=5)
-)
+  xaxis_title="Frame number, Time (seconds)",
+  yaxis_title="Amplitude",
+  legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
+  margin=dict(l=5, r=5, b=5, t=5),
+  font=dict(family="Computer Modern", color="black", size=18)
+  )
 
 stp = 5
+
 fig.update_xaxes(
-    ticktext=[f"i={i}, t={round(i/fps, 3)}" for i in X[::stp]],
-    tickvals=X[::stp] / fps
+  gridwidth=1, 
+  gridcolor='silver',
+  ticktext=[f"i={i}, t={round(i/fps, 3)}" for i in X[::stp]],
+  tickvals=X[::stp] / fps
 )
 
-fig.update_yaxes(zerolinewidth=2, zerolinecolor='black', automargin=True)
+fig.update_yaxes(zerolinewidth=2, zerolinecolor='silver', automargin=True)
 
 fig.add_trace(go.Scatter(name=f"Continuous Wave",
   x=T,
@@ -50,20 +54,8 @@ fig.add_trace(go.Scatter(name=f"Discrete Wave",
   y=W,
   mode='lines+markers',
   # line_shape='spline',
-  line=go.scatter.Line(color="black", width=2)
+  line=go.scatter.Line(color="black", width=1)
   ))
 
-# fig.add_trace(go.Scatter(name= "Discrete Wave",
-#   # legendgroup="Discrete Wave",
-#   x=X_lowres,
-#   y=Y_lowres,
-#   mode='markers',
-#   marker=dict(
-#       size=5,
-#       color="black",
-#   )))
-
-
 # fig.show()
-fig.write_image("./02ContinuousVsDiscreteSinusoid.eps", width=800, height=400, scale=10)
-fig.write_image("./02ContinuousVsDiscreteSinusoid.png", width=800, height=400, scale=10)
+fig.write_image("./02ContinuousVsDiscreteSinusoid.pdf", width=800, height=400, scale=1)
