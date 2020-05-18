@@ -4,16 +4,18 @@ import plotly.graph_objects as go
 
 
 random.seed(0)
+
+fps = 44100
 n = 1000+1
 
-X = np.arange(n)
+X = np.arange(n) / fps
 Y = np.zeros(n)
 
 for _ in range(100):
   a = random.uniform(1, 5)
   f = random.uniform(1, 10)
   p = random.uniform(0, 2 * np.pi)
-  Y += a * np.cos(p + 2 * np.pi * f * X / n)
+  Y += a * np.cos(p + 2 * np.pi * f * X * fps / n)
 
 Y = Y / np.max(np.abs(Y))
 
@@ -23,15 +25,15 @@ Y_lowres = np.round(Y[::20], 1)
 fig = go.Figure()
 
 fig.layout.template ="plotly_white"
-
+ 
 fig.update_layout(
-    # title="Continuous x Discrete Wave",
-    xaxis_title="Time",
-    yaxis_title="Amplitude")
+    xaxis_title="Time (seconds)",
+    yaxis_title="Amplitude",
+    legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
+    margin=dict(l=5, r=5, b=5, t=5))
+
 
 fig.update_yaxes(tickvals=np.linspace(-1, 1, 21), zerolinewidth=2, zerolinecolor='black')
-
-fig.update_layout(legend_orientation="h")
 
 fig.add_trace(go.Scatter(name= "Continuous Wave",
   x=X,
@@ -59,4 +61,5 @@ fig.add_trace(go.Scatter(name= "Discrete Wave",
   )))
 
 # fig.show()
+fig.write_image("./01ContinuousVsDiscrete.png", width=800, height=400, scale=10)
 fig.write_image("./01ContinuousVsDiscrete.eps", width=800, height=400, scale=10)

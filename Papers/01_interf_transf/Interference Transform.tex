@@ -44,15 +44,56 @@
 
   \begin{figure}[h!]
     \centering
-      \includegraphics[width=0.8\linewidth]{images/01ContinuousVsDiscrete}
+      \includegraphics[width=0.8\linewidth]{images/01ContinuousVsDiscrete.eps}
     \caption{Discrete samples (black points) from a continuous wave (grey line). Note that the amplitude is also truncated}
     \label{fig:ContinuousVsDiscrete}
   \end{figure}
 
   Thus, we have:
-  $ W[i] \in \mathbb{R} \forall i \in \mathbb{N}, 0 \le i < n $,
-  $ S(t) \in \mathbb{R} \forall t \in \mathbb{R}, 0 \le t < t_f $ where $ t_f=n / \textrm{fps} $
+  $ W[i] \in \mathbb{R} \  \forall \  i \in \mathbb{N}, 0 \le i < n $
+  $ S(t) \in \mathbb{R} \  \forall \  t \in \mathbb{R}, 0 \le t < t_f $ where $ t_f=\frac{n}{\textrm{fps}} $.
+
+  The relationship is better illustrated comparing two equivalent simple sinusoids, being one continuous and its discrete counterpart. Those can be described, respectively as 
+  $$ S(t) = a \cos \left( \phi + 2 \pi \mathcal{F} t \right) $$
+  and
+  $$ W[i] = a \cos \left( \phi + 2 \pi f \frac{i}{n} \right) $$
+  where:
+
+  $ \mathcal{F} \in \mathbb{R}^+ $, absolute frequency of the continuous wave in Hz;
+
+  $ f \in \mathbb{R}^+ $, relative frequency of the discrete wave in cycles per $n$ samples;
+
+  $ f = \frac{n}{\textrm{fps}} \mathcal{F} $;
+
+  $ i = t \  \textrm{fps}, i \in \mathbb{N} $, frame number;
+
+  $ t \in \mathbb{R} $, time in seconds;
+
+  $ n \in \mathbb{N} $, number os discrete samples;
+
+  $ 0 \le \frac{i}{n} < 1 $;
+
+  $ a \in \mathbb{R}^+ $, amplitude;
+
+  $ \phi \in \mathbb{R}^+, 0 \le \phi < 2 \pi $, phase;
+
+  \begin{figure}[h!]
+    \centering
+      \includegraphics[width=0.8\linewidth]{images/01ContinuousVsDiscreteSinusoid}
+    \caption{Continuous sinusoid (grey line) and the correspondent Discrete sinusoid (black points) illustrating the correspondence between frames i and time t}
+    \label{fig:ContinuousVsDiscreteSinusoid}
+  \end{figure}
+
   
+  \begin{figure}[h!]
+    \centering
+      \includegraphics[width=0.8\linewidth]{images/03OptSinusoids}
+    \caption{Sinusoids with maximum coinciding with sampled points i=3 and i=28 }
+    \label{fig:OptSinusoids}
+  \end{figure}
+
+
+
 
 
 
