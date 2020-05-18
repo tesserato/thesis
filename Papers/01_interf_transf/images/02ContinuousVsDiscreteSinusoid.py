@@ -65,5 +65,5 @@ fig.add_trace(go.Scatter(name=f"Discrete Wave",
 
 
 # fig.show()
-fig.write_image("./01ContinuousVsDiscreteSinusoid.eps", width=800, height=400, scale=10)
-fig.write_image("./01ContinuousVsDiscreteSinusoid.png", width=800, height=400, scale=10)
+fig.write_image("./02ContinuousVsDiscreteSinusoid.eps", width=800, height=400, scale=10)
+fig.write_image("./02ContinuousVsDiscreteSinusoid.png", width=800, height=400, scale=10)
