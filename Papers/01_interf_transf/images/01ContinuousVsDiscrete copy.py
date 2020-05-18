@@ -78,7 +78,7 @@ fig.add_trace(go.Scatter(name= "Discrete Wave",
 
 
 fig.show()
-fig.write_image("01.png")
+fig.write_image("./01ContinuousVsDiscrete.png")
 exit()
 
 # X = np.linspace(0, n, n * 2)
