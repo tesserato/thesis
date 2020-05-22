@@ -8,8 +8,8 @@ v1 = np.array([[1], [3]])        # vector perpendicular to l1
 n1 = v1 / np.sqrt(v1.T @ v1)     # unit vector perpendicular to l1
 u1 = r @ n1                      # unit vector in the direction of l1
 
-p2 = np.array([[8], [-1]])        # point in l2
-v2 = np.array([[1], [2]])        # vector perpendicular to l2
+p2 = np.array([[8], [-1]])       # point in l2
+v2 = np.array([[1], [1]])        # vector perpendicular to l2
 n2 = v2 / np.sqrt(v2.T @ v2)     # unit vector perpendicular to l2
 u2 = r @ n2                      # unit vector in the direction of l2
 
@@ -29,7 +29,6 @@ p = np.array([[4], [6]])
 
 d1 = np.sqrt((p - p1).T @ n1 @ n1.T @ (p - p1))
 d2 = np.sqrt((p - p2).T @ n2 @ n2.T @ (p - p2))
-
 
 min_x = min(xi, xf)
 max_x = max(xi, xf)
@@ -212,6 +211,21 @@ fig.add_trace(
     name="point",
     x=[p[0, 0]], 
     y=[p[1, 0]],
+    mode='markers',
+    marker=dict(
+        size=8,
+        color="black", #set color equal to a variable
+        showscale=False
+  )))
+
+
+po = np.linalg.inv((n1 @ n1.T) + (n2 @ n2.T)) @ ((n1 @ n1.T @ p1) + (n2 @ n2.T @ p2))
+##### po
+fig.add_trace(
+  go.Scatter(
+    name="point",
+    x=[po[0, 0]], 
+    y=[po[1, 0]],
     mode='markers',
     marker=dict(
         size=8,

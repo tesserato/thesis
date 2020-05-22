@@ -69,5 +69,5 @@ fig.add_trace(go.Scatter(name= "Discrete Wave",
       color="black",
   )))
 
-# fig.show()
-fig.write_image("./01ContinuousVsDiscrete.pdf", width=800, height=400, scale=1)
+fig.show()
+# fig.write_image("./01ContinuousVsDiscrete.pdf", width=800, height=400, scale=1)

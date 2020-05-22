@@ -38,7 +38,9 @@ U = R @ V #/ m_vec
 P=np.array([[p], [f]])
 O=np.array([[0], [0]])
 N = np.array([[x_vec], [y_vec]]) / m_vec
+
 dd=np.sqrt((P-O).T @ N @ N.T @ (P-O))[0][0]
+
 d = (n*p + 2*np.pi*t*f)/np.sqrt(n**2 + 4*np.pi**2*t**2)
 assert(round(d, 3) == round(dd, 3))
 fig.add_annotation( # TODO: put hovertext in the vector tip

@@ -1,0 +1,22 @@
+body {
+  color: black;
+  margin: 20px auto;
+  font-family: 'Lato';
+  font-weight: 300;
+  text-align: center;
+}
+
+#B1{
+  display: flex;
+  flex-direction: row;
+}
+
+#RandomWave{
+  width: 40em;
+  height: 20em;
+}
+
+#Isolines{
+  width: 70em;
+  height: 200em;
+}
