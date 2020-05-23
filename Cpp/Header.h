@@ -156,11 +156,11 @@ std::vector<std::vector<float>> interf_trans(const std::vector<float> & W, int r
 
 	std::cout << "n=" << n << ", min f=" << min_f << ", max f=" << max_f << ", min p=" << min_p << ", max_p=" << max_p << "\n";
 
-	const float preliminar_df = (max_f - min_f) / float(res_f);
-	const int global_res_f = std::round(float(n) / preliminar_df);
+	//const float preliminar_df = (max_f - min_f) / float(res_f);
+	const int global_res_f = std::round(float(n) / ((max_f - min_f) / float(res_f)));
 
-	const float preliminar_dp = (max_p - min_p) / float(res_p);
-	const int global_res_p = std::round(2.0 * PI / preliminar_dp);
+	//const float preliminar_dp = (max_p - min_p) / float(res_p);
+	const int global_res_p = std::round(2.0 * PI / ((max_p - min_p) / float(res_p)));
 
 	const int res = std::max(global_res_f, global_res_p) + 1;
 
@@ -171,7 +171,7 @@ std::vector<std::vector<float>> interf_trans(const std::vector<float> & W, int r
 	for (size_t i = 0; i < res - 1; i++) {
 		mutable_A[i] = std::cos(float(i) * dp);
 	}
-	const std::vector<float>& A = mutable_A;
+	const std::vector<float>& A = mutable_A; // mutable_A was only meant to initialize const A
 
 	std::cout << "G res f=" << global_res_f << ", G res p=" << global_res_p << ", G res=" << res << "\n";
 
@@ -191,13 +191,13 @@ std::vector<std::vector<float>> interf_trans(const std::vector<float> & W, int r
 	std::vector<std::vector<float>> FP(rows, std::vector<float>(cols));
 	for (auto& i : FP) { std::fill(i.begin(), i.end(), 0); }
 
-	std::vector<float> mutable_scaled_A(res - 1);
+	std::vector<float> scaled_A(res - 1);
 	int idx;
 	for (size_t t = 0; t < n; t++) {
 		for (size_t i = 0; i < A.size(); i++) {
-			mutable_scaled_A[i] = A[i] * W[t];
+			scaled_A[i] = A[i] * W[t];
 		}
-		const std::vector<float>& scaled_A = mutable_scaled_A;
+		//const std::vector<float>& scaled_A = mutable_scaled_A;
 		for (size_t i = 0; i < rows; i++) {
 			for (size_t j = 0; j < cols; j++) {
 				idx = ((f_idx_ini + i * f_step) * t + p_idx_ini + j * p_step) % (res - 1);
@@ -282,13 +282,14 @@ std::vector<std::vector<float>> interf_trans_n(const std::vector<float>& W, int 
 	return FP;
 }
 
-void get_f_and_p(std::vector<std::complex<float>>& FT) {
+void afp_from_FT(std::vector<std::complex<float>>& FT, std::string path = "FT.csv") {
 	int n = FT.size();
 	int f;
 	float p;
+	float a;
 	float val = 0.0;
 	float max_val = 0.0;
-	std::ofstream outfile("FT.csv");
+	std::ofstream outfile(path);
 	outfile << "Real, Imag\n";
 	for (std::size_t i = 0; i < n; ++i) {
 		outfile << FT[i].real() << "," << FT[i].imag() << "\n";
@@ -297,10 +298,11 @@ void get_f_and_p(std::vector<std::complex<float>>& FT) {
 			max_val = val;
 			f = i;
 			p = std::arg(FT[i]);
+			a = std::abs(FT[i]);
 		}
 	}
 	outfile.close();
-	std::cout << "n=" << n << ", f=" << std::to_string(f) << ", p=" << std::to_string(p) << "\n";
+	std::cout << "n=" << n << ", a=" << std::to_string(a) << ", f=" << std::to_string(f) << ", p=" << std::to_string(p) << "\n";
 
 }
 
@@ -318,7 +320,11 @@ std::vector<std::complex<float>> rfft(std::vector<float>& in) {
 	status = DftiComputeForward(descriptor, in.data(), out.data()); //Compute the Forward FFT
 	status = DftiFreeDescriptor(&descriptor); //Free the descriptor
 
-	get_f_and_p(out);
+	for (size_t i = 0; i < n; i++) {
+		out[i] = out[i] / float(n);
+	}
+
+	afp_from_FT(out, "FT.csv");
 
 	tp.stop("FFT Time: ");
 	std::cout << "\n";
@@ -327,20 +333,24 @@ std::vector<std::complex<float>> rfft(std::vector<float>& in) {
 
 std::vector<std::complex<float>> rfft_n(std::vector<float>& in) {
 	auto tp = Chronograph();
-	float n = float(in.size());
 	std::vector<std::complex<float>> out((in.size() + 1) / 2);
-	std::fill(out.begin(), out.end(), 0);
-	
+	std::fill(out.begin(), out.end(), 0.0);
+
+	std::cout << "\n" << out[0] << "\n\n";
 
 	float k;
 	for (size_t f = 0; f < out.size(); f++) {
 		for (size_t t = 0; t < in.size(); t++) {
-			k = 2.0 * PI * f * t / n;
-			out[f] += {in[t] * std::cos(k), in[t] * std::sin(k) };
+			k = 2.0 * PI * f * t / in.size();
+			out[f] += {in[t] * std::cos(k), -in[t] * std::sin(k) };
 		}
 	}
+	int n = out.size();
+	for (size_t i = 0; i < n; i++) {
+		out[i] = out[i] / float(n);
+	}
 
-	get_f_and_p(out);
+	afp_from_FT(out, "FTn.csv");
 
 	tp.stop("FFT naive Time: ");
 	std::cout << "\n";

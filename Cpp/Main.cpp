@@ -9,10 +9,6 @@ int main() {
 
 	auto ITn = interf_trans_n(W);
 
-	//auto IT = interf_trans(W, 1000, 100);
-
-	//auto ITn = interf_trans_n(W, 1000, 100);
-
 	auto FT = rfft(W);
 
 	auto FTn = rfft_n(W);
