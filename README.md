@@ -25,13 +25,13 @@ Journal | JCR 2018 | Acceptance time (days)| Obs.
 
 
 ---
-# ToDo
+# ~~ToDo~~ DEPRECATED see [GitHub issues instead](https://github.com/tesserato/thesis/issues)
 - ~~test Intel MKL~~ no effect; only works on vectorized code, probably
 - ~~pragma loop hint parallel~~ seems to slow the code
 - negative module
 - update python implementation to reflect C++
-- set .eps to same font as latex
-- fix line thickness issues in .eps
+- ~~set .eps to same font as latex~~
+- ~~fix line thickness issues in .eps~~
 ---
 
 # Calendar
