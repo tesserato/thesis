@@ -150,7 +150,7 @@ std::vector<std::vector<float>> interf_trans(const std::vector<float> & W, int r
 	auto tp = Chronograph();
 
 	const int n = W.size();
-	if (res_f == 0) { res_f = (n + 1) / 2; }
+	if (res_f == 0) { res_f = (n + 1) / 2 + 1; }
 	if (res_p == 0) { res_p = (n + 1) / 2; }
 	if (max_f == 0.0) { max_f = n / 2.0; }
 
@@ -186,7 +186,7 @@ std::vector<std::vector<float>> interf_trans(const std::vector<float> & W, int r
 	const int rows = std::round(float(f_idx_fin - f_idx_ini) / float(f_step));
 	const int cols = std::round(float(p_idx_fin - p_idx_ini) / float(p_step));
 
-	std::cout << "Rows=" << rows << ", Cols=" << cols << ", f step=" << f_step << ", p step=" << p_step << "\n";
+	std::cout << "Rows=" << rows << ", Cols=" << cols << ", f_step=" << f_step << ", p_step=" << p_step << "\n";
 
 	std::vector<std::vector<float>> FP(rows, std::vector<float>(cols));
 	for (auto& i : FP) { std::fill(i.begin(), i.end(), 0); }
@@ -206,18 +206,29 @@ std::vector<std::vector<float>> interf_trans(const std::vector<float> & W, int r
 		}
 	}
 
+	std::ofstream out("IT.csv");
+	out << "f\\p";
+	for (size_t j = 0; j < cols; j++) {
+		out << ',' << float(p_idx_ini + (j * p_step)) * dp;
+	}
+	out << "\n";
+
 	int f_idx = 0;
 	int p_idx = 0;
 	int val = 0;
 	for (size_t i = 0; i < rows; i++) {
+		out << float(f_idx_ini + (i * f_step)) * df;
 		for (size_t j = 0; j < cols; j++) {
+			out << ',' << FP[i][j];
 			if (FP[i][j] > val) {
 				f_idx = i;
 				p_idx = j;
 				val = FP[i][j];
 			}
 		}
+		out << "\n";
 	}
+	out.close();
 
 	const float p = float(p_idx_ini + (p_idx * p_step)) * dp;
 	const float f = float(f_idx_ini + (f_idx * f_step)) * df;
@@ -232,7 +243,7 @@ std::vector<std::vector<float>> interf_trans_n(const std::vector<float>& W, int 
 	auto tp = Chronograph();
 
 	const int n = W.size();
-	if (res_f == 0) { res_f = (n + 1) / 2; }
+	if (res_f == 0) { res_f = (n + 1) / 2 + 1; }
 	if (res_p == 0) { res_p = (n + 1) / 2; }
 	if (max_f == 0.0) { max_f = n / 2.0; }
 
@@ -260,17 +271,28 @@ std::vector<std::vector<float>> interf_trans_n(const std::vector<float>& W, int 
 		}
 	}
 
+	std::ofstream out("ITn.csv");
+	out << "f\\p";
+	for (size_t j = 0; j < res_p; j++) {
+		out << ',' << min_p + float(j) * dp;
+	}
+
 	int f_idx = 0;
 	int p_idx = 0;
 	int val = 0;
+
+	out << "\n";
 	for (size_t i = 0; i < res_f; i++) {
+		out << min_f + float(i) * df;
 		for (size_t j = 0; j < res_p; j++) {
+			out << ',' << FP[i][j];
 			if (FP[i][j] > val) {
 				f_idx = i;
 				p_idx = j;
 				val = FP[i][j];
 			}
 		}
+		out << "\n";
 	}
 
 	f = min_f + float(f_idx) * df;
@@ -335,8 +357,6 @@ std::vector<std::complex<float>> rfft_n(std::vector<float>& in) {
 	auto tp = Chronograph();
 	std::vector<std::complex<float>> out((in.size() + 1) / 2);
 	std::fill(out.begin(), out.end(), 0.0);
-
-	std::cout << "\n" << out[0] << "\n\n";
 
 	float k;
 	for (size_t f = 0; f < out.size(); f++) {
