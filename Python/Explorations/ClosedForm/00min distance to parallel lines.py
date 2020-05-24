@@ -128,8 +128,8 @@ W = np.cos(p + 2 * np.pi * f * X / n)
 #######################
 
 fig = go.Figure()
-fig.update_xaxes(tickvals=[0, np.pi / 2, np.pi, 3 * np.pi / 2, 2 * np.pi]);
-fig.update_yaxes(tickvals=[i for i in range(-n, n+1)]);
+fig.update_xaxes(tickvals=[0, np.pi / 2, np.pi, 3 * np.pi / 2, 2 * np.pi])
+fig.update_yaxes(tickvals=[i for i in range(-n, n+1)])
 
 fig.update_layout(
   height = 2000,

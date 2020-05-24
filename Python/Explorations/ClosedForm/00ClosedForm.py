@@ -33,8 +33,8 @@ class Line:
     Snp = np.zeros((2, 1))
     for line in cls.Lines:
       nnT = line.n @ line.n.T
-      Sn  += nnT * line.w
-      Snp += nnT @ line.p * line.w
+      Sn  += nnT #* line.w
+      Snp += nnT @ line.p #* line.w
     return np.linalg.inv(Sn) @ Snp
 
   def __init__(self, x_in_L, y_in_L, x_V, y_V, weight=1):
