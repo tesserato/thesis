@@ -147,6 +147,13 @@ function UpdateSurface() {
       }
     }
   }
+//////////////////////////////////////////////
+  for (var i = 0; i < res_f; i++) {
+    for (var j = 0; j < res_p; j++) {
+      FP[i][j] = Math.abs(FP[i][j])
+    }
+  }
+//////////////////////////////////////////////
 }
 UpdateSurface()
 
@@ -166,7 +173,7 @@ var SurfaceLayout = {
     zaxis:{title:"Amplitude"},
     camera:{
       eye:{x:0, y:0, z:2}, 
-      up:{x:0, y:-1, z:0}
+      up:{x:0, y:1, z:0}
     }
   } 
 }

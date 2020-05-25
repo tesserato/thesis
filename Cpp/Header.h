@@ -163,20 +163,18 @@ void write_2d_vector(std::vector<std::vector<float>> V, std::string path = "test
 	out.close();
 }
 
-std::vector<std::vector<float>> interf_trans(const std::vector<float> & W, int res_f = 0, int res_p = 0, float min_f = 0, float min_p = 0, float max_f = 0, float max_p = 2 * PI) {
+std::vector<float> interf_trans(const std::vector<float> & W, int res_f = 0, int res_p = 0, float min_f = 0, float min_p = 0, float max_f = 0, float max_p = PI, std::string path = "") {
 	auto tp = Chronograph();
 
 	const int n = W.size();
-	if (res_f == 0) { res_f = (n + 1) / 2 + 1; }
+	if (res_f == 0) { res_f = (n + 1) / 2; }
 	if (res_p == 0) { res_p = (n + 1) / 2; }
 	if (max_f == 0.0) { max_f = n / 2.0; }
 
 	std::cout << "n=" << n << ", min f=" << min_f << ", max f=" << max_f << ", min p=" << min_p << ", max_p=" << max_p << "\n";
 
-	//const float preliminar_df = (max_f - min_f) / float(res_f);
 	const int global_res_f = std::round(float(n) / ((max_f - min_f) / float(res_f)));
 
-	//const float preliminar_dp = (max_p - min_p) / float(res_p);
 	const int global_res_p = std::round(2.0 * PI / ((max_p - min_p) / float(res_p)));
 
 	const int res = std::max(global_res_f, global_res_p) + 1;
@@ -188,7 +186,6 @@ std::vector<std::vector<float>> interf_trans(const std::vector<float> & W, int r
 	for (size_t i = 0; i < res - 1; i++) {
 		A[i] = std::cos(float(i) * dp);
 	}
-	//const std::vector<float>& A = mutable_A; // mutable_A was only meant to initialize const A
 
 	std::cout << "G res f=" << global_res_f << ", G res p=" << global_res_p << ", G res=" << res << "\n";
 
@@ -223,40 +220,60 @@ std::vector<std::vector<float>> interf_trans(const std::vector<float> & W, int r
 		}
 	}
 
-	std::ofstream out("IT.csv");
-	out << "f\\p";
-	for (size_t j = 0; j < cols; j++) {
-		out << ',' << float(p_idx_ini + (j * p_step)) * dp;
-	}
-	out << "\n";
-
-	int f_idx = 0;
-	int p_idx = 0;
-	int val = 0;
-	for (size_t i = 0; i < rows; i++) {
-		out << float(f_idx_ini + (i * f_step)) * df;
-		for (size_t j = 0; j < cols; j++) {
-			out << ',' << FP[i][j];
-			if (FP[i][j] > val) {
-				f_idx = i;
-				p_idx = j;
-				val = FP[i][j];
+	float p = 0.0;
+	float f = 0.0;
+	float a = 0.0;
+	if (path == "") { // won`t save the FP interference matrix
+		for (size_t i = 0; i < rows; i++) {
+			for (size_t j = 0; j < cols; j++) {
+				if (std::abs(FP[i][j]) > a) {
+					a = std::abs(FP[i][j]);
+					f = float(f_idx_ini + (i * f_step)) * df;
+					if (FP[i][j] >= 0.0) {
+						p = float(p_idx_ini + (j * p_step)) * dp;
+					}
+					else {
+						p = float(p_idx_ini + (j * p_step)) * dp + PI;
+					}
+				}
 			}
 		}
+	} else {
+		std::ofstream out(path); // saves FP in path
+		out << "f\\p";
+		for (size_t j = 0; j < cols; j++) {
+			out << ',' << float(p_idx_ini + (j * p_step)) * dp;
+		}
 		out << "\n";
+		for (size_t i = 0; i < rows; i++) {
+			out << float(f_idx_ini + (i * f_step)) * df;
+			for (size_t j = 0; j < cols; j++) {
+				out << ',' << FP[i][j];
+				if (std::abs(FP[i][j]) > a) {
+					a = std::abs(FP[i][j]);
+					f = float(f_idx_ini + (i * f_step)) * df;
+					if (FP[i][j] >= 0.0) {
+						p = float(p_idx_ini + (j * p_step)) * dp;
+					}
+					else {
+						p = float(p_idx_ini + (j * p_step)) * dp + PI;
+					}
+				}
+			}
+			out << "\n";
+		}
+		out.close();
+		std::cout << "saved FP @" << path << "\n";
 	}
-	out.close();
 
-	const float p = float(p_idx_ini + (p_idx * p_step)) * dp;
-	const float f = float(f_idx_ini + (f_idx * f_step)) * df;
-	std::cout << "f=" << f << ", i=" << f_idx << ", p=" << p << ", j=" << p_idx << "\n";
+	a = a * 2.0 / n;
+	std::cout << "f=" << f << ", p=" << p << ", a=" << a << "\n";
 	tp.stop("Interference Transform Time: ");
 	std::cout << "\n";
-
-	return FP;
+	return { f, p, a };
 }
 
-std::vector<std::vector<float>> interf_trans_n(const std::vector<float>& W, int res_f = 0, int res_p = 0, float min_f = 0, float min_p = 0, float max_f = 0, float max_p = 2 * PI) {
+std::vector<std::vector<float>> interf_trans_n(const std::vector<float>& W, int res_f = 0, int res_p = 0, float min_f = 0, float min_p = 0, float max_f = 0, float max_p = PI) {
 	auto tp = Chronograph();
 
 	const int n = W.size();
@@ -271,7 +288,6 @@ std::vector<std::vector<float>> interf_trans_n(const std::vector<float>& W, int 
 	const float dp = (max_p - min_p) / float(res_p);
 
 	std::cout << "G res f=" << res_f << ", G res p=" << res_p << "\n";
-
 
 	std::vector<std::vector<float>> FP(res_f, std::vector<float>(res_p));
 	for (auto& i : FP) { std::fill(i.begin(), i.end(), 0.0); }
@@ -321,31 +337,44 @@ std::vector<std::vector<float>> interf_trans_n(const std::vector<float>& W, int 
 	return FP;
 }
 
-void afp_from_FT(std::vector<std::complex<float>>& FT, std::string path = "FT.csv") {
+std::vector<float> fpa_from_FT(std::vector<std::complex<float>>& FT, std::string path = "") {
 	int n = FT.size();
 	int f;
 	float p;
 	float a;
 	float val = 0.0;
 	float max_val = 0.0;
-	std::ofstream outfile(path);
-	outfile << "Real, Imag\n";
-	for (std::size_t i = 0; i < n; ++i) {
-		outfile << FT[i].real() << "," << FT[i].imag() << "\n";
-		val = std::pow(FT[i].real(), 2.0) + std::pow(FT[i].imag(), 2.0);
-		if (val > max_val) {
-			max_val = val;
-			f = i;
-			p = std::arg(FT[i]);
-			a = std::abs(FT[i]);
+	if (path == "") {
+		for (std::size_t i = 0; i < n; ++i) {
+			val = std::pow(FT[i].real(), 2.0) + std::pow(FT[i].imag(), 2.0);
+			if (val > max_val) {
+				max_val = val;
+				f = i;
+				p = std::arg(FT[i]);
+				a = std::abs(FT[i]);
+			}
 		}
+	} else {
+		std::ofstream outfile(path);
+		outfile << "Real, Imag\n";
+		for (std::size_t i = 0; i < n; ++i) {
+			outfile << FT[i].real() << "," << FT[i].imag() << "\n";
+			val = std::pow(FT[i].real(), 2.0) + std::pow(FT[i].imag(), 2.0);
+			if (val > max_val) {
+				max_val = val;
+				f = i;
+				p = std::arg(FT[i]);
+				a = std::abs(FT[i]);
+			}
+		}
+		outfile.close();
+		std::cout << "saved FT @" << path << "\n";
 	}
-	outfile.close();
-	std::cout << "n=" << n << ", a=" << std::to_string(a) << ", f=" << std::to_string(f) << ", p=" << std::to_string(p) << "\n";
-
+	std::cout << "f=" << f << ", p=" << p << ", a=" << a << ", n=" << n << "\n";
+	return { float(f), p, a };
 }
 
-std::vector<std::complex<float>> rfft(std::vector<float>& in) {
+std::vector<float> rfft(std::vector<float>& in) {
 	auto tp = Chronograph();
 	int n = (in.size() + 1) / 2;
 	std::vector<std::complex<float>> out(n);
@@ -363,11 +392,11 @@ std::vector<std::complex<float>> rfft(std::vector<float>& in) {
 		out[i] = out[i] / float(n);
 	}
 
-	afp_from_FT(out, "FT.csv");
+	auto fpa = fpa_from_FT(out);
 
 	tp.stop("FFT Time: ");
 	std::cout << "\n";
-	return out;
+	return fpa;
 }
 
 std::vector<std::complex<float>> rfft_n(std::vector<float>& in) {
@@ -387,7 +416,7 @@ std::vector<std::complex<float>> rfft_n(std::vector<float>& in) {
 		out[i] = out[i] / float(n);
 	}
 
-	afp_from_FT(out, "FTn.csv");
+	fpa_from_FT(out, "FTn.csv");
 
 	tp.stop("FFT naive Time: ");
 	std::cout << "\n";
@@ -448,7 +477,16 @@ Wav generate_sinusoid(int n = 1000, float f = 1.0, float p = 0.0, float a = 1.0,
 	if (save) {
 		W.write("sinusoid.wav");
 	}
-
+	std::cout << "Sinusoid Generated: f=" << f << ", p=" << p << ", a=" << a << ", n=" << n << "\n\n";
 	return W;
 
+}
+
+float error(const std::vector<float>& W1, const std::vector<float>& W2) {
+	int n = W1.size();
+	float e = 0.0;
+	for (size_t i = 0; i < n; i++) {
+		e += std::abs(W1[i] - W2[i]);
+	}
+	return e;
 }

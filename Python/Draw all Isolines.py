@@ -18,9 +18,9 @@ fig.update_xaxes(tickvals=[0, np.pi / 2, np.pi, 3 * np.pi / 2, 2 * np.pi])
 fig.update_yaxes(tickvals=[i for i in range(n)])
 
 fig.update_layout(
-    width = 2 * np.pi * 220,
+    # width = 2 * np.pi * 220,
     height = n * 220,
-    # yaxis = dict(scaleanchor = "x", scaleratio = 1),
+    yaxis = dict(scaleanchor = "x", scaleratio = 1),
     title=f"n = {n}",
     xaxis_title="Phase",
     yaxis_title="Frequency",

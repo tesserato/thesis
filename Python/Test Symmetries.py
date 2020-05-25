@@ -7,12 +7,12 @@ import plotly.graph_objects as go
 #######################
 n = 50
 t = 36
-local_res_f = 30
-local_res_p = 20
+local_res_f = 10
+local_res_p = 10
 local_min_f = 20
 local_max_f = 40
 min_p = 0
-max_p = 2 * np.pi
+max_p = np.pi
 #######################
 #######################
 
