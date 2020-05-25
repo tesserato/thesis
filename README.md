@@ -45,7 +45,7 @@ Journal | JCR 2018 | Acceptance time (days)| Obs.
 - Draft of a thesis chapter with same theme.
 
 ## 01 / 06 / 2020 
-- Sound representation / machine learning focused article
+- Draft Sound representation
 - Draft of a thesis chapter with same theme.
 
 ## 08 / 06 / 2020 

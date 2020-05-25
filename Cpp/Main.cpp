@@ -2,7 +2,7 @@
 
 int main() {
 
-	int n = 1000;
+	int n = 10000;
 
 	Wav WA = generate_sinusoid(n, 2.4);
 

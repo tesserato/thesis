@@ -91,7 +91,7 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\Execs</OutDir>
     <IntDir>..\Intermediary</IntDir>
-    <TargetName>$(Platform)_$(Configuration) $(ProjectName) </TargetName>
+    <TargetName>$(Platform)_$(Configuration)_IT</TargetName>
     <ExecutablePath>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Execs;$(ExecutablePath)</ExecutablePath>
     <LibraryPath>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -108,7 +108,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\Execs</OutDir>
     <IntDir>..\Intermediary</IntDir>
-    <TargetName>$(Platform)_$(Configuration) $(ProjectName) </TargetName>
+    <TargetName>$(Platform)_$(Configuration)_IT</TargetName>
     <ExecutablePath>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Execs;$(ExecutablePath)</ExecutablePath>
     <LibraryPath>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Libs;$(LibraryPath)</LibraryPath>
     <RunCodeAnalysis>true</RunCodeAnalysis>
