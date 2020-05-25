@@ -147,12 +147,14 @@ function UpdateSurface() {
       }
     }
   }
+/////// Use absolute values to surface ///////
 //////////////////////////////////////////////
-  for (var i = 0; i < res_f; i++) {
-    for (var j = 0; j < res_p; j++) {
-      FP[i][j] = Math.abs(FP[i][j])
-    }
-  }
+  // for (var i = 0; i < res_f; i++) {
+  //   for (var j = 0; j < res_p; j++) {
+  //     FP[i][j] = Math.abs(FP[i][j])
+  //   }
+  // }
+//////////////////////////////////////////////
 //////////////////////////////////////////////
 }
 UpdateSurface()
