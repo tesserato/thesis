@@ -9,7 +9,8 @@
 #include <algorithm>
 #include <complex>
 #include <sndfile.hh> // Wav in and out
-#include "mkl_dfti.h"
+#include "mkl_dfti.h" // Intel MKL
+#include <random>
 
 const float PI = 3.14159265358979323846;
 const std::complex<float> I = sqrt(-1.0);
@@ -46,7 +47,7 @@ private:
 	float a;
 	std::vector<float> W;
 public:
-	Wav(std::vector<float> W_, int fps_) {
+	Wav(std::vector<float> W_, int fps_=44100) {
 		fps = fps_;
 		W = W_;
 		n = W.size();
@@ -79,6 +80,22 @@ public:
 			N[i] = W[i] / a;
 		}
 		return N;
+	}
+	void write(std::string path = "test.wav") {
+		if (W.size() == 0) {
+			std::cout << "size = 0";
+			return;
+		}
+		const char* fname = path.c_str();
+		SF_INFO sfinfo;
+		sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+		sfinfo.channels = 1;
+		sfinfo.samplerate = fps;
+
+		SNDFILE* outfile = sf_open(fname, SFM_WRITE, &sfinfo);
+		sf_write_float(outfile, &W[0], W.size());
+		sf_close(outfile);
+		std::cout << "file written. path=" << path << ", fps=" << fps << "\n";
 	}
 };
 
@@ -117,22 +134,22 @@ Wav read_wav(std::string path) {
 	return Wav(W, fps);
 };
 
-void write_wav(const std::vector<float> W, std::string path = "test.wav", int fps = 44100) {
-	if (W.size() == 0) {
-		std::cout << "size = 0";
-		return;
-	}
-	const char* fname = path.c_str();
-	SF_INFO sfinfo;
-	sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
-	sfinfo.channels = 1;
-	sfinfo.samplerate = fps;
-
-	SNDFILE* outfile = sf_open(fname, SFM_WRITE, &sfinfo);
-	sf_write_float(outfile, &W[0], W.size());
-	sf_close(outfile);
-	return;
-}
+//void write_wav(const std::vector<float> W, std::string path = "test.wav", int fps = 44100) {
+//	if (W.size() == 0) {
+//		std::cout << "size = 0";
+//		return;
+//	}
+//	const char* fname = path.c_str();
+//	SF_INFO sfinfo;
+//	sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+//	sfinfo.channels = 1;
+//	sfinfo.samplerate = fps;
+//
+//	SNDFILE* outfile = sf_open(fname, SFM_WRITE, &sfinfo);
+//	sf_write_float(outfile, &W[0], W.size());
+//	sf_close(outfile);
+//	return;
+//}
 
 void write_2d_vector(std::vector<std::vector<float>> V, std::string path = "teste.csv") {
 	std::ofstream out(path);
@@ -167,11 +184,11 @@ std::vector<std::vector<float>> interf_trans(const std::vector<float> & W, int r
 	const float dp = 2.0 * PI / float(res - 1);
 	const float df = float(n) / float(res - 1);
 
-	std::vector<float> mutable_A(res - 1);
+	std::vector<float> A(res - 1);
 	for (size_t i = 0; i < res - 1; i++) {
-		mutable_A[i] = std::cos(float(i) * dp);
+		A[i] = std::cos(float(i) * dp);
 	}
-	const std::vector<float>& A = mutable_A; // mutable_A was only meant to initialize const A
+	//const std::vector<float>& A = mutable_A; // mutable_A was only meant to initialize const A
 
 	std::cout << "G res f=" << global_res_f << ", G res p=" << global_res_p << ", G res=" << res << "\n";
 
@@ -191,17 +208,17 @@ std::vector<std::vector<float>> interf_trans(const std::vector<float> & W, int r
 	std::vector<std::vector<float>> FP(rows, std::vector<float>(cols));
 	for (auto& i : FP) { std::fill(i.begin(), i.end(), 0); }
 
-	std::vector<float> scaled_A(res - 1);
+	//std::vector<float> scaled_A(res - 1);
 	int idx;
 	for (size_t t = 0; t < n; t++) {
-		for (size_t i = 0; i < A.size(); i++) {
-			scaled_A[i] = A[i] * W[t];
-		}
+		//for (size_t i = 0; i < A.size(); i++) {
+		//	scaled_A[i] = A[i] * W[t];
+		//}
 		//const std::vector<float>& scaled_A = mutable_scaled_A;
 		for (size_t i = 0; i < rows; i++) {
 			for (size_t j = 0; j < cols; j++) {
 				idx = ((f_idx_ini + i * f_step) * t + p_idx_ini + j * p_step) % (res - 1);
-				FP[i][j] += scaled_A[idx];
+				FP[i][j] += W[t] * A[idx];
 			}
 		}
 	}
@@ -286,7 +303,7 @@ std::vector<std::vector<float>> interf_trans_n(const std::vector<float>& W, int 
 		out << min_f + float(i) * df;
 		for (size_t j = 0; j < res_p; j++) {
 			out << ',' << FP[i][j];
-			if (FP[i][j] > val) {
+			if (std::abs(FP[i][j]) > val) {
 				f_idx = i;
 				p_idx = j;
 				val = FP[i][j];
@@ -375,4 +392,63 @@ std::vector<std::complex<float>> rfft_n(std::vector<float>& in) {
 	tp.stop("FFT naive Time: ");
 	std::cout << "\n";
 	return out;
+}
+
+Wav generate_random_wave(const int n, int seed=0, int number_of_sinusoids=100, bool save=true) {
+
+	std::mt19937 gen(seed); // mersenne_twister_engine
+	std::uniform_int_distribution<int> i_dis(0, n/2); // get index to fill
+	const float bnd = 2.0 / number_of_sinusoids;
+	std::uniform_real_distribution<float> f_dis(- bnd, bnd); // get value to use in index
+
+	std::vector<std::complex<float>>FT(n);
+
+	for (size_t i = 0; i < number_of_sinusoids; i++) {
+		FT[i_dis(gen)] = {f_dis(gen) , f_dis(gen)};
+		//std::cout << i_dis(gen) << " " << f_dis(gen) << f_dis(gen) << "\n";
+	}
+
+	//std::fill(FT.begin(), FT.end(), 0.0);
+	//FT[1] = { 0.0, 0.5 };
+
+	//std::vector<std::complex<float>> out(n);
+
+	DFTI_DESCRIPTOR_HANDLE descriptor;
+	MKL_LONG status;
+	std::vector<float>W_vec(n);
+	status = DftiCreateDescriptor(&descriptor, DFTI_SINGLE, DFTI_REAL, 1, FT.size()); //Specify size and precision
+	status = DftiSetValue(descriptor, DFTI_PLACEMENT, DFTI_NOT_INPLACE); //Out of place FFT
+	status = DftiCommitDescriptor(descriptor); //Finalize the descriptor
+	status = DftiComputeBackward(descriptor, FT.data(), W_vec.data()); //Compute the Backward FFT
+	status = DftiFreeDescriptor(&descriptor); //Free the descriptor
+
+	//for (size_t i = 0; i < n; i++) {
+	//	std::cout << W_vec[i] << "\n";
+	//}
+	Wav W(W_vec);
+
+
+	if (save) {
+		W.write();
+	}
+
+	return W;
+}
+
+Wav generate_sinusoid(int n = 1000, float f = 1.0, float p = 0.0, float a = 1.0, bool save=true) {
+
+	std::vector<float> W_vec(n);
+
+	for (size_t x = 0; x < n; x++) {
+		W_vec[x] = a * std::cos(p + 2.0 * PI * f * x / n);
+	}
+
+	Wav W(W_vec);
+
+	if (save) {
+		W.write("sinusoid.wav");
+	}
+
+	return W;
+
 }

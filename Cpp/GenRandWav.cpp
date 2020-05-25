@@ -2,5 +2,5 @@
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    generate_random_wave(10000, 0, 1);
 }

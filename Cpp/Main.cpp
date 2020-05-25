@@ -2,7 +2,9 @@
 
 int main() {
 
-	Wav WA = read_wav("Wavs/local_f=2-p=0-n=1000.wav");
+	//Wav WA = read_wav("Wavs/local_f=2-p=0-n=1000.wav");
+
+	Wav WA = generate_sinusoid(1000, 2.5);
 	auto W = WA.get_samples();
 
 	auto IT = interf_trans(W, 0, 2);
@@ -13,8 +15,8 @@ int main() {
 
 	auto FTn = rfft_n(W);
 
-	char dummy;
-	std::cin.get(dummy);
+	//char dummy;
+	//std::cin.get(dummy);
 
 	return 0;
 }
