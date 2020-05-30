@@ -140,6 +140,7 @@ fig.update_layout(
 ParallelLines(15, n)
 ParallelLines(16, n)
 ParallelLines(17, n)
+ParallelLines(18, n)
 
 ParallelLines.Plot(ymax=n+1)
 
