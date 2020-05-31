@@ -16,3 +16,4 @@ Cpp/Intermediary
 .vs
 *.csv
 Cpp/Execs/FT.csv
+*.sol
