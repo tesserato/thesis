@@ -20,9 +20,9 @@
   The Fourier Transform, naturally due to the context and time in which it was idealized, was formulated without regard to discrete waves or computational complexity.
   Some developments, such as the Discrete Fourier Transform and the Fast Fourier Transform algorithm updated the theory to the digital, discrete era.
   % motivation
-  Some shortcomings were introduced with those methods, such as diminishing resolution in dealing with a small number of os samples.
+  Some shortcomings were introduced with those methods, such as diminishing resolution in dealing with increasingly small number of os samples.
   % objective
-  In this paper we propose a transform specifically designed for the discrete case, optimizing the inference of frequency and amplitude from whatever sampled points are available.
+  In this paper we propose a formal framework based on discrete waves, optimizing the inference of frequency and amplitude from whatever sampled points are available. Although arising from a intuitively different approach, the framework here presented can be viewed as a generalization of the Discrete Fourier Transform.
   % methods
   The algorithm is based on the representation of the set of samples in a frequency versus phase space and the investigation of the interference pattern thus generated. Each sample defines a sinusoidal planar wave in this space, with a particular amplitude, direction and frequency. The determination of the point in which maximum constructive interference occurs translates to the determination of the most accurate sinusoidal description of the whole set of samples.
   % results
@@ -35,7 +35,11 @@
 
 \section{Introduction}
 
-\section{Literature Review}
+Despite the ubiquitous presence of the DFT algorithm, some of its shortcomings, specially with respect to low resolution waves, are yet to be addressed. Nevertheless, areas such as audio compression would greatly benefit from improved analysis of the characteristics of low resolution samples, enabling, for example, the extraction of parameters to be used in machine learning algorithms or sound restoration.
+
+This neglect is felt in the virtual inexistence of research in this specific topic.  
+
+\subsection{Literature Review}
 
 \section{Methodology}
 
@@ -77,7 +81,7 @@
 
   $ \phi \in \mathbb{R}^+, 0 \le \phi < 2 \pi $, phase; \\
 
-  Figure \ref{fig:ContinuousVsDiscreteSinusoid} illustrates the relationship between the two. The values for the amplitude of both coincide, in contrast with the sampled example, as the case here is conceptually different: both sinusoids were constructed from identical parameters.
+  Figure \ref{fig:ContinuousVsDiscreteSinusoid} illustrates the relationship between the two.
   
   \begin{figure}[h!]
     \centering
@@ -86,17 +90,21 @@
     \label{fig:ContinuousVsDiscreteSinusoid}
   \end{figure}
   
-  So it's easy to see that, for each frame of a given discrete wave $W[i]$, there exists an infinite family of continuous sinusoids that pass exactly through the point defined by $i$ and $W[i]$. In fact, almost any sinusoid of the form $a \cos \left( \phi + 2 \pi f \frac{i}{n} \right)$ can be forced to contain the point $(i, W[i])$, given a suitable choice of $a$, with the exception of the particular case where $W[i] \ne 0$ and $\cos \left( \phi + 2 \pi \mathcal{F} \frac{i}{\textrm{fps}} \right)$. Of interest to this work are those sinusoids, as shown in Figure \ref{fig:OptSinusoids}, that have one of their infinite extrema, either maximum or minimum, coinciding with the abscissa $i$ or, setting $a=W[t]$, coincident with the point $(i, W[i])$.
+  So it's easy to see that, for each frame of a given discrete wave $W[i]$, there exists an infinite family of continuous sinusoids that pass exactly through the point defined by $i$ and $W[i]$. In fact, almost any sinusoid of the form $a \cos \left( \phi + 2 \pi f \frac{i}{n} \right)$ can be forced to contain the point $(i, W[i])$, given a suitable choice of $a$, with the exception of the particular case where $W[i] \ne 0$ and $\cos \left( \phi + 2 \pi \mathcal{F} \frac{i}{\textrm{fps}} \right)$. 
+  
+  Of interest to this work are those sinusoids, as shown in Figure \ref{fig:OptSinusoids}, that have one of their infinite extrema, either maximum or minimum, coinciding with the abscissa $i$ or, setting $a=W[t]$, coincident with the point $(i, W[i])$.
   
   \begin{figure}[h!]
     \centering
       \includegraphics[width=0.8\linewidth]{images/03OptSinusoids.pdf}
-    \caption{Sinusoids with maximum coinciding with sampled points i=3 and i=28 }
+    \caption{Sinusoids with maximum coinciding with frames i=3 and i=28 }
     \label{fig:OptSinusoids}
   \end{figure}
 
   One can define, for each frame, those waves mathematically as the family of continuous sinusoids that satisfy the equality $\cos \left( \phi + 2 \pi \mathcal{F} t \right) = \textrm{sgn}(W[t])$ or, in terms of discrete sinusoids, $\cos \left( \phi + 2 \pi f \frac{i}{n} \right) = \textrm{sgn}(W[t])$ where the sign function is defined as 
   $ \textrm{sgn}(x) = \{ -1 \  \textrm{if} \ x < 0, \  0  \  \textrm{if} \ x = 0, \  1  \  \textrm{if} \ x > 0\}$.
+
+
 
   
 \section{Results}

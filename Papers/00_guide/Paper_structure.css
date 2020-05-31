@@ -35,10 +35,15 @@ button{
   cursor: pointer;
 }
 
-/* button:hover{
-  background-color: var(--hover-color);
-  cursor: pointer;
-} */
+a{
+  color: var(--font-color);
+  font-style: normal;
+  text-decoration: none;
+}
+
+a:hover{
+  color: var(--hover-color);
+}
 
 h1, summary{
   font-weight: bold;
