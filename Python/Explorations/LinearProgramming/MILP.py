@@ -4,25 +4,25 @@ import numpy as np
 
 
 #######################
-n = 10
+n = 100
 X = np.arange(n)
-f = 3
-p = 1
+f = 3.5
+p = 1.4
 W = np.cos(p + 2 * np.pi * f * X / n)
 #######################
 
 prob = pulp.LpProblem("LP", pulp.LpMinimize)
 
-x = pulp.LpVariable("p")
-y = pulp.LpVariable("f")
+x = pulp.LpVariable("p", 0 , 2 * np.pi)
+y = pulp.LpVariable("f", 0 , n/2)
 
 O = [] # opt
 K = []
 for t in range(n):
   m = 2 * np.pi * n / np.sqrt(n**2 + 4 * np.pi**2 * t**2)
   d = (n*x + 2*np.pi*t*y)/np.sqrt(n**2 + 4*np.pi**2 * t**2)
-  k = pulp.LpVariable(f"k_{t}", cat=pulp.LpInteger)
-  a = pulp.LpVariable(f"a_{t}")
+  k = pulp.LpVariable(f"k_{t}", 0, t + 1, cat=pulp.LpInteger)
+  a = pulp.LpVariable(f"a_{t}", 0, t + 1)
   if W[t] >= 0:
     r = d - k * m
   else:
@@ -34,7 +34,7 @@ for t in range(n):
 prob += pulp.lpSum([O[t] * abs(W[t]) for t in range(n)]) # <|<|<|<|<|<|<|<|
 
 
-prob.writeLP("LP.lp")
+prob.writeLP("lp.lp")
 
 # status = prob.solve()
 # status = prob.solve(pulp.GLPK(msg = 0))
