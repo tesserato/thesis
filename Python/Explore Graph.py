@@ -5,7 +5,7 @@ import numpy as np
 
 #######################
 n = 7
-t = 3
+t = 5
 res_f = 10
 res_p = 10
 min_f = 0
@@ -167,7 +167,7 @@ fig.update_layout(
     width = 2 * np.pi * 200,
     height = max_f * 200,
     yaxis = dict(scaleanchor = "x", scaleratio = 1),
-    title=f"n = {n}",
+    title=f"n={n}, t={t}",
     xaxis_title="Phase",
     yaxis_title="Frequency",
     font=dict(

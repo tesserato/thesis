@@ -215,6 +215,7 @@ std::vector<float> interf_trans(const std::vector<float> & W, int res_f = 0, int
 		for (size_t i = 0; i < rows; i++) {
 			for (size_t j = 0; j < cols; j++) {
 				idx = ((f_idx_ini + i * f_step) * t + p_idx_ini + j * p_step) % (res - 1);
+				//std::cout << idx << "\n";
 				FP[i][j] += W[t] * A[idx];
 			}
 		}

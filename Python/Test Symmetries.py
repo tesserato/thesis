@@ -37,7 +37,7 @@ FP = np.zeros((res, res))
 X, Y = [], []
 for i in range(res):
   for j in range(res):
-    FP[i, j] = np.cos(P[j] + 2*np.pi*F[i]*t/n)
+    FP[i, j] = np.cos(P[j] + 2 * np.pi * F[i] * t / n)
     X.append(P[j])
     Y.append(F[i])
 
