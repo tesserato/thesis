@@ -107,6 +107,14 @@ for (var t = 0; t < n; t++) {
   )
 }
 
+var x_vals = []
+var x_text = []
+for (let i = -20; i < 100; i++) {
+  x_vals.push(i * Math.PI)
+  x_text.push("$ " + String(i) + " \\pi $")
+}
+
+
 var IsolinesLayout = {
   title:'Isolines',
   font: {
@@ -114,14 +122,14 @@ var IsolinesLayout = {
     size: 18,
     color: "black"
   },
-  // xaxis: {
-  //   scaleanchor:"y",
-  // },
+  xaxis: {
+    tickvals: x_vals,
+    ticktext: x_text,
+  },
   yaxis: {
     scaleanchor:"x",
     range:[0, n+1],
-    
-    // tickvals: X.map(i => i - n).concat(X.concat([n])),
+    tickvals: X,
   }
 };
  
