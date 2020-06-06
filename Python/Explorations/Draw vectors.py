@@ -114,7 +114,7 @@ fig.add_trace(
   )
 )
 
-# fig.show(config=dict({'scrollZoom': False}))
+fig.show(config=dict({'scrollZoom': False}))
 
 
 
