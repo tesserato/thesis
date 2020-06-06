@@ -20,9 +20,10 @@ P = np.array([0, np.pi / 2])
 FP = np.zeros((freqs, 2))
 
 X, Y = [], []
-for t in range(n):
-  for i in range(freqs):
-    for j in range(2):
+
+for i in range(freqs):
+  for j in range(2):
+    for t in range(n):
       FP[i, j] += W[t] * np.cos(P[j] + 2 * np.pi * F[i] * t / n) * 2 / n
 
 FT = np.fft.rfft(W) * 2 / n
