@@ -1,28 +1,44 @@
 import pulp
-# import cplex
+import random
 import numpy as np
 
+#######################
+n=40
+random.seed(0)
+X = np.arange(n)
+W = np.zeros(n)
+number_of_random_waves = 1
+A = np.array([random.uniform(1, 5) for i in range(number_of_random_waves)])
+F = np.array([random.uniform(1, 9) for i in range(number_of_random_waves)])
+P = np.array([random.uniform(0, 2 * np.pi) for i in range(number_of_random_waves)])
+W = np.sum(A * np.cos(P + 2 * np.pi * F.T * X[:, np.newaxis] / n), 1)
+W = W / np.max(np.abs(W))
+idx = np.argmax(A)
+print(W)
+print(F[idx])
+#######################
 
 #######################
-n = 100
-X = np.arange(n)
-f = 3.5
-p = 1.4
-W = np.cos(p + 2 * np.pi * f * X / n)
+# n = 30
+# X = np.arange(n)
+# f0 = 3.5
+# p0 = 1.4
+# W = np.cos(p0 + 2 * np.pi * f0 * X / n)
 #######################
 
 prob = pulp.LpProblem("LP", pulp.LpMinimize)
 
-x = pulp.LpVariable("p", 0 , 2 * np.pi)
-y = pulp.LpVariable("f", 0 , n/2)
+p = pulp.LpVariable("p", 0 , 2 * np.pi)
+f = pulp.LpVariable("f", 0 , n / 2)
 
 O = [] # opt
 K = []
 for x in range(n):
-  m = 2 * np.pi * n / np.sqrt(n**2 + 4 * np.pi**2 * x**2)
-  d = (n*x + 2*np.pi*x*y)/np.sqrt(n**2 + 4*np.pi**2 * x**2)
-  k = pulp.LpVariable(f"k_{x}", 0, x + 1, cat=pulp.LpInteger)
-  a = pulp.LpVariable(f"a_{x}", 0, x + 1)
+  den = np.sqrt(n**2 + 4 * np.pi**2 * x**2)
+  m = 2 * np.pi * n / den
+  d = (n * p + 2 * np.pi * x * f) / den
+  k = pulp.LpVariable(f"k_{x}", 0, cat=pulp.LpInteger)
+  a = pulp.LpVariable(f"a_{x}", 0)
   if W[x] >= 0:
     r = d - k * m
   else:
@@ -45,6 +61,6 @@ print(pulp.LpStatus[status])
 for v in prob.variables():
   print(v.name, "=", v.varValue)
 
-print(f"f={round(pulp.value(y), 2)} p={round(pulp.value(x), 2)}")
+print(f"f={round(pulp.value(f), 2)} p={round(pulp.value(p), 2)}")
 
 
