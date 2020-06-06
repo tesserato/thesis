@@ -1,5 +1,5 @@
 import pulp
-# import plotly.graph_objects as go
+# import cplex
 import numpy as np
 
 
@@ -18,27 +18,27 @@ y = pulp.LpVariable("f", 0 , n/2)
 
 O = [] # opt
 K = []
-for t in range(n):
-  m = 2 * np.pi * n / np.sqrt(n**2 + 4 * np.pi**2 * t**2)
-  d = (n*x + 2*np.pi*t*y)/np.sqrt(n**2 + 4*np.pi**2 * t**2)
-  k = pulp.LpVariable(f"k_{t}", 0, t + 1, cat=pulp.LpInteger)
-  a = pulp.LpVariable(f"a_{t}", 0, t + 1)
-  if W[t] >= 0:
+for x in range(n):
+  m = 2 * np.pi * n / np.sqrt(n**2 + 4 * np.pi**2 * x**2)
+  d = (n*x + 2*np.pi*x*y)/np.sqrt(n**2 + 4*np.pi**2 * x**2)
+  k = pulp.LpVariable(f"k_{x}", 0, x + 1, cat=pulp.LpInteger)
+  a = pulp.LpVariable(f"a_{x}", 0, x + 1)
+  if W[x] >= 0:
     r = d - k * m
   else:
-    r = d - k * m + m/2
+    r = d - k * m + m / 2
   prob += a >= r
   prob += a >= - r
   O.append(a)
 
-prob += pulp.lpSum([O[t] * abs(W[t]) for t in range(n)]) # <|<|<|<|<|<|<|<|
+prob += pulp.lpSum([O[x] * abs(W[x]) for x in range(n)]) # <|<|<|<|<|<|<|<|
 
 
 prob.writeLP("lp.lp")
 
 # status = prob.solve()
 # status = prob.solve(pulp.GLPK(msg = 0))
-status = prob.solve(pulp.CPLEX())
+status = prob.solve(pulp.CPLEX_CMD(path=r"C:\Program Files\IBM\ILOG\CPLEX_Studio1210\cplex\bin\x64_win64\cplex.exe"))
 
 print(pulp.LpStatus[status])
 
