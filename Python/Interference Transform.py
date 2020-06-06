@@ -1,23 +1,36 @@
 import numpy as np
 import plotly.graph_objects as go
-
+import random
 from Helper import read_wav
 
 #######################
 #######################
+n = 10
 res_f = 20
 res_p = 10
 min_f = 1
 max_f = 3
 min_p = 0
 max_p = 1#2 * np.pi
-path = "Python\local_f=2.wav"
 #######################
 #######################
 
-W, fps = read_wav(path)
+### Generating random wave
+random.seed(1)
+X = np.arange(n)
+W = np.zeros(n)
+number_of_random_waves = 5
+A = np.array([random.uniform(1, 5) for i in range(number_of_random_waves)])
+F = np.array([random.uniform(1, 9) for i in range(number_of_random_waves)])
+P = np.array([random.uniform(0, 2 * np.pi) for i in range(number_of_random_waves)])
+W = np.sum(A * np.cos(P + 2 * np.pi * F.T * X[:, np.newaxis] / n), 1)
+W = W / np.max(np.abs(W))
+idx = np.argmax(A)
 
-n = W.shape[0]
+# print(W.shape)
+# exit()
+
+
 
 assert min_p < max_p, f"min_p={round(min_p, 3)} >= max_p={round(max_p, 3)}"
 
