@@ -8,11 +8,9 @@ class interval:
     self.end = end
     self.value = value
 
-
-
 ### Generating random wave
-n = 20
-random.seed(0)
+n = 100
+random.seed(2)
 X = np.arange(n)
 W = np.zeros(n)
 number_of_random_waves = 5
@@ -143,8 +141,8 @@ for s in summation:
       name=f"t={x}, a={s.value:.2f}", 
       mode='lines',
       line=go.scatter.Line(
-        color="red",
-        width= abs(s.value) * 5
+        color= "red" if s.value >= 0 else "blue",
+        width= max(abs(s.value) * 10, 4)
       )
     )
   )
