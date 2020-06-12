@@ -1,4 +1,4 @@
-var n = 10;
+var n = 16;
 var X = [...Array(n).keys()];
 var W = Array(n);
 var Wvis = Array(n).fill(true);

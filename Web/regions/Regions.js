@@ -32,7 +32,7 @@ function RandomWave() {
         type:'scatter',
         showlegend: false,
         marker: {color:"black"},
-        hovertemplate: "t = %{x}<br>W[%{x}] = %{y:.2f}"
+        // hovertemplate: "t = %{x}<br>W[%{x}] = %{y:.2f}"
       }
     }
   )
@@ -73,7 +73,7 @@ for (var t = 0; t < n; t++) {
       type: "scatter",
       mode: "none",
       fill: "tozeroy",
-      fillcolor: W[t] >= 0 ? "rgba(191, 63, 63, 0.2)" : "rgba(26,150,65,0.2)",
+      fillcolor: W[t] >= 0 ? "rgba(191, 63, 63, 0.2)" : "rgba(26,150,65,0.0)",
       showlegend: false,
     }
   )
@@ -85,6 +85,11 @@ for (var t = 0; t < n; t++) {
   Xl.push(2 * Math.PI * k - 2 * Math.PI * t + Math.PI / 2)   ; Yl.push(n)
   Xl.push(2 * Math.PI * k - 2 * Math.PI * t + 1.5 * Math.PI) ; Yl.push(n)
   Xl.push(2 * Math.PI * k + 1.5 * Math.PI)                   ; Yl.push(0)
+
+  // Xl.push(-Math.acos(W[t]) + k * 2 * Math.PI)               ; Yl.push(0)
+  // Xl.push(-2*Math.PI*t - Math.acos(W[t]) + 2*Math.PI)   ; Yl.push(n)
+  // Xl.push(-2*Math.PI*t + Math.acos(W[t]))                      ; Yl.push(n)
+  // Xl.push(Math.acos(W[t]) + k * 2 * Math.PI)                   ; Yl.push(0)
   }
   RegionsData.push(
     {
@@ -94,7 +99,7 @@ for (var t = 0; t < n; t++) {
       type: "scatter",
       mode: "none",
       fill: "tozeroy",
-      fillcolor: W[t] >= 0 ? "rgba(26,150,65,0.2)" : "rgba(191, 63, 63, 0.2)",
+      fillcolor: W[t] >= 0 ? "rgba(26,150,65,0.0)" : "rgba(191, 63, 63, 0.2)",
       showlegend: false,
     }
   )
@@ -102,7 +107,7 @@ for (var t = 0; t < n; t++) {
 
 var x_vals = []
 var x_text = []
-for (let i = -20; i < 100; i++) {
+for (let i = -20; i < 100; i+=.5) {
   x_vals.push(i * Math.PI)
   x_text.push("$ " + String(i) + " \\pi $")
 }
@@ -115,7 +120,7 @@ RegionsLayout = {
     color: "black"
   },
   xaxis: {
-    range:[0 - 0.1, 2 * Math.PI + 0.1],
+    range:[0 - 0.1, Math.PI / 2 + 0.1],
     tickvals: x_vals,
     ticktext: x_text,
     // zerolinecolor: "gray",
@@ -138,7 +143,7 @@ Plotly.plot("Isolines", RegionsData, RegionsLayout);
 function plot_unique_space(){
   var dt = [{
     name: "Unique Space",
-    x: [0, 0, Math.PI, Math.PI, 0],
+    x: [0, 0, Math.PI / 2, Math.PI / 2, 0],
     y: [0, n/2, n/2, 0, 0],
     type: "scatter",
     mode: "lines",
@@ -148,7 +153,6 @@ function plot_unique_space(){
   }]
   Plotly.plot("Isolines", dt)
 }
-
 plot_unique_space()
 
 function Update() {
