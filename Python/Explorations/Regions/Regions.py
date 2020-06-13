@@ -12,7 +12,7 @@ class interval:
 
 ### Generating random wave
 n = 20
-random.seed(0)
+random.seed(3)
 X = np.arange(n)
 W = np.zeros(n)
 number_of_random_waves = 5
@@ -20,7 +20,7 @@ A = np.array([random.uniform(1, 5) for i in range(number_of_random_waves)])
 F = np.array([random.uniform(1, 9) for i in range(number_of_random_waves)])
 P = np.array([random.uniform(0, 2 * np.pi) for i in range(number_of_random_waves)])
 W = np.sum(A * np.cos(P + 2 * np.pi * F.T * X[:, np.newaxis] / n), 1)
-W = W / np.max(np.abs(W))
+# W = W / np.max(np.abs(W))
 
 fig = go.Figure()
 
@@ -145,6 +145,9 @@ for x in range(1, n // 2 + 1):
     )
   )
 
+fticks = p0_fticks + p1_fticks
+fticks = np.unique(np.array(fticks))
+
 print(len(p0_fticks))
 p0_fticks = np.unique(np.array(p0_fticks))
 print(p0_fticks.shape)
@@ -160,12 +163,12 @@ p1_summation = [interval(p1_fticks[i], p1_fticks[i + 1], 0) for i in range(len(p
 for r in p0_regions:
   for s in p0_summation:
     if r.start <= s.start and r.end >= s.end:
-      s.value += r.value
+      s.value += r.value * 2 / n
 
 for r in p1_regions:
   for s in p1_summation:
     if r.start <= s.start and r.end >= s.end:
-      s.value += r.value
+      s.value += r.value * 2 / n
 
 for s in p0_summation:
   fig.add_trace(
@@ -197,6 +200,14 @@ for s in p1_summation:
     )
   )
 
+fig.update_yaxes(tickvals=fticks)
+
+# fig.show(config=dict({'scrollZoom': False}))
+
+###################################
+###################################
+###################################
+
 
 idx = np.argmax(A)
 
@@ -212,6 +223,99 @@ for s in p1_summation:
 
 print(F[idx], p0_max, p1_max)
 
-fig.update_yaxes(tickvals=p0_fticks)
+
+fig = go.Figure()
+
+# fig.update_xaxes(tickvals=[0, np.pi / 2, np.pi, 3 * np.pi / 2, 2 * np.pi])
+# fig.update_yaxes(tickvals=[i for i in range(n)])
+
+fig.update_layout(
+    # width = 2 * np.pi * 220,
+    # height = n * 300,
+    # yaxis = dict(scaleanchor = "x", scaleratio = 1),
+    title=f"n = {n}",
+    xaxis_title="Phase",
+    yaxis_title="Frequency",
+    font=dict(
+        family="Courier New, monospace",
+        size=18,
+        color="#7f7f7f"
+    )
+)
+
+
+idxs = np.argsort(F)
+fig.add_trace(
+  go.Scatter(
+    x=F[idxs],
+    y=A[idxs],
+    hoverinfo=f"all",
+    name=f"t={0}, a={W[0]:.2f}", 
+    mode='lines',
+    line=go.scatter.Line(
+      color="black",
+      width=3
+    )
+  )
+)
+
+FT = np.fft.rfft(W) * 2 / n
+
+fig.add_trace(
+  go.Scatter(
+    x=X,
+    y=np.abs(FT.real),
+    hoverinfo=f"all",
+    name=f"t={0}, a={W[0]:.2f}", 
+    mode='lines',
+    line=go.scatter.Line(
+      color="red",
+      width=3
+    )
+  )
+)
+
+fig.add_trace(
+  go.Scatter(
+    x=X,
+    y=np.abs(FT.imag),
+    hoverinfo=f"all",
+    name=f"t={0}, a={W[0]:.2f}", 
+    mode='lines',
+    line=go.scatter.Line(
+      color="blue",
+      width=3
+    )
+  )
+)
+
+fig.add_trace(
+  go.Scatter(
+    x=np.array([[r.start, r.end] for r in p0_summation]).flat,
+    y=np.abs(np.array([[r.value, r.value] for r in p0_summation]).flat),
+    hoverinfo=f"all",
+    name=f"t={0}, a={W[0]:.2f}", 
+    mode='lines',
+    line=go.scatter.Line(
+      color="red",
+      width=3
+    )
+  )
+)
+
+fig.add_trace(
+  go.Scatter(
+    x=np.array([[r.start, r.end] for r in p1_summation]).flat,
+    y=np.abs(np.array([[r.value, r.value] for r in p1_summation]).flat),
+    hoverinfo=f"all",
+    name=f"t={0}, a={W[0]:.2f}", 
+    mode='lines',
+    line=go.scatter.Line(
+      color="blue",
+      width=3
+    )
+  )
+)
+
 
 fig.show(config=dict({'scrollZoom': False}))
