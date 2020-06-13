@@ -7,10 +7,12 @@ class interval:
     self.start = start
     self.end = end
     self.value = value
+  def __str__(self):
+    return f"[{self.start}, {self.end}]; v={round(self.value, 2)}"
 
 ### Generating random wave
-n = 100
-random.seed(2)
+n = 20
+random.seed(0)
 X = np.arange(n)
 W = np.zeros(n)
 number_of_random_waves = 5
@@ -19,9 +21,6 @@ F = np.array([random.uniform(1, 9) for i in range(number_of_random_waves)])
 P = np.array([random.uniform(0, 2 * np.pi) for i in range(number_of_random_waves)])
 W = np.sum(A * np.cos(P + 2 * np.pi * F.T * X[:, np.newaxis] / n), 1)
 W = W / np.max(np.abs(W))
-idx = np.argmax(A)
-
-print(F[idx])
 
 fig = go.Figure()
 
@@ -57,8 +56,11 @@ fig.add_trace(
 )
 
 x0 = 0
-regions = [] # list of [start, end, weight] #[[0, 1 if W[0] >= 0 else 0], [n//2+1, 1 if W[0] >= 0 else 0]]
-yticks = []
+p0_regions = []
+p0_fticks = []
+p1_regions = []
+p1_fticks = []
+
 for x in range(1, n // 2 + 1):
 
   X_lines_e = []
@@ -69,26 +71,48 @@ for x in range(1, n // 2 + 1):
   w = 1 if W[x] >= 0 else -1
 
   for k in range(x // 2 + 1):
-    f0_e = np.round((4 * k - 1) * n / (4 * x), 2)
-    f1_e = np.round((4 * k + 1) * n / (4 * x), 2)
-    regions.append(interval(f0_e, f1_e, w))
-    f0_o = np.round((4 * k + 1) * n / (4 * x), 2)
-    f1_o = np.round((4 * k + 3) * n / (4 * x), 2)
-    regions.append(interval(f0_o, f1_o, -w))
-    yticks.append(f0_e), yticks.append(f1_e), yticks.append(f0_o), yticks.append(f1_o)
+    p0_f0_e = np.round((4 * k - 1) * n / (4 * x), 2)
+    p0_f1_e = np.round((4 * k + 1) * n / (4 * x), 2)
+    p0_regions.append(interval(p0_f0_e, p0_f1_e, W[x]))
+    p0_f0_o = np.round((4 * k + 1) * n / (4 * x), 2)
+    p0_f1_o = np.round((4 * k + 3) * n / (4 * x), 2)
+    p0_regions.append(interval(p0_f0_o, p0_f1_o, -W[x]))
+    p0_fticks.append(p0_f0_e), p0_fticks.append(p0_f1_e), p0_fticks.append(p0_f0_o), p0_fticks.append(p0_f1_o)
+
+    p1_f0_e = np.round((2 * k + 1) * n / (2 * x), 2)
+    p1_f1_e = np.round((2 * k + 2) * n / (2 * x), 2)
+    p1_regions.append(interval(p1_f0_e, p1_f1_e, W[x]))
+    p1_f0_o = np.round(2 * k * n / (2 * x), 2)
+    p1_f1_o = np.round((2 * k + 1) * n / (2 * x), 2)
+    p1_regions.append(interval(p1_f0_o, p1_f1_o, -W[x]))
+    p1_fticks.append(p1_f0_e), p1_fticks.append(p1_f1_e), p1_fticks.append(p1_f0_o), p1_fticks.append(p1_f1_o)
 
     X_lines_e.append(x0)
     X_lines_e.append(x0)
     X_lines_e.append(None)
-    Y_lines_e.append(f0_e)
-    Y_lines_e.append(f1_e)
+    Y_lines_e.append(p0_f0_e)
+    Y_lines_e.append(p0_f1_e)
     Y_lines_e.append(None)
 
     X_lines_o.append(x0)
     X_lines_o.append(x0)
     X_lines_o.append(None)
-    Y_lines_o.append(f0_o)
-    Y_lines_o.append(f1_o)
+    Y_lines_o.append(p0_f0_o)
+    Y_lines_o.append(p0_f1_o)
+    Y_lines_o.append(None)
+
+    X_lines_e.append(x0 + .25)
+    X_lines_e.append(x0 + .25)
+    X_lines_e.append(None)
+    Y_lines_e.append(p1_f0_e)
+    Y_lines_e.append(p1_f1_e)
+    Y_lines_e.append(None)
+
+    X_lines_o.append(x0 + .25)
+    X_lines_o.append(x0 + .25)
+    X_lines_o.append(None)
+    Y_lines_o.append(p1_f0_o)
+    Y_lines_o.append(p1_f1_o)
     Y_lines_o.append(None)
 
   x0 +=1
@@ -121,18 +145,29 @@ for x in range(1, n // 2 + 1):
     )
   )
 
-print(len(yticks))
-yticks = np.unique(np.array(yticks))
-print(yticks.shape)
+print(len(p0_fticks))
+p0_fticks = np.unique(np.array(p0_fticks))
+print(p0_fticks.shape)
 
-summation = [interval(yticks[i], yticks[i + 1], 0) for i in range(len(yticks) - 1)]
+print(len(p1_fticks))
+p1_fticks = np.unique(np.array(p1_fticks))
+print(p1_fticks.shape)
 
-for r in regions:
-  for s in summation:
+
+p0_summation = [interval(p0_fticks[i], p0_fticks[i + 1], 0) for i in range(len(p0_fticks) - 1)]
+p1_summation = [interval(p1_fticks[i], p1_fticks[i + 1], 0) for i in range(len(p1_fticks) - 1)]
+
+for r in p0_regions:
+  for s in p0_summation:
     if r.start <= s.start and r.end >= s.end:
       s.value += r.value
 
-for s in summation:
+for r in p1_regions:
+  for s in p1_summation:
+    if r.start <= s.start and r.end >= s.end:
+      s.value += r.value
+
+for s in p0_summation:
   fig.add_trace(
     go.Scatter(
       x=[x0, x0],
@@ -147,6 +182,36 @@ for s in summation:
     )
   )
 
-fig.update_yaxes(tickvals=yticks)
+for s in p1_summation:
+  fig.add_trace(
+    go.Scatter(
+      x=[x0 + 1, x0 + 1],
+      y=[s.start, s.end],
+      hoverinfo=f"all",
+      name=f"t={x}, a={s.value:.2f}", 
+      mode='lines',
+      line=go.scatter.Line(
+        color= "red" if s.value >= 0 else "blue",
+        width= max(abs(s.value) * 10, 4)
+      )
+    )
+  )
+
+
+idx = np.argmax(A)
+
+p0_max = interval(0,0,0)
+for s in p0_summation:
+  if abs(s.value) > abs(p0_max.value):
+    p0_max = s
+
+p1_max = interval(0,0,0)
+for s in p1_summation:
+  if abs(s.value) > abs(p1_max.value):
+    p1_max = s
+
+print(F[idx], p0_max, p1_max)
+
+fig.update_yaxes(tickvals=p0_fticks)
 
 fig.show(config=dict({'scrollZoom': False}))
