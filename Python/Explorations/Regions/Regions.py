@@ -7,11 +7,13 @@ class interval:
     self.start = start
     self.end = end
     self.value = value
+
   def __str__(self):
     return f"[{self.start}, {self.end}]; v={round(self.value, 2)}"
 
+
 ### Generating random wave
-n = 20
+n = 40
 random.seed(3)
 X = np.arange(n)
 W = np.zeros(n)
@@ -69,22 +71,23 @@ for x in range(1, n // 2 + 1):
   Y_lines_o = []
   
   w = 1 if W[x] >= 0 else -1
+  # w = W[x]
 
   for k in range(x // 2 + 1):
     p0_f0_e = np.round((4 * k - 1) * n / (4 * x), 2)
     p0_f1_e = np.round((4 * k + 1) * n / (4 * x), 2)
-    p0_regions.append(interval(p0_f0_e, p0_f1_e, W[x]))
+    p0_regions.append(interval(p0_f0_e, p0_f1_e, w))
     p0_f0_o = np.round((4 * k + 1) * n / (4 * x), 2)
     p0_f1_o = np.round((4 * k + 3) * n / (4 * x), 2)
-    p0_regions.append(interval(p0_f0_o, p0_f1_o, -W[x]))
+    p0_regions.append(interval(p0_f0_o, p0_f1_o, -w))
     p0_fticks.append(p0_f0_e), p0_fticks.append(p0_f1_e), p0_fticks.append(p0_f0_o), p0_fticks.append(p0_f1_o)
 
     p1_f0_e = np.round((2 * k + 1) * n / (2 * x), 2)
     p1_f1_e = np.round((2 * k + 2) * n / (2 * x), 2)
-    p1_regions.append(interval(p1_f0_e, p1_f1_e, W[x]))
+    p1_regions.append(interval(p1_f0_e, p1_f1_e, w))
     p1_f0_o = np.round(2 * k * n / (2 * x), 2)
     p1_f1_o = np.round((2 * k + 1) * n / (2 * x), 2)
-    p1_regions.append(interval(p1_f0_o, p1_f1_o, -W[x]))
+    p1_regions.append(interval(p1_f0_o, p1_f1_o, -w))
     p1_fticks.append(p1_f0_e), p1_fticks.append(p1_f1_e), p1_fticks.append(p1_f0_o), p1_fticks.append(p1_f1_o)
 
     X_lines_e.append(x0)
@@ -221,8 +224,7 @@ for s in p1_summation:
   if abs(s.value) > abs(p1_max.value):
     p1_max = s
 
-print(F[idx], p0_max, p1_max)
-
+print(len(p0_summation), len(p1_summation))
 
 fig = go.Figure()
 
@@ -242,7 +244,6 @@ fig.update_layout(
         color="#7f7f7f"
     )
 )
-
 
 idxs = np.argsort(F)
 fig.add_trace(
@@ -317,5 +318,6 @@ fig.add_trace(
   )
 )
 
+fig.update_xaxes(range=[1, 7])
 
 fig.show(config=dict({'scrollZoom': False}))
