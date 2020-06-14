@@ -14,15 +14,15 @@ class interval:
 
 ### Generating random wave
 n = 40
-random.seed(3)
+random.seed(1)
 X = np.arange(n)
 W = np.zeros(n)
 number_of_random_waves = 5
 A = np.array([random.uniform(1, 5) for i in range(number_of_random_waves)])
-F = np.array([random.uniform(1, 9) for i in range(number_of_random_waves)])
+F = np.array([random.uniform(1, 5) for i in range(number_of_random_waves)])
 P = np.array([random.uniform(0, 2 * np.pi) for i in range(number_of_random_waves)])
 W = np.sum(A * np.cos(P + 2 * np.pi * F.T * X[:, np.newaxis] / n), 1)
-# W = W / np.max(np.abs(W))
+W = W / np.max(np.abs(W))
 
 fig = go.Figure()
 
@@ -70,8 +70,8 @@ for x in range(1, n // 2 + 1):
   X_lines_o = []
   Y_lines_o = []
   
-  w = 1 if W[x] >= 0 else -1
-  # w = W[x]
+  # w = 1 if W[x] >= 0 else -1
+  w = W[x]
 
   for k in range(x // 2 + 1):
     p0_f0_e = np.round((4 * k - 1) * n / (4 * x), 2)
@@ -151,17 +151,17 @@ for x in range(1, n // 2 + 1):
 fticks = p0_fticks + p1_fticks
 fticks = np.unique(np.array(fticks))
 
-print(len(p0_fticks))
-p0_fticks = np.unique(np.array(p0_fticks))
-print(p0_fticks.shape)
+# print(len(p0_fticks))
+# p0_fticks = np.unique(np.array(p0_fticks))
+# print(p0_fticks.shape)
 
-print(len(p1_fticks))
-p1_fticks = np.unique(np.array(p1_fticks))
-print(p1_fticks.shape)
+# print(len(p1_fticks))
+# p1_fticks = np.unique(np.array(p1_fticks))
+# print(p1_fticks.shape)
 
 
-p0_summation = [interval(p0_fticks[i], p0_fticks[i + 1], 0) for i in range(len(p0_fticks) - 1)]
-p1_summation = [interval(p1_fticks[i], p1_fticks[i + 1], 0) for i in range(len(p1_fticks) - 1)]
+p0_summation = [interval(fticks[i], fticks[i + 1], 0) for i in range(len(fticks) - 1)]
+p1_summation = [interval(fticks[i], fticks[i + 1], 0) for i in range(len(fticks) - 1)]
 
 for r in p0_regions:
   for s in p0_summation:
@@ -215,16 +215,28 @@ fig.update_yaxes(tickvals=fticks)
 idx = np.argmax(A)
 
 p0_max = interval(0,0,0)
-for s in p0_summation:
-  if abs(s.value) > abs(p0_max.value):
-    p0_max = s
-
 p1_max = interval(0,0,0)
-for s in p1_summation:
-  if abs(s.value) > abs(p1_max.value):
-    p1_max = s
+gl_max = interval(0,0,0)
 
-print(len(p0_summation), len(p1_summation))
+for i in range(len(p0_summation)):
+  if abs(p0_summation[i].value) > abs(p0_max.value):
+    p0_max = p0_summation[i]
+
+  if abs(p1_summation[i].value) > abs(p1_max.value):
+    p1_max = p1_summation[i]
+
+  m = np.sqrt(p0_summation[i].value**2 + p1_summation[i].value**2)
+  if m > gl_max.value:
+    gl_max = interval(p0_summation[i].start, p0_summation[i].end, m)
+
+idx = np.argmax(A)
+
+FT = np.fft.rfft(W) * 2 / n
+
+f = np.argmax(np.abs(FT))
+
+
+print(round(F[idx], 2), round(A[idx], 2), p0_max, p1_max, gl_max, f, np.abs(FT[f]))
 
 fig = go.Figure()
 
@@ -232,20 +244,21 @@ fig = go.Figure()
 # fig.update_yaxes(tickvals=[i for i in range(n)])
 
 fig.update_layout(
-    # width = 2 * np.pi * 220,
-    # height = n * 300,
-    # yaxis = dict(scaleanchor = "x", scaleratio = 1),
-    title=f"n = {n}",
-    xaxis_title="Phase",
-    yaxis_title="Frequency",
-    font=dict(
-        family="Courier New, monospace",
-        size=18,
-        color="#7f7f7f"
-    )
+  # width = 2 * np.pi * 220,
+  # height = n * 300,
+  # yaxis = dict(scaleanchor = "x", scaleratio = 1),
+  title=f"n = {n}",
+  xaxis_title="Phase",
+  yaxis_title="Frequency",
+  font=dict(
+      family="Courier New, monospace",
+      size=18,
+      color="#7f7f7f"
+  )
 )
 
 idxs = np.argsort(F)
+
 fig.add_trace(
   go.Scatter(
     x=F[idxs],
@@ -259,8 +272,6 @@ fig.add_trace(
     )
   )
 )
-
-FT = np.fft.rfft(W) * 2 / n
 
 fig.add_trace(
   go.Scatter(
