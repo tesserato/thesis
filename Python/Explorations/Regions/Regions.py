@@ -2,8 +2,8 @@ import numpy as np
 import plotly.graph_objects as go
 import random
 
-class interval:
-  def __init__(self, start, end, value=0):
+class region:
+  def __init__(self, p0, p1, p2, p3, value=0):
     self.start = start
     self.end = end
     self.value = value

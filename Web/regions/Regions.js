@@ -73,7 +73,7 @@ for (var t = 0; t < n; t++) {
       type: "scatter",
       mode: "none",
       fill: "tozeroy",
-      fillcolor: W[t] >= 0 ? "rgba(191, 63, 63, 0.2)" : "rgba(26,150,65,0.0)",
+      fillcolor: W[t] >= 0 ? "rgba(191, 63, 63, 0.2)" : "rgba(26,150,65,0.2)",
       showlegend: false,
     }
   )
@@ -99,7 +99,7 @@ for (var t = 0; t < n; t++) {
       type: "scatter",
       mode: "none",
       fill: "tozeroy",
-      fillcolor: W[t] >= 0 ? "rgba(26,150,65,0.0)" : "rgba(191, 63, 63, 0.2)",
+      fillcolor: W[t] >= 0 ? "rgba(26,150,65,0.2)" : "rgba(191, 63, 63, 0.2)",
       showlegend: false,
     }
   )
@@ -120,7 +120,7 @@ RegionsLayout = {
     color: "black"
   },
   xaxis: {
-    range:[0 - 0.1, Math.PI / 2 + 0.1],
+    range:[0 - 0.1, Math.PI + 0.1],
     tickvals: x_vals,
     ticktext: x_text,
     // zerolinecolor: "gray",
@@ -143,7 +143,7 @@ Plotly.plot("Isolines", RegionsData, RegionsLayout);
 function plot_unique_space(){
   var dt = [{
     name: "Unique Space",
-    x: [0, 0, Math.PI / 2, Math.PI / 2, 0],
+    x: [0, 0, Math.PI, Math.PI, 0],
     y: [0, n/2, n/2, 0, 0],
     type: "scatter",
     mode: "lines",
