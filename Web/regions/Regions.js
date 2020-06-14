@@ -71,6 +71,8 @@ for (var t = 0; t < n; t++) {
       x: Xl,
       y: Yl,
       type: "scatter",
+      mode: 'lines',
+      line:{width:0.5, color:"black"},
       mode: "none",
       fill: "tozeroy",
       fillcolor: W[t] >= 0 ? "rgba(191, 63, 63, 0.2)" : "rgba(26,150,65,0.2)",
@@ -85,11 +87,6 @@ for (var t = 0; t < n; t++) {
   Xl.push(2 * Math.PI * k - 2 * Math.PI * t + Math.PI / 2)   ; Yl.push(n)
   Xl.push(2 * Math.PI * k - 2 * Math.PI * t + 1.5 * Math.PI) ; Yl.push(n)
   Xl.push(2 * Math.PI * k + 1.5 * Math.PI)                   ; Yl.push(0)
-
-  // Xl.push(-Math.acos(W[t]) + k * 2 * Math.PI)               ; Yl.push(0)
-  // Xl.push(-2*Math.PI*t - Math.acos(W[t]) + 2*Math.PI)   ; Yl.push(n)
-  // Xl.push(-2*Math.PI*t + Math.acos(W[t]))                      ; Yl.push(n)
-  // Xl.push(Math.acos(W[t]) + k * 2 * Math.PI)                   ; Yl.push(0)
   }
   RegionsData.push(
     {
@@ -97,7 +94,8 @@ for (var t = 0; t < n; t++) {
       x: Xl,
       y: Yl,
       type: "scatter",
-      mode: "none",
+      mode: 'lines', 
+      line:{width:0.5, color:"black"},
       fill: "tozeroy",
       fillcolor: W[t] >= 0 ? "rgba(26,150,65,0.2)" : "rgba(191, 63, 63, 0.2)",
       showlegend: false,
@@ -147,8 +145,6 @@ function plot_unique_space(){
     y: [0, n/2, n/2, 0, 0],
     type: "scatter",
     mode: "lines",
-    // fill: "tozeroy",
-    // fillcolor: W[t] >= 0 ? "rgba(26,150,65,0.2)" : "rgba(191, 63, 63, 0.2)",
     showlegend: false,
   }]
   Plotly.plot("Isolines", dt)
@@ -160,7 +156,6 @@ function Update() {
   RandomWave();
 
   for (let i = 0; i < n; i++) {
-
       RegionsData[2 * i].fillcolor = W[i] >= 0 ? "rgba(191, 63, 63, 0.2)" : "rgba(26,150,65,0.2)"
       // console.log("even")
       RegionsData[2 * i + 1].fillcolor = W[i] >= 0 ? "rgba(26,150,65,0.2)" : "rgba(191, 63, 63, 0.2)"
