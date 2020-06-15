@@ -1,10 +1,49 @@
 var n = 10
 var X = [...Array(n).keys()]
-var W = Array(n)
+var W = Array(n).fill(0.0)
 var Wvis = Array(n).fill(true)
 // var Colors = Plotly.d3.scale.linear().domain([0, n-1]).range(["blue", "red"])
 var RED = "rgba(191, 63, 63, 0.2)"
 var BLUE = "rgba(26,150,65,0.2)"
+
+var number_of_random_sinusoids = 3
+var F = Array(number_of_random_sinusoids)
+var A = Array(number_of_random_sinusoids)
+var P = Array(number_of_random_sinusoids)
+
+/////////////////////////////////////////////
+/////////////////////////////////////////////
+function RandomWave() {
+  for (var i=0; i < number_of_random_sinusoids; i++) { 
+    // TODO normalize A
+    A[i] = Math.random()
+    F[i] = Math.random() * n / 2;
+    P[i] = Math.random() * Math.PI;
+    for (var j = 0; j < n; j++) {
+      W[j] += A[i] * Math.cos(P[i] + 2.0 * Math.PI * F[i] * X[j] / n);
+    }
+  }
+  
+  var maxW = Math.max(...W.map(i => Math.abs(i))) + 0.001
+  W = W.map(i => i / maxW)
+
+  RandomWaveData = X.map(
+    (i) => {
+      return {
+        name:"",
+        x:[i, i],
+        y:[0, W[i]],
+        type:'scatter',
+        showlegend: false,
+        marker: {color:"black"},
+        hovertemplate: "t = %{x}<br>W[%{x}] = %{y:.2f}"
+      }
+    }
+  )
+}
+RandomWave();
+/////////////////////////////////////////////
+/////////////////////////////////////////////
 
 var RandomWaveLayout = {
   title:'Discrete Wave',
@@ -18,27 +57,6 @@ var RandomWaveLayout = {
   }
 }
  
-var p = 1.36
-var f = 9.34
-
-for (var j = 0; j < n; j++) {
-  W[j] = Math.cos(p + 2.0 * Math.PI * f * j / n);
-}
-
-var RandomWaveData = X.map(
-  (i) => {
-    return {
-      name:"",
-      x:[i, i], 
-      y:[0, W[i]], 
-      type:'scatter',
-      showlegend: false,
-      marker: {color:"black"},
-      // hovertemplate: "t = %{x}<br>W[%{x}] = %{y:.2f}"
-    }
-  }
-)
-
 Plotly.plot("RandomWave", RandomWaveData, RandomWaveLayout);
 
 
@@ -76,73 +94,61 @@ var RegionsLayout = {
 
 var RegionsData = []
 
-
 for (var x = 0; x < n; x++) {
+  var Xr = []
+  var Yr = []
   var Xl = []
   var Yl = []
+  var color = W[x] >= 0 ? RED : BLUE
   if (W[x] >= 0) {
     for (var k = 0; k <= x + 1; k++) {
-      Xl.push(2 * Math.PI * k + Math.acos(W[x]))                   ; Yl.push(0)
-      Xl.push(2 * Math.PI * k + Math.acos(W[x]) - 2 * Math.PI * x) ; Yl.push(n)
-      Xl.push(2 * Math.PI * k - Math.acos(W[x]) - 2 * Math.PI * x) ; Yl.push(n)
-      Xl.push(2 * Math.PI * k - Math.acos(W[x]))                   ; Yl.push(0)
+      Xr.push(2 * Math.PI * k + Math.acos(W[x]))                   ; Yr.push(0)
+      Xr.push(2 * Math.PI * k + Math.acos(W[x]) - 2 * Math.PI * x) ; Yr.push(n)
+      Xr.push(2 * Math.PI * k - Math.acos(W[x]) - 2 * Math.PI * x) ; Yr.push(n)
+      Xr.push(2 * Math.PI * k - Math.acos(W[x]))                   ; Yr.push(0)
+
+      Xl.push(2 * Math.PI * k)                         ; Yl.push(0)
+      Xl.push(Math.PI * (-2 * n * x + n * (2 * k)) / n); Yl.push(n)
+      Xl.push(NaN) ; Yl.push(NaN)
     }
-    RegionsData.push(
-      {
-        name: x,
-        x: Xl,
-        y: Yl,
-        type: "scatter",
-        mode: 'lines',
-        line:{width:0.5, color:"black"},
-        fill: "tozeroy",
-        fillcolor: W[x] >= 0 ? RED : BLUE,
-        // showlegend: false,
-      }
-    )
   } else {
     for (var k = 0; k <= x + 1; k++) {
-      Xl.push(2 * Math.PI * k + Math.acos(W[x]))                                 ; Yl.push(0)
-      Xl.push(2 * Math.PI * k - 2 * Math.PI * x + Math.acos(W[x]))               ; Yl.push(n)
-      Xl.push(2 * Math.PI * k - 2 * Math.PI * x - Math.acos(W[x]) + 2 * Math.PI) ; Yl.push(n)
-      Xl.push(2 * Math.PI * k - Math.acos(W[x]) + 2 * Math.PI)                   ; Yl.push(0)
-    }
-    RegionsData.push(
-      {
-        name: x,
-        x: Xl,
-        y: Yl,
-        type: "scatter",
-        mode: 'lines',
-        line:{width:0.5, color:"black"},
-        fill: "tozeroy",
-        fillcolor: W[x] >= 0 ? RED : BLUE,
-        // showlegend: false,
-      }
-    )
+      Xr.push(2 * Math.PI * k + Math.acos(W[x]))                                 ; Yr.push(0)
+      Xr.push(2 * Math.PI * k - 2 * Math.PI * x + Math.acos(W[x]))               ; Yr.push(n)
+      Xr.push(2 * Math.PI * k - 2 * Math.PI * x - Math.acos(W[x]) + 2 * Math.PI) ; Yr.push(n)
+      Xr.push(2 * Math.PI * k - Math.acos(W[x]) + 2 * Math.PI)                   ; Yr.push(0)
 
+      Xl.push(2 * Math.PI * k + Math.PI)                   ; Yl.push(0)
+      Xl.push(Math.PI * (-2 * n * x + n * (2 * k + 1)) / n); Yl.push(n)
+      Xl.push(NaN) ; Yl.push(NaN)
+    }
   }
-  // Xl = []
-  // Yl = []
-  // for (var k = 0; k <= x + 1; k++) {
-  // Xl.push(2 * Math.PI * k + Math.PI / 2)                     ; Yl.push(0)
-  // Xl.push(2 * Math.PI * k - 2 * Math.PI * x + Math.PI / 2)   ; Yl.push(n)
-  // Xl.push(2 * Math.PI * k - 2 * Math.PI * x + 1.5 * Math.PI) ; Yl.push(n)
-  // Xl.push(2 * Math.PI * k + 1.5 * Math.PI)                   ; Yl.push(0)
-  // }
-  // RegionsData.push(
-  //   {
-  //     name: "",
-  //     x: Xl,
-  //     y: Yl,
-  //     type: "scatter",
-  //     mode: 'lines', 
-  //     line:{width:0.5, color:"black"},
-  //     fill: "tozeroy",
-  //     fillcolor: W[x] >= 0 ? "rgba(26,150,65,0.2)" : "rgba(191, 63, 63, 0.2)",
-  //     showlegend: false,
-  //   }
-  // )
+  RegionsData.push(
+    {
+      name: x,
+      x: Xr,
+      y: Yr,
+      type: "scatter",
+      mode: 'lines',
+      line:{width:0.5, color:"black"},
+      fill: "tozeroy",
+      fillcolor: color,
+      // showlegend: false,
+    }
+  )
+  RegionsData.push(
+    {
+      name: x,
+      x: Xl,
+      y: Yl,
+      type: "scatter",
+      mode: 'lines',
+      line:{width:0.5, color:"black"},
+      // fill: "tozeroy",
+      // fillcolor: color,
+      // showlegend: false,
+    }
+  )
 }
 
 Plotly.plot("Isolines", RegionsData, RegionsLayout);
@@ -159,20 +165,11 @@ var dt = [
   },
   {
     name: "Max Frequency",
-    x: [0, Math.PI],
-    y: [f, f],
+    x: P,
+    y: F,
     type: "scatter",
-    mode: "lines",
-    line:{width:1, color:"red"},
-    showlegend: false,
-  },
-  {
-    name: "Max Phase",
-    x: [p, p],
-    y: [0, n/2],
-    type: "scatter",
-    mode: "lines",
-    line:{width:1, color:"red"},
+    mode: "markers",
+    // line:{width:1, color:"red"},
     showlegend: false,
   }
 ]
