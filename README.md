@@ -11,7 +11,7 @@ Carlos Tarjano PhD thesis - WIP
 - [Edanz Journal Selector](https://en-author-services.edanzgroup.com/)
 - [Elsevier Journal Finder](https://journalfinder.elsevier.com/)
 
-
+TODO find papers suited to MILP version
 ## Potential Journals (in order of preference)
 
 Journal | JCR 2018 | Acceptance time (days)| Obs.
@@ -24,16 +24,7 @@ Journal | JCR 2018 | Acceptance time (days)| Obs.
 
 
 
----
-# ~~ToDo~~ DEPRECATED see [GitHub issues instead](https://github.com/tesserato/thesis/issues)
-- ~~test Intel MKL~~ no effect; only works on vectorized code, probably
-- ~~pragma loop hint parallel~~ seems to slow the code
-- negative module
-- update python implementation to reflect C++
-- ~~set .eps to same font as latex~~
-- ~~fix line thickness issues in .eps~~
----
-
+TODO rework calendar
 # Calendar
 
 ## 11 / 05 / 2020 

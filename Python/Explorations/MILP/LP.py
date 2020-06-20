@@ -1,10 +1,10 @@
 import pulp
 import random
 import numpy as np
-
+## FIXME implement quadratic programming
 #######################
 random.seed(0)
-n=10
+n=100
 
 X = np.arange(n)
 W = np.zeros(n)
@@ -41,9 +41,9 @@ for x in range(n):
     b = pulp.LpVariable(f"b_{x}_{k}", 0)
     den = np.sqrt(n**2 + 4 * np.pi**2 * x**2)
     if W[x] >= 0:
-      d = (n * p + 2 * np.pi * x * f - 4 * np.pi**2 * k * x) / den
+      d = b * (n * p + 2 * np.pi * x * f - 4 * np.pi**2 * k * x) / den
     else:
-      d = (n * p + 2 * np.pi * x * f - 4 * np.pi**2 * k * x - np.pi * n) / den
+      d = b * (n * p + 2 * np.pi * x * f - 4 * np.pi**2 * k * x - np.pi * n) / den
 
     prob += a >= + d # pulp.LpConstraint(a - d, rhs=0 , sense=pulp.LpConstraintGE, name=f"c_{x}_{k}_pos") #
     prob += a >= - d # pulp.LpConstraint(a + d, rhs=0 , sense=pulp.LpConstraintLE, name=f"c_{x}_{k}_neg") #
@@ -64,8 +64,8 @@ status = prob.solve(pulp.CPLEX_CMD(path=r"C:\Program Files\IBM\ILOG\CPLEX_Studio
 
 print(pulp.LpStatus[status])
 
-for v in prob.variables():
-  print(v.name, "=", v.varValue)
+# for v in prob.variables():
+  # print(v.name, "=", v.varValue)
 
 print(f"f={round(pulp.value(f), 2)} p={round(pulp.value(p), 2)}")
 
