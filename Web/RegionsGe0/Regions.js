@@ -1,45 +1,18 @@
-var n = 10
+var n = 20
 var X = [...Array(n).keys()]
-var W = Array(n)
+var W = Array(n).fill(0.0)
 var Wvis = Array(n).fill(true)
-var Colors = Plotly.d3.scale.linear().domain([0, n-1]).range(["blue", "red"])
+// var Colors = Plotly.d3.scale.linear().domain([0, n-1]).range(["blue", "red"])
+var number_of_random_sinusoids = 1
 
-var RandomWaveData
-var RandomWaveLayout
+var F = Array(number_of_random_sinusoids)
+var A = Array(number_of_random_sinusoids)
+var P = Array(number_of_random_sinusoids)
 
-var RegionsData
-var RegionsLayout
 
-function RandomWave() {
-  W.fill(0.0);
-  for (var i=0; i < 10; i++) {
-    var f = Math.random() * n;
-    var p = Math.random() * 2.0 * Math.PI;
-    for (var j = 0; j < n; j++) {
-      W[j] += Math.cos(p + 2.0 * Math.PI * f * X[j] / n);
-    }
-  }
-  
-  var maxW = Math.max(...W.map(i => Math.abs(i)))
-  W = W.map(i => i / maxW)
-
-  RandomWaveData = X.map(
-    (i) => {
-      return {
-        name:"",
-        x:[i, i], 
-        y:[0, W[i]], 
-        type:'scatter',
-        showlegend: false,
-        marker: {color:"black"},
-        // hovertemplate: "t = %{x}<br>W[%{x}] = %{y:.2f}"
-      }
-    }
-  )
-}
-RandomWave();
-
-RandomWaveLayout = {
+/////// RANDOM WAVE ///////
+///////////////////////////
+var RandomWaveLayout = {
   title:'Discrete Wave',
   font: {
     family: "Computer Modern",
@@ -50,67 +23,48 @@ RandomWaveLayout = {
     range:[-1.1, 1.1]
   }
 };
-Plotly.plot("RandomWave", RandomWaveData, RandomWaveLayout);
 
-RegionsData = []
-var Xl = []
-var Yl = []
-
-for (var t = 0; t < n; t++) {
-  Xl = []
-  Yl = []
-  for (var k = 0; k <= t + 1; k++) {
-    Xl.push(2 * Math.PI * k - Math.PI / 2)                   ; Yl.push(0)
-    Xl.push(2 * Math.PI * k - 2 * Math.PI * t - Math.PI / 2) ; Yl.push(n)
-    Xl.push(2 * Math.PI * k - 2 * Math.PI * t + Math.PI / 2) ; Yl.push(n)
-    Xl.push(2 * Math.PI * k + Math.PI / 2)                   ; Yl.push(0)
-  }
-  RegionsData.push(
-    {
-      name: "",
-      x: Xl,
-      y: Yl,
-      type: "scatter",
-      mode: 'lines',
-      line:{width:0.5, color:"black"},
-      mode: "none",
-      fill: "tozeroy",
-      fillcolor: W[t] >= 0 ? "rgba(191, 63, 63, 0.2)" : "rgba(26,150,65,0.2)",
-      showlegend: false,
+var RandomWaveData
+function GenRandomWave() {
+  for (var i=0; i < number_of_random_sinusoids; i++) {
+    A[i] = Math.random()
+    F[i] = Math.random() * n / 2;
+    P[i] = Math.random() * Math.PI;
+    for (var j = 0; j < n; j++) {
+      W[j] += A[i] * Math.cos(P[i] + 2.0 * Math.PI * F[i] * j / n);
     }
-  )
-
-  Xl = []
-  Yl = []
-  for (var k = 0; k <= t + 1; k++) {
-  Xl.push(2 * Math.PI * k + Math.PI / 2)                     ; Yl.push(0)
-  Xl.push(2 * Math.PI * k - 2 * Math.PI * t + Math.PI / 2)   ; Yl.push(n)
-  Xl.push(2 * Math.PI * k - 2 * Math.PI * t + 1.5 * Math.PI) ; Yl.push(n)
-  Xl.push(2 * Math.PI * k + 1.5 * Math.PI)                   ; Yl.push(0)
   }
-  RegionsData.push(
-    {
-      name: "",
-      x: Xl,
-      y: Yl,
-      type: "scatter",
-      mode: 'lines', 
-      line:{width:0.5, color:"black"},
-      fill: "tozeroy",
-      fillcolor: W[t] >= 0 ? "rgba(26,150,65,0.2)" : "rgba(191, 63, 63, 0.2)",
-      showlegend: false,
+  
+  var maxW = Math.max(...W.map(i => Math.abs(i))) //+ 0.001
+  W = W.map(i => i / maxW)
+
+  RandomWaveData = X.map(
+    (i) => {
+      return {
+        name:"",
+        x:[i, i],
+        y:[0, W[i]],
+        type:'scatter',
+        showlegend: false,
+        marker: {color:"black"},
+        hovertemplate: "t = %{x}<br>W[%{x}] = %{y:.2f}"
+      }
     }
   )
 }
+GenRandomWave();
 
+Plotly.plot("RandomWave", RandomWaveData, RandomWaveLayout);
+
+///////// REGIONS /////////
+///////////////////////////
 var x_vals = []
 var x_text = []
 for (let i = -20; i < 100; i+=.5) {
   x_vals.push(i * Math.PI)
   x_text.push("$ " + String(i) + " \\pi $")
 }
-
-RegionsLayout = {
+var RegionsLayout = {
   title:'Isolines',
   font: {
     family: "Computer Modern",
@@ -136,35 +90,103 @@ RegionsLayout = {
   }
 }
 
-Plotly.plot("Isolines", RegionsData, RegionsLayout);
-
-function plot_unique_space(){
-  var dt = [{
+var RegionsData = []
+for (var x = 0; x < n; x++) {
+  var Xl = []
+  var Yl = []
+  var RD = `rgba(191, 63, 63, ${Math.abs(W[x]) / 10})`
+  var BL = `rgba(26, 150, 65, ${Math.abs(W[x]) / 10})`
+  for (var k = 0; k <= x + 1; k++) {
+    Xl.push(2 * Math.PI * k - Math.PI / 2)                   ; Yl.push(0)
+    Xl.push(2 * Math.PI * k - 2 * Math.PI * x - Math.PI / 2) ; Yl.push(n)
+    Xl.push(2 * Math.PI * k - 2 * Math.PI * x + Math.PI / 2) ; Yl.push(n)
+    Xl.push(2 * Math.PI * k + Math.PI / 2)                   ; Yl.push(0)
+  }
+  RegionsData.push(
+    {
+      name: "",
+      x: Xl,
+      y: Yl,
+      type: "scatter",
+      mode: 'lines',
+      line:{width:0.5, color:"black"},
+      mode: "none",
+      fill: "tozeroy",
+      fillcolor: W[x] >= 0 ? RD : BL,
+      showlegend: false,
+    }
+  )
+  Xl = []
+  Yl = []
+  for (var k = 0; k <= x + 1; k++) {
+  Xl.push(2 * Math.PI * k + Math.PI / 2)                     ; Yl.push(0)
+  Xl.push(2 * Math.PI * k - 2 * Math.PI * x + Math.PI / 2)   ; Yl.push(n)
+  Xl.push(2 * Math.PI * k - 2 * Math.PI * x + 1.5 * Math.PI) ; Yl.push(n)
+  Xl.push(2 * Math.PI * k + 1.5 * Math.PI)                   ; Yl.push(0)
+  }
+  RegionsData.push(
+    {
+      name: "",
+      x: Xl,
+      y: Yl,
+      type: "scatter",
+      mode: 'lines', 
+      line:{width:0.5, color:"black"},
+      fill: "tozeroy",
+      fillcolor: W[x] >= 0 ? BL : RD,
+      showlegend: false,
+    }
+  )
+}
+RegionsData.push(
+  {
     name: "Unique Space",
     x: [0, 0, Math.PI, Math.PI, 0],
     y: [0, n/2, n/2, 0, 0],
     type: "scatter",
     mode: "lines",
+    line:{width:2, color:"black"},
     showlegend: false,
-  }]
-  Plotly.plot("Isolines", dt)
-}
-plot_unique_space()
+  }
+)
+
+Plotly.plot("Isolines", RegionsData, RegionsLayout);
+
+
+
+
+var PointsData = [
+  {
+    name: "Max Frequency",
+    x: P,
+    y: F,
+    type: "scatter",
+    mode: "markers",
+    marker: {width:10, color:"black"},
+    showlegend: false,
+  }
+]  
+Plotly.plot("Isolines", PointsData)
+
+
 
 function Update() {
 
-  RandomWave();
+  GenRandomWave();
 
-  for (let i = 0; i < n; i++) {
-      RegionsData[2 * i].fillcolor = W[i] >= 0 ? "rgba(191, 63, 63, 0.2)" : "rgba(26,150,65,0.2)"
-      // console.log("even")
-      RegionsData[2 * i + 1].fillcolor = W[i] >= 0 ? "rgba(26,150,65,0.2)" : "rgba(191, 63, 63, 0.2)"
-      // console.log("odd")
+  for (let x = 0; x < n; x++) {
+    var RD = `rgba(191, 63, 63, ${Math.abs(W[x]) / 10})`
+    var BL = `rgba(26, 150, 65, ${Math.abs(W[x]) / 10})`
+    RegionsData[2 * x].fillcolor     = W[x] >= 0 ? RD : BL
+    RegionsData[2 * x + 1].fillcolor = W[x] >= 0 ? BL : RD
   }
 
+  PointsData[0].x = P
+  PointsData[0].y = F
+
   Plotly.react("RandomWave", RandomWaveData, RandomWaveLayout )
+  Plotly.react("Isolines", PointsData, RegionsLayout)
   Plotly.react("Isolines", RegionsData, RegionsLayout)
-  // plot_unique_space()
 }
 
 

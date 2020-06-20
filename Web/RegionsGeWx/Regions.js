@@ -205,7 +205,7 @@ var dt = [
 
 Plotly.plot("Isolines", dt)
 
-function Update() {
+function Update() { // TODO update responsiveness
 
   RandomWave();
 
