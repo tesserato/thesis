@@ -4,11 +4,11 @@ import numpy as np
 
 #######################
 random.seed(1)
-n=100
+n=50
 
 X = np.arange(n)
 W = np.zeros(n)
-number_of_random_waves = 2
+number_of_random_waves = 4
 A = np.array([random.uniform(1, 5) for i in range(number_of_random_waves)])
 F = np.array([random.uniform(1, n/2) for i in range(number_of_random_waves)])
 P = np.array([random.uniform(0, 2 * np.pi) for i in range(number_of_random_waves)])
@@ -59,13 +59,19 @@ print(pulp.LpStatus[status])
 
 # for v in prob.variables():
 #   print(v.name, "=", v.varValue)
-
-print(f"MILP: f={round(pulp.value(f), 2)} p={round(pulp.value(p), 2)}")
+f_MILP = pulp.value(f)
+p_MILP = pulp.value(p)
+w_MILP = np.cos(p_MILP + 2 * np.pi * X * f_MILP / n)
+e_MILP = np.average(np.abs(W - w_MILP))
+print(f"MILP: f={round(f_MILP, 2)} p={round(p_MILP, 2)} e={round(e_MILP, 2)}")
 
 FT = np.fft.rfft(W)
 f_FT = np.argmax(np.abs(FT))
 p_FT = np.angle(FT[f_FT])
-print(f"FFT: f={round(f_FT, 2)} p={round(p_FT, 2)}")
+W_FT = np.cos(p_FT + 2 * np.pi * X * f_FT / n)
+e_FT = np.average(np.abs(W - W_FT))
+print(f"FFT: f={round(f_FT, 2)} p={round(p_FT, 2)} e={round(e_FT, 2)}")
 # w_ft
 
 
+# TODO signal to noise
