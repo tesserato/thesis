@@ -70,8 +70,8 @@ for x in range(1, n // 2 + 1):
   X_lines_o = []
   Y_lines_o = []
   
-  w = 1 if W[x] >= 0 else -1
-  # w = W[x]
+  # w = 1 if W[x] >= 0 else -1
+  w = W[x]
 
   for k in range(x // 2 + 1):
     p0_f0_e = np.round((4 * k - 1) * n / (4 * x), 2)
@@ -166,12 +166,12 @@ p1_summation = [interval(fticks[i], fticks[i + 1], 0) for i in range(len(fticks)
 for r in p0_regions:
   for s in p0_summation:
     if r.start <= s.start and r.end >= s.end:
-      s.value += r.value * 2 / n
+      s.value += r.value #* 2 / n
 
 for r in p1_regions:
   for s in p1_summation:
     if r.start <= s.start and r.end >= s.end:
-      s.value += r.value * 2 / n
+      s.value += r.value #* 2 / n
 
 for s in p0_summation:
   fig.add_trace(
@@ -276,7 +276,7 @@ fig.add_trace(
 fig.add_trace(
   go.Scatter(
     x=X,
-    y=np.abs(FT.real),
+    y=np.abs(FT),
     hoverinfo=f"all",
     name=f"t={0}, a={W[0]:.2f}", 
     mode='lines',
@@ -287,10 +287,33 @@ fig.add_trace(
   )
 )
 
+# fig.add_trace(
+#   go.Scatter(
+#     x=X,
+#     y=np.abs(FT.imag),
+#     hoverinfo=f"all",
+#     name=f"t={0}, a={W[0]:.2f}", 
+#     mode='lines',
+#     line=go.scatter.Line(
+#       color="blue",
+#       width=3
+#     )
+#   )
+# )
+
+XX = []
+YY = []
+for i in range(len(p0_summation)):
+  XX.append(p0_summation[i].start)
+  XX.append(p0_summation[i].end)
+  val = p0_summation[i].value**2 + p1_summation[i].value**2
+  YY.append(val)
+  YY.append(val)
+
 fig.add_trace(
   go.Scatter(
-    x=X,
-    y=np.abs(FT.imag),
+    x=XX,
+    y=YY,
     hoverinfo=f"all",
     name=f"t={0}, a={W[0]:.2f}", 
     mode='lines',
@@ -301,33 +324,33 @@ fig.add_trace(
   )
 )
 
-fig.add_trace(
-  go.Scatter(
-    x=np.array([[r.start, r.end] for r in p0_summation]).flat,
-    y=np.abs(np.array([[r.value, r.value] for r in p0_summation]).flat),
-    hoverinfo=f"all",
-    name=f"t={0}, a={W[0]:.2f}", 
-    mode='lines',
-    line=go.scatter.Line(
-      color="red",
-      width=3
-    )
-  )
-)
+# fig.add_trace(
+#   go.Scatter(
+#     x=np.array([[r.start, r.end] for r in p0_summation]).flat,
+#     y=np.abs(np.array([[r.value, r.value] for r in p0_summation]).flat),
+#     hoverinfo=f"all",
+#     name=f"t={0}, a={W[0]:.2f}", 
+#     mode='lines',
+#     line=go.scatter.Line(
+#       color="red",
+#       width=3
+#     )
+#   )
+# )
 
-fig.add_trace(
-  go.Scatter(
-    x=np.array([[r.start, r.end] for r in p1_summation]).flat,
-    y=np.abs(np.array([[r.value, r.value] for r in p1_summation]).flat),
-    hoverinfo=f"all",
-    name=f"t={0}, a={W[0]:.2f}", 
-    mode='lines',
-    line=go.scatter.Line(
-      color="blue",
-      width=3
-    )
-  )
-)
+# fig.add_trace(
+#   go.Scatter(
+#     x=np.array([[r.start, r.end] for r in p1_summation]).flat,
+#     y=np.abs(np.array([[r.value, r.value] for r in p1_summation]).flat),
+#     hoverinfo=f"all",
+#     name=f"t={0}, a={W[0]:.2f}", 
+#     mode='lines',
+#     line=go.scatter.Line(
+#       color="blue",
+#       width=3
+#     )
+#   )
+# )
 
 fig.update_xaxes(range=[1, 7])
 
