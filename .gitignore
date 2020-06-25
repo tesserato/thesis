@@ -17,3 +17,4 @@ Cpp/Intermediary
 *.csv
 Cpp/Execs/FT.csv
 *.sol
+*.ini
