@@ -11,7 +11,6 @@ Carlos Tarjano PhD thesis - WIP
 - [Edanz Journal Selector](https://en-author-services.edanzgroup.com/)
 - [Elsevier Journal Finder](https://journalfinder.elsevier.com/)
 
-TODO find papers suited to MILP version
 ## Potential Journals (in order of preference)
 
 Journal | JCR 2018 | Acceptance time (days)| Obs.
@@ -22,38 +21,32 @@ Journal | JCR 2018 | Acceptance time (days)| Obs.
 [Journal of Computational Physics](https://www.journals.elsevier.com/journal-of-computational-physics)|2.845|84|high acceptance rate
 [Journal of Signal Processing Systems](https://www.springer.com/journal/11265)|1.035|318|
 
-
-
-TODO rework calendar
 # Calendar
 
-## 11 / 05 / 2020 
-- implementation of the method in C++ 
-- decide prominent feature: (speed, ability to identify frequencies of low res samples, linearity)
+## 01 / 07 / 2020 
+- Update potential journals
+- Outline important papers - themes to serve as basis to the literature review
 
-## 25 / 05 / 2020 
-- "The Interference transform - an alternative to the FFT algorithm"; mathematical focused article proposing the method and comparing with other transforms (FFT, Wavelet Transform, Short time Fourier transform)
-- Draft of a thesis chapter with same theme.
-
-## 01 / 06 / 2020 
+## 08 / 07 / 2020 
 - Draft Sound representation
 - Draft of a thesis chapter with same theme.
 
-## 08 / 06 / 2020 
-- Deadline to submit the articles
+## 15 / 07 / 2020 
+- Deadline to submit article
 - finish literature review
 
-## 15 / 06 / 2020 
-- Outline of the thesis
+## 22 / 07 / 2020 
+- Outline of the thesis -> flesh out thesis based calendar
 - literature review chapter
 
-## 22 / 06 / 2020 
+## 29 / 07 / 2020 
 - Methodology chapter
 
-## 29 / 06 / 2020 
+## (maybe) paper about Song Archaeology
 
-## 29 / 06 / 2020 
-
-## 01 / 08 / 2020
+## 01 / 03 / 2021
 - 70 % of text ready
 - Qualification of the thesis
+
+## 01 / 06 / 2021
+- Final Presentation
