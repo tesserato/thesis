@@ -11,9 +11,9 @@ class Pulse:
     # Pulse.pulses.append(self)
     self.start = x0 - .5
     self.end = self.start + W.shape[0]
-    self.n = self.end - self.start
-    self.W = W
-    self.normalized_W = W / np.max(np.abs(W))
+    # self.n = self.end - self.start
+    # self.W = W
+    # self.normalized_W = W / np.max(np.abs(W))
     self.a = np.average(W)
     # centered_W = W - np.average(W)
     # self.FT = np.fft.rfft(W)
@@ -33,7 +33,7 @@ W = W / a
 
 # W = savgol_filter(W, 5, 3)
 
-W = W [ : 5000]
+# W = W [ : 5000]
 
 n = W.shape[0]
 X = np.arange(n)
