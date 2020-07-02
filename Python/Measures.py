@@ -15,6 +15,7 @@ class Pulse:
     self.W = W
     self.normalized_W = W / np.max(np.abs(W))
     self.avg = np.average(W)
+    self.var = np.var(W)
     centered_W = W - np.average(W)
     FT = np.fft.rfft(centered_W)
     self.f = np.argmax(np.abs(FT))
@@ -27,14 +28,14 @@ class Pulse:
         sign = np.sign(w)
 
 
-W, fps = read_wav("Samples/piano33.wav")
+W, fps = read_wav("Samples/tom.wav")
 W = W - np.average(W)
 a = np.max(np.abs(W))
 W = W / a
 
 # W = savgol_filter(W, 5, 3)
 
-W = W [ : 5000]
+# W = W [ : 5000]
 
 n = W.shape[0]
 X = np.arange(n)
@@ -59,9 +60,11 @@ if n - x0 > max_length:
 
 print(f"Max length of a pulse={max_length}")
 
-## Plot original signal and pulses
+## Plot original signal, pulses and amplitude
 XX = []
 YY = []
+XX_avg = []
+YY_avg = []
 for p in pulses:
   XX.append(p.start)
   XX.append(p.end)
@@ -69,6 +72,8 @@ for p in pulses:
   YY.append(p.avg)
   YY.append(p.avg)
   YY.append(None)
+  XX_avg.append((p.start + p.end) / 2)
+  YY_avg.append(np.abs(p.avg))
 
 fig = go.Figure()
 
@@ -105,7 +110,7 @@ fig.add_trace(
     x=XX,
     y=YY,
     fill="tozeroy",
-    name=f"Half Cycles",
+    name="Pulses",
     mode="none",
     # marker=dict(
     #     size=8,
@@ -115,7 +120,23 @@ fig.add_trace(
   )
 )
 
+fig.add_trace(
+  go.Scatter(
+    x=XX_avg,
+    y=YY_avg,
+    name="Average Amplitudes",
+    mode="markers+lines",
+    # marker=dict(
+    #     size=8,
+    #     color="red", #set color equal to a variable
+    #     showscale=False
+    # )
+  )
+)
+
 fig.show(config=dict({'scrollZoom': True}))
+
+ZZ = np.arange(len(pulses))
 
 ## Plot f x p
 XX = []
@@ -146,13 +167,53 @@ fig.add_trace(
     y=YY,
     name="",
     mode="markers",
-    # marker=dict(
-    #     size=8,
-    #     color="black", #set color equal to a variable
-    #     showscale=False
-    # )
+    marker=dict(
+        size=4,
+        color=ZZ,
+        colorscale='Viridis',
+        showscale=True
+    )
   )
 )
 
 fig.show(config=dict({'scrollZoom': True}))
 
+## Plot avg x var
+XX = []
+YY = []
+for p in pulses:
+  XX.append(p.avg)
+  YY.append(p.var)
+
+fig = go.Figure()
+
+fig.update_layout(
+    # width = 2 * np.pi * 220,
+    # height = n * 220,
+    # yaxis = dict(scaleanchor = "x", scaleratio = 1),
+    title=f"Average x Variance",
+    xaxis_title="Average",
+    yaxis_title="Variance",
+    # font=dict(
+    #     family="Courier New, monospace",
+    #     size=18,
+    #     color="#7f7f7f"
+    # )
+)
+
+fig.add_trace(
+  go.Scatter(
+    x=XX,
+    y=YY,
+    name="",
+    mode="markers",
+    marker=dict(
+        size=4,
+        color=ZZ,
+        colorscale='Viridis',
+        showscale=True
+    )
+  )
+)
+
+fig.show(config=dict({'scrollZoom': True}))
