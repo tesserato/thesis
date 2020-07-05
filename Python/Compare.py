@@ -25,7 +25,7 @@ W = W / a
 
 # W = savgol_filter(W, 5, 3)
 
-# W = W [ : 500]
+W = W[ : W.size // 100]
 
 n = W.shape[0]
 X = np.arange(n)
@@ -113,16 +113,19 @@ scaled_pulses = []
 for p in pulses:
   FT = np.fft.rfft(p.W)
   normalized_W = np.abs(np.fft.irfft(FT, max_length))
-  if p.end - p.start > 10:
+  if p.end - p.start > 1:
     scaled_pulses.append(Pulse(p.start, normalized_W))
 
 
 print(len(scaled_pulses))
-correlations = np.zeros((len(scaled_pulses), len(scaled_pulses)))
-for i in range(len(scaled_pulses)):
-  print(i)
-  for j in range(i+1, len(scaled_pulses)):
-    cor = np.average(scaled_pulses[i].normalized_W * scaled_pulses[j].normalized_W)
+correlations = np.zeros((len(pulses), len(pulses)))
+for i in range(len(pulses)):
+  a1 = np.abs(pulses[i].a)
+  n1 = pulses[i].n
+  for j in range(i+1, len(pulses)):
+    a2 = np.abs(pulses[j].a)
+    n2 = pulses[j].n
+    cor = np.sqrt((a1-a2)**2 + (n1-n2)**2)
     correlations[i, j] = cor
     correlations[j, i] = cor
 
