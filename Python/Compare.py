@@ -11,7 +11,7 @@ class Pulse:
     # Pulse.pulses.append(self)
     self.start = x0 - .5
     self.end = self.start + W.shape[0]
-    self.n = self.end - self.start
+    self.n = W.shape[0]
     self.W = W
     self.normalized_W = W / np.max(np.abs(W))
     self.a = np.average(W)
@@ -25,7 +25,7 @@ W = W / a
 
 # W = savgol_filter(W, 5, 3)
 
-W = W[ : W.size // 100]
+W = W[ 70000: 80000]
 
 n = W.shape[0]
 X = np.arange(n)
@@ -106,28 +106,31 @@ fig.add_trace(
   )
 )
 
-# fig.show(config=dict({'scrollZoom': True}))
+fig.show(config=dict({'scrollZoom': True}))
 
-# Reconstruct pulses with maximun length
-scaled_pulses = []
-for p in pulses:
-  FT = np.fft.rfft(p.W)
-  normalized_W = np.abs(np.fft.irfft(FT, max_length))
-  if p.end - p.start > 1:
-    scaled_pulses.append(Pulse(p.start, normalized_W))
+# # Reconstruct pulses with maximun length
+# scaled_pulses = []
+# for p in pulses:
+#   FT = np.fft.rfft(p.W)
+#   normalized_W = np.abs(np.fft.irfft(FT, max_length))
+#   if p.end - p.start > 1:
+#     scaled_pulses.append(Pulse(p.start, normalized_W))
+# print(len(scaled_pulses))
 
+print(len(pulses))
+pulses = [p for p in pulses if p.n > 1]
+print(len(pulses))
 
-print(len(scaled_pulses))
-correlations = np.zeros((len(pulses), len(pulses)))
+correlations = np.ones((len(pulses), len(pulses)))
+# correlations.fill(999)
 for i in range(len(pulses)):
   a1 = np.abs(pulses[i].a)
   n1 = pulses[i].n
   for j in range(i+1, len(pulses)):
     a2 = np.abs(pulses[j].a)
     n2 = pulses[j].n
-    cor = np.sqrt((a1-a2)**2 + (n1-n2)**2)
+    cor =( np.abs(a1 - a2) / max([a1, a2]) + np.abs(n1 - n2) / max([n1, n2]) ) / 2
     correlations[i, j] = cor
-    correlations[j, i] = cor
 
 fig = go.Figure()
 
@@ -145,66 +148,68 @@ fig.add_trace(
 )
 
 fig.show(config=dict({'scrollZoom': True}))
-
-groups = 0
-while np.max(correlations) > 0:
-  idx1, idx2 = np.unravel_index(correlations.argmax(), correlations.shape)
+# for i in range(len(pulses)):
+#   correlations[i, j] = 999
+# groups = 0
+# while np.min(correlations) < 999:
+for i in range(50):
+  idx1, idx2 = np.unravel_index(correlations.argmin(), correlations.shape)
   print(correlations[idx1, idx2], idx1, idx2)
-  correlations[idx1, idx2] = 0
-  correlations[idx2, idx1] = 0
-  if scaled_pulses[idx1].group == None and scaled_pulses[idx2].group == None:
-    scaled_pulses[idx1].group = groups
-    scaled_pulses[idx2].group = groups
-    groups += 1
-  else:
-    if scaled_pulses[idx1].group == None:
-      scaled_pulses[idx1].group = scaled_pulses[idx2].group
-    else:
-      scaled_pulses[idx2].group = scaled_pulses[idx1].group  
+  correlations[idx1, idx2] = 999
+  correlations[idx2, idx1] = 999
+#   if scaled_pulses[idx1].group == None and scaled_pulses[idx2].group == None:
+#     scaled_pulses[idx1].group = groups
+#     scaled_pulses[idx2].group = groups
+#     groups += 1
+#   else:
+#     if scaled_pulses[idx1].group == None:
+#       scaled_pulses[idx1].group = scaled_pulses[idx2].group
+#     else:
+#       scaled_pulses[idx2].group = scaled_pulses[idx1].group  
 
-print(len(scaled_pulses), groups)
-fig = go.Figure()
+# print(len(scaled_pulses), groups)
+# fig = go.Figure()
 
-fig.update_layout(
-    # width = 2 * np.pi * 220,
-    # height = n * 220,
-    # yaxis = dict(scaleanchor = "x", scaleratio = 1),
-    title=f"Cycles",
-    xaxis_title="x",
-    yaxis_title="Amplitude",
-    # font=dict(
-    #     family="Courier New, monospace",
-    #     size=18,
-    #     color="#7f7f7f"
-    # )
-)
+# fig.update_layout(
+#     # width = 2 * np.pi * 220,
+#     # height = n * 220,
+#     # yaxis = dict(scaleanchor = "x", scaleratio = 1),
+#     title=f"Cycles",
+#     xaxis_title="x",
+#     yaxis_title="Amplitude",
+#     # font=dict(
+#     #     family="Courier New, monospace",
+#     #     size=18,
+#     #     color="#7f7f7f"
+#     # )
+# )
 
-fig.add_trace(
-  go.Scatter(
-    # x=X,
-    y=scaled_pulses[idx1].normalized_W,
-    name="Signal W[x]",
-    mode="markers",
-    # marker=dict(
-    #     size=8,
-    #     color="red", #set color equal to a variable
-    #     showscale=False
-    # )
-  )
-)
+# fig.add_trace(
+#   go.Scatter(
+#     # x=X,
+#     y=scaled_pulses[idx1].normalized_W,
+#     name="Signal W[x]",
+#     mode="markers",
+#     # marker=dict(
+#     #     size=8,
+#     #     color="red", #set color equal to a variable
+#     #     showscale=False
+#     # )
+#   )
+# )
 
-fig.add_trace(
-  go.Scatter(
-    # x=XX,
-    y=scaled_pulses[idx2].normalized_W,
-    name=f"Half Cycles",
-    mode="markers",
-    # marker=dict(
-    #     size=8,
-    #     color="black", #set color equal to a variable
-    #     showscale=False
-    # )
-  )
-)
+# fig.add_trace(
+#   go.Scatter(
+#     # x=XX,
+#     y=scaled_pulses[idx2].normalized_W,
+#     name=f"Half Cycles",
+#     mode="markers",
+#     # marker=dict(
+#     #     size=8,
+#     #     color="black", #set color equal to a variable
+#     #     showscale=False
+#     # )
+#   )
+# )
 
-fig.show(config=dict({'scrollZoom': True}))
+# fig.show(config=dict({'scrollZoom': True}))

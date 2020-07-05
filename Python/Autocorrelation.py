@@ -117,35 +117,35 @@ fig.show(config=dict({'scrollZoom': True}))
 # fig.write_image("./01ContinuousVsDiscrete.pdf", width=800, height=400, scale=1)
 
 # abs_FT = np.abs(np.fft.rfft(Y_avg))[:-1]
-# # correlation = np.correlate(Y_avg[ : nY_avg//4], Y_avg, "valid")
+correlation = np.correlate(W[ : n//2], W, "valid")
 
-# fig = go.Figure()
-# fig.layout.template ="plotly_white"
-# fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
-# fig.update_layout(
-#   xaxis_title="Frequency",
-#   yaxis_title="Intensity",
-#   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
-#   margin=dict(l=5, r=5, b=5, t=5),
-#   font=dict(
-#   family="Computer Modern",
-#   color="black",
-#   size=18
-#   )
-# )
+fig = go.Figure()
+fig.layout.template ="plotly_white"
+fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
+fig.update_layout(
+  xaxis_title="Frequency",
+  yaxis_title="Intensity",
+  legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
+  margin=dict(l=5, r=5, b=5, t=5),
+  font=dict(
+  family="Computer Modern",
+  color="black",
+  size=18
+  )
+)
 
-# fig.add_trace(
-#   go.Scatter(
-#     # x=X,
-#     y=abs_FT,
-#     name="Signal",
-#     mode="lines",
-#     line=dict(
-#         # size=8,
-#         color="black",
-#         # showscale=False
-#     )
-#   )
-# )
+fig.add_trace(
+  go.Scatter(
+    # x=X,
+    y=correlation,
+    name="Signal",
+    mode="lines",
+    line=dict(
+        # size=8,
+        color="black",
+        # showscale=False
+    )
+  )
+)
 
-# fig.show(config=dict({'scrollZoom': True}))
+fig.show(config=dict({'scrollZoom': True}))
