@@ -18,3 +18,4 @@ Cpp/Intermediary
 Cpp/Execs/FT.csv
 *.sol
 *.ini
+*.pyc
