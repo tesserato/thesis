@@ -67,7 +67,7 @@ def get_pulses_area(pulses):
   return X, Y
 
 
-def get_pulses_curvatures_poly(X, Y):
+def get_pulses_curvatures_poly3(X, Y):
   '''Return max curvatures, avg and r for the poly approximation of 3 pulses amplitude at a time'''
   # pulses = [pulses[0]] + pulses + [pulses[-1]] # FIXME
 
@@ -79,8 +79,34 @@ def get_pulses_curvatures_poly(X, Y):
     # y = y / y1
     a0, a1, a2 = poly.polyfit(x, y, 2)
     # c = np.abs(2 * a2) # max curvature
+    c = ((2 * a2 * x1 + a1) / np.sqrt((2 * a2 * x1 + a1)**2 + 1) - (2 * a2 * x0 + a1) / np.sqrt((2 * a2 * x0 + a1)**2 + 1)) / (x1-x0)
+    # c = 2 * a2 / ((a1 + 2*a2*x1)**2 + 1)**(3/2)
+    curvatures.append(c)
+    # X = np.linspace(x0, x2, 100)
+    # Y = poly.polyval(X, args)
+    # for x, y in zip(X, Y):
+    #   pos_curvature_X.append(x); pos_curvature_Y.append(y)
+    # pos_curvature_X.append(None) ; pos_curvature_Y.append(None)
+  average_curvature = np.abs(np.average(curvatures))
+  radius = 1 / average_curvature
+  curvatures = [curvatures[0]] + curvatures + [curvatures[-1]]
+  return curvatures, average_curvature, radius
+
+
+def get_pulses_curvatures_poly(X, Y):
+  '''Return max curvatures, avg and r for the poly approximation of 3 pulses amplitude at a time'''
+  # pulses = [pulses[0]] + pulses + [pulses[-1]] # FIXME
+
+  curvatures = []
+  for i in range(len(X) - 3):
+    x0, x1, x2, x3 = X[i], X[i + 1], X[i + 2], X[i + 3]
+    y0, y1, y2, y3 = Y[i], Y[i + 1], Y[i + 2], Y[i + 3]
+    x, y = np.array([x0, x1, x2, x3]), np.array([y0, y1, y2, y3])
+    # y = y / y1
+    a0, a1, a2 = poly.polyfit(x, y, 2)
+    # c = np.abs(2 * a2) # max curvature
     # c = ((2 * a2 * x1 + a1) / np.sqrt((2 * a2 * x1 + a1)**2 + 1) - (2 * a2 * x0 + a1) / np.sqrt((2 * a2 * x0 + a1)**2 + 1)) / (x1-x0)
-    c = 2 * a2 / ((a1 + 2*a2*x)**2 + 1)**(3/2)
+    c = 2 * a2 / ((a1 + 2 * a2 * (x1 + x2) / 2)**2 + 1)**(3/2)
     curvatures.append(c)
     # X = np.linspace(x0, x2, 100)
     # Y = poly.polyval(X, args)
@@ -283,11 +309,12 @@ def draw_circle(xc, yc, r, n=100):
   )
   return X, Y
 
+
 '''==============='''
 ''' Read wav file '''
 '''==============='''
 
-name = "piano33"
+name = "bend"
 W, fps = read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 amplitude = np.max(np.abs(W))
@@ -297,23 +324,14 @@ W = W / amplitude
 
 pulses = signal_to_pulses(W)
 
-# avg_len = np.average([p.len for p in pulses])
-# avg_y = np.average([abs(p.y) for p in pulses])
-# for p in pulses:
-#   p.len = p.len / avg_len
-#   p.y = p.y / avg_y
-
 areas_X, areas_Y = get_pulses_area(pulses)
 
 pos_pulses, neg_pulses, pos_noises, neg_noises = split_pulses(pulses)
-
-# pos_curvatures, avg_pos_curvature, radius = get_pulses_curvatures_poly(pos_pulses)
 
 pos_X, neg_X = np.array([p.x for p in pos_pulses]), np.array([p.x for p in neg_pulses])
 pos_Y, neg_Y = np.array([p.y for p in pos_pulses]), np.array([p.y for p in neg_pulses])
 pos_L, neg_L = np.array([p.len for p in pos_pulses]) , np.array([p.len for p in neg_pulses])
 
-# pos_X_tri, pos_Y_tri = get_delaunay(pos_X, pos_Y)
 
 
 '''============================================================================'''
