@@ -226,11 +226,68 @@ def get_circle(x0, y0, x1, y1, r):
   return xc, yc
 
 
+def get_envelope(X, Y, r):
+  n = len(X)
+  idx1 = 0
+  idx2 = 1
+  envelope_X = []
+  envelope_Y = []
+  while idx2 < n:
+    xc, yc = get_circle(X[idx1], Y[idx1], X[idx2], Y[idx2], r)
+    empty = True
+    for i in range(idx2 + 1, n):
+      if np.sqrt((xc - X[i])**2 + (yc - Y[i])**2) < r:
+        empty = False
+        idx2 += 1
+        break
+    if empty:
+      envelope_X.append(X[idx1]) , envelope_Y.append(Y[idx1])
+      envelope_X.append(X[idx2]) , envelope_Y.append(Y[idx2])
+      idx1 = idx2
+      idx2 += 1
+
+      draw_circle(xc, yc, radius, n=100)
+      # fig.add_shape(
+      #   type="circle",
+      #   xref="x",
+      #   yref="y",
+      #   x0= xc - radius,
+      #   y0= yc - radius,
+      #   x1= xc + radius,
+      #   y1= yc + radius,
+      #   line_color="LightSeaGreen",
+      # )
+
+  return envelope_X, envelope_Y
+
+
+def draw_circle(xc, yc, r, n=100):
+  X = []
+  Y = []
+  for t in np.linspace(0, 2 * np.pi, n):
+    X.append(xc + r * np.cos(t))
+    Y.append(yc + r * np.sin(t))
+  fig.add_trace(
+    go.Scatter(
+      name="",
+      legendgroup="Circles",
+      x=X,
+      y=Y,
+      showlegend=False,
+      mode="lines",
+      line=dict(
+          width=1,
+          color="green"
+      )
+    )
+  )
+  return X, Y
+
 '''==============='''
 ''' Read wav file '''
 '''==============='''
 
-name = "bend"
+name = "piano33"
 W, fps = read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 amplitude = np.max(np.abs(W))
@@ -256,7 +313,7 @@ pos_X, neg_X = np.array([p.x for p in pos_pulses]), np.array([p.x for p in neg_p
 pos_Y, neg_Y = np.array([p.y for p in pos_pulses]), np.array([p.y for p in neg_pulses])
 pos_L, neg_L = np.array([p.len for p in pos_pulses]) , np.array([p.len for p in neg_pulses])
 
-pos_X_tri, pos_Y_tri = get_delaunay(pos_X, pos_Y)
+# pos_X_tri, pos_Y_tri = get_delaunay(pos_X, pos_Y)
 
 
 '''============================================================================'''
@@ -316,7 +373,7 @@ fig.add_trace(
     x=pos_X,
     y=pos_Y,
     # hovertext=np.arange(len(pos_pulses)),
-    mode="lines+markers",
+    mode="markers",
     marker=dict(
         size=6,
         color="black",
@@ -340,19 +397,8 @@ fig.add_trace(
   )
 )
 
-fig.add_trace(
-  go.Scatter(
-    name="Pos Tri",
-    x=pos_X_tri,
-    y=pos_Y_tri,
-    mode="lines",
-    line=dict(
-        width=.5,
-        color="red",
-        # showscale=False
-    )
-  )
-)
+
+
 
 
 fig.show(config=dict({'scrollZoom': True}))
@@ -397,10 +443,10 @@ fig.update_layout(
   # title = name,
   xaxis_title="x",
   yaxis_title="Amplitude",
-  yaxis = dict(
-    scaleanchor = "x",
-    scaleratio = 1,
-  ),
+  # yaxis = dict(
+  #   scaleanchor = "x",
+  #   scaleratio = 1,
+  # ),
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=5, r=5, b=5, t=5),
   font=dict(
@@ -428,9 +474,29 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="lms",
+    name="alpha",
     x=alpha_X,
     y=alpha_Y,
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=4,
+        color="blue",
+        # showscale=False
+    )
+  )
+)
+
+# for x, y in zip([0], [0]):
+# x, y = get_circle(pos_X[0], pos_Y[0], pos_X[1], pos_Y[1], radius)
+
+env_X, env_Y = get_envelope(pos_X, pos_Y, radius)
+
+fig.add_trace(
+  go.Scatter(
+    name="env",
+    x=env_X,
+    y=env_Y,
     # fill="toself",
     mode="lines",
     line=dict(
@@ -441,20 +507,22 @@ fig.add_trace(
   )
 )
 
-# for x, y in zip([0], [0]):
-
-x, y = get_circle(pos_X[0], pos_Y[0], pos_X[1], pos_Y[1], radius)
-
-fig.add_shape(
-  type="circle",
-  xref="x",
-  yref="y",
-  x0= x - radius,
-  y0= y - radius,
-  x1= x + radius,
-  y1= y + radius,
-  line_color="LightSeaGreen",
+fig.add_trace(
+  go.Scatter(
+    name="Circles",
+    legendgroup="Circles",
+    x=[0],
+    y=[0],
+    mode="markers",
+    marker=dict(
+        size=.1,
+        color="green",
+        # showscale=False
+    )
+  )
 )
+
+
 
 
 fig.show(config=dict({'scrollZoom': True}))
