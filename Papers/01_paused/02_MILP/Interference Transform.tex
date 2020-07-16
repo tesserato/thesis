@@ -13,24 +13,21 @@
 
 \begin{document}
 
-FIXME return when progress is made in alternative to FFT
-
 \maketitle
 
 \begin{abstract} % 250 words
   % background
-  The Fourier Transform, naturally due to the context and time in which it was idealized, was formulated without regard to discrete waves or computational complexity.
-  Some developments, such as the Discrete Fourier Transform and the Fast Fourier Transform algorithm updated the theory to the digital, discrete era.
+  TODO low res samples, interest in best sinusoidal approximation
   % motivation
-  Some shortcomings were introduced with those methods, such as diminishing resolution in dealing with increasingly small number of os samples.
+  The Discrete Fourier Transform decomposes an periodic wave in a finite set of predefined sinusoids, commonly with frequencies coinciding with the natural numbers, offering no guarantees that one of those frequencies is the best one, in the sense of the frequency that generates the closest sinusoid to the original wave.
   % objective
-  In this paper we propose a formal framework based on discrete waves, optimizing the inference of frequency and amplitude from whatever sampled points are available. Although arising from a intuitively different approach, the framework here presented can be viewed as a generalization of the Discrete Fourier Transform.
+  Starting from the observation of the intersection of plane waves in the frequency versus phase space we propose a mixed-integer programming formulation of the problem.
   % methods
-  The algorithm is based on the representation of the set of samples in a frequency versus phase space and the investigation of the interference pattern thus generated. Each sample defines a sinusoidal planar wave in this space, with a particular amplitude, direction and frequency. The determination of the point in which maximum constructive interference occurs translates to the determination of the most accurate sinusoidal description of the whole set of samples.
+  The algorithm is based on the representation of the set of samples in a frequency versus phase space and the observation of the interference pattern thus generated. Each sample defines a sinusoidal plane wave in this space, with a particular amplitude, direction and frequency. The determination of the point in which maximum constructive interference occurs translates to the determination of the closest point to the lines that represent the maxima of each plane wave.
   % results
-  % TODO: improvement of the naïve algorithm. better accuracy
+  TODO: better accuracy than FFT, more time consuming
   % implications
-  % TODO: an alternative to wavelet and short-time Fourier transform
+  TODO: an alternative to wavelet and short-time Fourier transform
 \end{abstract}
 
 {\bf Keywords:} Fast Fourier Transform, Digital Signal Processing, Wavelet Transform
@@ -94,7 +91,7 @@ This neglect is felt in the virtual inexistence of research in this specific top
   
   So it's easy to see that, for each frame of a given discrete wave $W[i]$, there exists an infinite family of continuous sinusoids that pass exactly through the point defined by $i$ and $W[i]$. In fact, almost any sinusoid of the form $a \cos \left( \phi + 2 \pi f \frac{i}{n} \right)$ can be forced to contain the point $(i, W[i])$, given a suitable choice of $a$, with the exception of the particular case where $W[i] \ne 0$ and $\cos \left( \phi + 2 \pi \mathcal{F} \frac{i}{\textrm{fps}} \right)$. 
   
-  Of interest to this work are those sinusoids, as shown in Figure \ref{fig:OptSinusoids}, that have one of their infinite extrema, either maximum or minimum, coinciding with the abscissa $i$ or, setting $a=W[t]$, coincident with the point $(i, W[i])$.
+  Of interest to this work are those sinusoids, as shown in Figure \ref{fig:OptSinusoids}, that have one of their infinite extrema, either maximum or minimum, coinciding with the abscissa $i$ or, setting $a=W[t]$, coincident with the point $(i, W[i])$; those sinusoids represent the combinations of phase an frequency that would maximize the value of $W[t] S[t]$ for frame $t$.
   
   \begin{figure}[h!]
     \centering
@@ -105,6 +102,7 @@ This neglect is felt in the virtual inexistence of research in this specific top
 
   One can define, for each frame, those waves mathematically as the family of continuous sinusoids that satisfy the equality $\cos \left( \phi + 2 \pi \mathcal{F} t \right) = \textrm{sgn}(W[t])$ or, in terms of discrete sinusoids, $\cos \left( \phi + 2 \pi f \frac{i}{n} \right) = \textrm{sgn}(W[t])$ where the sign function is defined as 
   $ \textrm{sgn}(x) = \{ -1 \  \textrm{if} \ x < 0, \  0  \  \textrm{if} \ x = 0, \  1  \  \textrm{if} \ x > 0\}$.
+  TODO We can plot 
 
 
 
