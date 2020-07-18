@@ -1,13 +1,13 @@
 import plotly.graph_objects as go
-# import alphashape
+from scipy.interpolate import interp1d, UnivariateSpline
 import numpy as np
 from Helper import read_wav
-# from scipy.signal import savgol_filter
+from scipy.signal import savgol_filter
 import numpy.polynomial.polynomial as poly
-from scipy.spatial import Delaunay
 
 class Pulse:
   def __init__(self, x0, W, is_noise = False):
+    self.W = W
     self.start = x0
     self.len = W.size
     self.end = self.start + self.len
@@ -56,7 +56,7 @@ def split_pulses(pulses):
 
 
 def get_pulses_area(pulses):
-  ''' Return pulses X & Y area vectors '''
+  ''' Return X & Y pulses area vectors '''
   X, Y = [], []
   for p in pulses:
     X.append(p.start - .5); Y.append(0)
@@ -67,59 +67,23 @@ def get_pulses_area(pulses):
   return X, Y
 
 
-def get_pulses_curvatures_poly3(X, Y):
-  '''Return max curvatures, avg and r for the poly approximation of 3 pulses amplitude at a time'''
-  # pulses = [pulses[0]] + pulses + [pulses[-1]] # FIXME
-
-  curvatures = []
-  for i in range(len(X) - 2):
-    x0, x1, x2 = X[i], X[i + 1], X[i + 2]
-    y0, y1, y2 = Y[i], Y[i + 1], Y[i + 2]
-    x, y = np.array([x0, x1, x2]), np.array([y0, y1, y2])
-    # y = y / y1
-    a0, a1, a2 = poly.polyfit(x, y, 2)
-    # c = np.abs(2 * a2) # max curvature
-    c = ((2 * a2 * x1 + a1) / np.sqrt((2 * a2 * x1 + a1)**2 + 1) - (2 * a2 * x0 + a1) / np.sqrt((2 * a2 * x0 + a1)**2 + 1)) / (x1-x0)
-    # c = 2 * a2 / ((a1 + 2*a2*x1)**2 + 1)**(3/2)
-    curvatures.append(c)
-    # X = np.linspace(x0, x2, 100)
-    # Y = poly.polyval(X, args)
-    # for x, y in zip(X, Y):
-    #   pos_curvature_X.append(x); pos_curvature_Y.append(y)
-    # pos_curvature_X.append(None) ; pos_curvature_Y.append(None)
-  average_curvature = np.abs(np.average(curvatures))
-  radius = 1 / average_curvature
-  curvatures = [curvatures[0]] + curvatures + [curvatures[-1]]
-  return curvatures, average_curvature, radius
-
-
-def get_pulses_curvatures_poly(X, Y):
-  '''Return max curvatures, avg and r for the poly approximation of 3 pulses amplitude at a time'''
-  # pulses = [pulses[0]] + pulses + [pulses[-1]] # FIXME
-
+def get_average_curvature(X, Y):
+  '''Return average curvature and radius of the equivalent circle for the poly approximation of 4 points amplitude at a time'''
   curvatures = []
   for i in range(len(X) - 3):
     x0, x1, x2, x3 = X[i], X[i + 1], X[i + 2], X[i + 3]
     y0, y1, y2, y3 = Y[i], Y[i + 1], Y[i + 2], Y[i + 3]
     x, y = np.array([x0, x1, x2, x3]), np.array([y0, y1, y2, y3])
-    # y = y / y1
     a0, a1, a2 = poly.polyfit(x, y, 2)
-    # c = np.abs(2 * a2) # max curvature
-    # c = ((2 * a2 * x1 + a1) / np.sqrt((2 * a2 * x1 + a1)**2 + 1) - (2 * a2 * x0 + a1) / np.sqrt((2 * a2 * x0 + a1)**2 + 1)) / (x1-x0)
-    c = 2 * a2 / ((a1 + 2 * a2 * (x1 + x2) / 2)**2 + 1)**(3/2)
+    c = 2 * a2 / ((a1 + a2 * (x1 + x2))**2 + 1)**(3/2)
     curvatures.append(c)
-    # X = np.linspace(x0, x2, 100)
-    # Y = poly.polyval(X, args)
-    # for x, y in zip(X, Y):
-    #   pos_curvature_X.append(x); pos_curvature_Y.append(y)
-    # pos_curvature_X.append(None) ; pos_curvature_Y.append(None)
   average_curvature = np.abs(np.average(curvatures))
   radius = 1 / average_curvature
-  curvatures = [curvatures[0]] + curvatures + [curvatures[-1]]
-  return curvatures, average_curvature, radius
+  return  average_curvature, radius
 
 
 def constrained_least_squares(X, Y, q=4, k=4):
+  '''constrained least squares with q intervals and k-1 polynomial'''
   assert X.size == Y.size
   n = X.size
   l = n // q
@@ -151,7 +115,8 @@ def constrained_least_squares(X, Y, q=4, k=4):
   return np.reshape(A, (q, -1))
 
 
-def coefs_to_array(A, X): # create array of size 'n' from a coefficient matrix 'A'
+def coefs_to_array(A, X): 
+  '''evaluates x E X from a coefficient matrix A'''
   n = X.size
   q = A.shape[0]
   k = A.shape[1]
@@ -174,120 +139,26 @@ def coefs_to_array(A, X): # create array of size 'n' from a coefficient matrix '
   return Y
 
 
-def get_delaunay(X, Y):
-  points = np.array([[x, y] for x, y in zip(pos_X, pos_Y)])
-  tri = Delaunay(points)
-  X_tri = []
-  Y_tri = []
-  for ia, ib, ic in tri.vertices:
-    xa, ya = points[ia]
-    xb, yb = points[ib]
-    xc, yc = points[ic]
-    X_tri.append(xa), Y_tri.append(ya)
-    X_tri.append(xb), Y_tri.append(yb)
-    X_tri.append(xc), Y_tri.append(yc)
-    X_tri.append(xa), Y_tri.append(ya)
-    X_tri.append(None), Y_tri.append(None)
-  return X_tri, Y_tri
-
-
-def alpha_shape(points, alpha, only_outer=True):
-    """
-    Compute the alpha shape (concave hull) of a set of points.
-    :param points: np.array of shape (n, 2) points.
-    :param alpha: alpha value.
-    :param only_outer: boolean value to specify if we keep only the outer border
-    or also inner edges.
-    :return: set of (i,j) pairs representing edges of the alpha-shape. (i,j) are
-    the indices in the points array.
-    """
-    assert points.shape[0] > 3, "Need at least four points"
-
-    def add_edge(edges, i, j):
-        """
-        Add a line between the i-th and j-th points,
-        if not in the list already
-        """
-        if (i, j) in edges or (j, i) in edges:
-            # already added
-            assert (j, i) in edges, "Can't go twice over same directed edge right?"
-            if only_outer:
-                # if both neighboring triangles are in shape, it's not a boundary edge
-                edges.remove((j, i))
-            return
-        edges.add((i, j))
-
-    tri = Delaunay(points)
-    edges = set()
-    # Loop over triangles:
-    # ia, ib, ic = indices of corner points of the triangle
-    for ia, ib, ic in tri.vertices:
-        pa = points[ia]
-        pb = points[ib]
-        pc = points[ic]
-        # Computing radius of triangle circumcircle
-        # www.mathalino.com/reviewer/derivation-of-formulas/derivation-of-formula-for-radius-of-circumcircle
-        a = np.sqrt((pa[0] - pb[0]) ** 2 + (pa[1] - pb[1]) ** 2)
-        b = np.sqrt((pb[0] - pc[0]) ** 2 + (pb[1] - pc[1]) ** 2)
-        c = np.sqrt((pc[0] - pa[0]) ** 2 + (pc[1] - pa[1]) ** 2)
-        s = (a + b + c) / 2.0
-        area = np.sqrt(s * (s - a) * (s - b) * (s - c))
-        circum_r = a * b * c / (4.0 * area)
-        if circum_r < alpha:
-            add_edge(edges, ia, ib)
-            add_edge(edges, ib, ic)
-            add_edge(edges, ic, ia)
-    return edges
-
-
 def get_circle(x0, y0, x1, y1, r):
+  '''returns center of circle that passes through two points'''
   radsq = r * r
   q = np.sqrt((x1 - x0)**2 + (y1 - y0)**2)
 
   x3 = (x0 + x1) / 2
-  xc = x3 + np.sqrt(radsq - (q / 2)**2) * ((y0 - y1) / q)
-
   y3 = (y0 + y1) / 2
-  yc = y3 + np.sqrt(radsq - (q / 2)**2) * ((x1 - x0) / q)
+
+  if y0 + y1 >= 0:
+    xc = x3 + np.sqrt(radsq - (q / 2)**2) * ((y0 - y1) / q)
+    yc = y3 + np.sqrt(radsq - (q / 2)**2) * ((x1 - x0) / q)
+  else:
+    xc = x3 - np.sqrt(radsq - (q / 2)**2) * ((y0 - y1) / q)
+    yc = y3 - np.sqrt(radsq - (q / 2)**2) * ((x1 - x0) / q)
+
   return xc, yc
 
 
-def get_envelope(X, Y, r):
-  n = len(X)
-  idx1 = 0
-  idx2 = 1
-  envelope_X = []
-  envelope_Y = []
-  while idx2 < n:
-    xc, yc = get_circle(X[idx1], Y[idx1], X[idx2], Y[idx2], r)
-    empty = True
-    for i in range(idx2 + 1, n):
-      if np.sqrt((xc - X[i])**2 + (yc - Y[i])**2) < r:
-        empty = False
-        idx2 += 1
-        break
-    if empty:
-      envelope_X.append(X[idx1]) , envelope_Y.append(Y[idx1])
-      envelope_X.append(X[idx2]) , envelope_Y.append(Y[idx2])
-      idx1 = idx2
-      idx2 += 1
-
-      draw_circle(xc, yc, radius, n=100)
-      # fig.add_shape(
-      #   type="circle",
-      #   xref="x",
-      #   yref="y",
-      #   x0= xc - radius,
-      #   y0= yc - radius,
-      #   x1= xc + radius,
-      #   y1= yc + radius,
-      #   line_color="LightSeaGreen",
-      # )
-
-  return envelope_X, envelope_Y
-
-
-def draw_circle(xc, yc, r, n=100):
+def draw_circle(xc, yc, r, fig, n=100):
+  '''draws circle as plotly scatter from center and radius'''
   X = []
   Y = []
   for t in np.linspace(0, 2 * np.pi, n):
@@ -310,15 +181,53 @@ def draw_circle(xc, yc, r, n=100):
   return X, Y
 
 
+def get_frontier(X, Y):
+  '''extracts the envelope via rolling circle method'''
+  _, r = get_average_curvature(X, Y)
+  n = len(X)
+  idx1 = 0
+  idx2 = 1
+  envelope_X = [X[0]]
+  envelope_Y = [Y[0]]
+  while idx2 < n:
+    xc, yc = get_circle(X[idx1], Y[idx1], X[idx2], Y[idx2], r)
+    empty = True
+    for i in range(idx2 + 1, n):
+      if np.sqrt((xc - X[i])**2 + (yc - Y[i])**2) < r:
+        empty = False
+        idx2 += 1
+        break
+    if empty:
+      # envelope_X.append(X[idx1]) , envelope_Y.append(Y[idx1])
+      envelope_X.append(X[idx2]) , envelope_Y.append(Y[idx2])
+      idx1 = idx2
+      idx2 += 1
+  return envelope_X, envelope_Y
+
+
+def remove_envelope(X, Y, pulses):
+  W = np.zeros(pulses[-1].start + pulses[-1].len)
+  f = interp1d((X), Y, kind="linear", fill_value='extrapolate', assume_sorted=True)
+  # f = UnivariateSpline(X, Y)
+  for p in pulses:
+    x0 = p.start
+    x1 = p.start + p.len
+    Xn = p.start + np.arange(p.len)
+    A = f(Xn)
+    W[x0 : x1] = p.W / A
+  return W, f
+
 '''==============='''
 ''' Read wav file '''
 '''==============='''
 
-name = "bend"
+name = "tom"
 W, fps = read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 amplitude = np.max(np.abs(W))
 W = W / amplitude
+n = W.size
+X = np.arange(n)
 
 # W = W [ : W.size // 10]
 
@@ -331,6 +240,33 @@ pos_pulses, neg_pulses, pos_noises, neg_noises = split_pulses(pulses)
 pos_X, neg_X = np.array([p.x for p in pos_pulses]), np.array([p.x for p in neg_pulses])
 pos_Y, neg_Y = np.array([p.y for p in pos_pulses]), np.array([p.y for p in neg_pulses])
 pos_L, neg_L = np.array([p.len for p in pos_pulses]) , np.array([p.len for p in neg_pulses])
+
+pos_env_X, pos_env_Y = get_frontier(pos_X, pos_Y)
+
+# print(pos_env_X)
+
+neg_env_X, neg_env_Y = get_frontier(neg_X, neg_Y)
+
+def smooth(X, Y):
+  Xs = []
+  Ys = []
+  Xs.append(X[0])
+  Ys.append(0)
+  for i in range(0, len(X) - 5, 4):
+    Xs.append(X[i + 2]), Xs.append(X[i + 4]) #, Xs.append(None)
+    Ys.append(Y[i + 2]), Ys.append(0) #, Ys.append(None)
+
+  f = UnivariateSpline(Xs, Ys, k=1, s=0)
+  return f
+
+
+# W_normalized = np.zeros(W.size)
+
+# W_pos, f_pos = remove_envelope(pos_env_X, pos_env_Y, pos_pulses)
+# W_normalized[0 : W_pos.size] += W_pos
+
+# W_neg, f_neg = remove_envelope(neg_env_X, neg_env_Y, neg_pulses)
+# W_normalized[0 : W_neg.size] -= W_neg
 
 
 
@@ -362,7 +298,7 @@ fig.update_layout(
 fig.add_trace(
   go.Scatter(
     name="Signal",
-    x=np.arange(W.size),
+    x=X,
     y=W,
     mode="lines",
     line=dict(
@@ -373,7 +309,21 @@ fig.add_trace(
   )
 )
 
-''' Pulses info '''
+# fig.add_trace(
+#   go.Scatter(
+#     name="Normalized Signal",
+#     x=np.arange(W.size),
+#     y=W_normalized,
+#     mode="lines",
+#     line=dict(
+#         # size=8,
+#         color="orange",
+#         # showscale=False
+#     )
+#   )
+# )
+
+''' Pulses '''
 fig.add_trace(
   go.Scatter(
     name="Pulses",
@@ -387,7 +337,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Positive Amplitudes",
+    name="+ Amplitudes",
     x=pos_X,
     y=pos_Y,
     # hovertext=np.arange(len(pos_pulses)),
@@ -402,7 +352,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Negative Amplitudes",
+    name="- Amplitudes",
     x=neg_X,
     y=neg_Y,
     # hovertext=np.arange(len(pos_pulses)),
@@ -415,44 +365,80 @@ fig.add_trace(
   )
 )
 
+fig.add_trace(
+  go.Scatter(
+    name="+ Frontier",
+    x=pos_env_X,
+    y=pos_env_Y,
+    # fill="toself",
+    mode="lines+markers",
+    line=dict(
+        width=1,
+        color="red",
+        # showscale=False
+    )
+  )
+)
 
+fig.add_trace(
+  go.Scatter(
+    name="- Frontier",
+    x=neg_env_X,
+    y=neg_env_Y,
+    # fill="toself",
+    mode="lines+markers",
+    line=dict(
+        width=1,
+        color="red",
+        # showscale=False
+    )
+  )
+)
 
+f = smooth(pos_env_X, pos_env_Y)
 
+fig.add_trace(
+  go.Scatter(
+    name="+ Envelope",
+    x=X,
+    y=f(X),
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=1,
+        color="blue",
+        # showscale=False
+    )
+  )
+)
+
+# fig.add_trace(
+#   go.Scatter(
+#     name="Negative Envelope Cubic",
+#     x=X,
+#     y=savgol_filter(f_neg(X), 101, 3),
+#     # fill="toself",
+#     mode="lines",
+#     line=dict(
+#         width=1,
+#         color="blue",
+#         # showscale=False
+#     )
+#   )
+# )
 
 fig.show(config=dict({'scrollZoom': True}))
 
-# exit()
+exit()
 
 '''============================================================================'''
-'''                                    ENVE                                    '''
+'''                                     FT                                     '''
 '''============================================================================'''
 
-avg_L = np.average(pos_L)
-pos_X = pos_X / avg_L
-pos_L = pos_L / avg_L
-
-avg_Y = np.average(pos_Y)
-pos_Y = pos_Y / avg_Y
-
-curvatures, average_curvature, radius = get_pulses_curvatures_poly(pos_X, pos_Y)
-
-print(radius)
-
-points = np.array([[x, y] for x, y in zip(pos_X, pos_Y)])
-
-edges = alpha_shape(points, radius)
-
-# print(edges)
-
-alpha_X = []
-alpha_Y = []
-
-for e in edges:
-  idx1, idx2 = e
-  x0, x1 = pos_X[idx1], pos_X[idx2]
-  y0, y1 = pos_Y[idx1], pos_Y[idx2]
-  alpha_X.append(x0), alpha_X.append(x1), alpha_X.append(None)
-  alpha_Y.append(y0), alpha_Y.append(y1), alpha_Y.append(None)
+FT = np.abs(np.fft.rfft(W))
+FT = FT / np.max(FT)
+FT_normalized = np.abs(np.fft.rfft(W_normalized))
+FT_normalized = FT_normalized / np.max(FT_normalized)
 
 fig = go.Figure()
 fig.layout.template ="plotly_white"
@@ -476,72 +462,33 @@ fig.update_layout(
 
 fig.add_trace(
   go.Scatter(
-    name="Positive Amplitudes",
-    x=pos_X,
-    y=pos_Y,
+    name="Original FT",
+    # x=pos_X,
+    y=FT,
     # hovertext=np.arange(len(pos_pulses)),
-    mode="markers",
-    marker=dict(
-        size=6,
+    mode="lines",
+    line=dict(
+        # size=6,
         color="black",
         # showscale=False
     )
   )
 )
 
-
 fig.add_trace(
   go.Scatter(
-    name="alpha",
-    x=alpha_X,
-    y=alpha_Y,
-    # fill="toself",
+    name="Normalized FT",
+    # x=pos_X,
+    y=FT_normalized,
+    # hovertext=np.arange(len(pos_pulses)),
     mode="lines",
     line=dict(
-        width=4,
-        color="blue",
-        # showscale=False
-    )
-  )
-)
-
-# for x, y in zip([0], [0]):
-# x, y = get_circle(pos_X[0], pos_Y[0], pos_X[1], pos_Y[1], radius)
-
-env_X, env_Y = get_envelope(pos_X, pos_Y, radius)
-
-fig.add_trace(
-  go.Scatter(
-    name="env",
-    x=env_X,
-    y=env_Y,
-    # fill="toself",
-    mode="lines",
-    line=dict(
-        width=1,
+        # size=6,
         color="red",
         # showscale=False
     )
   )
 )
-
-fig.add_trace(
-  go.Scatter(
-    name="Circles",
-    legendgroup="Circles",
-    x=[0],
-    y=[0],
-    mode="markers",
-    marker=dict(
-        size=.1,
-        color="green",
-        # showscale=False
-    )
-  )
-)
-
-
-
 
 fig.show(config=dict({'scrollZoom': True}))
 # fig.write_image("./01ContinuousVsDiscrete.pdf", width=800, height=400, scale=1)
