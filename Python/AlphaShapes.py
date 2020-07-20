@@ -1,3 +1,4 @@
+from numpy.core.numeric import False_
 import plotly.graph_objects as go
 from scipy.interpolate import interp1d, UnivariateSpline
 import numpy as np
@@ -243,30 +244,65 @@ pos_L, neg_L = np.array([p.len for p in pos_pulses]) , np.array([p.len for p in 
 
 pos_env_X, pos_env_Y = get_frontier(pos_X, pos_Y)
 
-# print(pos_env_X)
-
 neg_env_X, neg_env_Y = get_frontier(neg_X, neg_Y)
 
-def smooth(X, Y):
-  Xs = []
-  Ys = []
-  Xs.append(X[0])
-  Ys.append(0)
+def smoothstep(t):
+
+  # return 3 * t**2 - 2 * t**3
+  # return 6 * t**5 - 15 * t**4 + 10 * t**3
+  # return -20 * t**7 + 70 * t**6 - 84 * t**5 + 35 * t**4
+  return t**2
+
+def smooth(X, Y, n):
+  X[0] = 0
+  Xs = np.arange(n)
+  Ye0 = np.zeros(n)
+  Ye1 = np.zeros(n)
+  Yo0 = np.zeros(n)
+  Yo1 = np.zeros(n)
+
+  t = np.linspace(0, .5, X[1])[::-1]
+  w = smoothstep(t)
+  Yo1[0 : X[1]] = w * Y[0]
+  Yo0[0 : X[1]] = (1 - w) * Y[1]
+
   for i in range(0, len(X) - 5, 4):
-    Xs.append(X[i + 2]), Xs.append(X[i + 4]) #, Xs.append(None)
-    Ys.append(Y[i + 2]), Ys.append(0) #, Ys.append(None)
+    x0, x1, x2, x3, x4, x5 = X[i], X[i + 1], X[i + 2], X[i + 3], X[i + 4], X[i + 5]
+    y0, y1, y2, y3, y4, y5 = Y[i], Y[i + 1], Y[i + 2], Y[i + 3], Y[i + 4], Y[i + 5]
+    '''even'''
+    t = np.linspace(0, 1, x2 - x0)
+    w = smoothstep(t)
+    Ye1[x0 : x2] = w * y2
+    Ye0[x0 : x2] = (1 - w) * y0
 
-  f = UnivariateSpline(Xs, Ys, k=1, s=0)
-  return f
+    t = np.linspace(0, 1, x4 - x2)[::-1]
+    w = smoothstep(t)
+    Ye1[x2 : x4] = w * y2
+    Ye0[x2 : x4] = (1 - w) * y4
+    '''odd'''
+    t = np.linspace(0, 1, x3 - x1)
+    w = smoothstep(t)
+    Yo1[x1 : x3] = w * y3
+    Yo0[x1 : x3] = (1 - w) * y1
 
+    t = np.linspace(0, 1, x5 - x3)[::-1]
+    w = smoothstep(t)
+    Yo1[x3 : x5] = w * y3
+    Yo0[x3 : x5] = (1 - w) * y5
 
-# W_normalized = np.zeros(W.size)
+  t = np.linspace(0, .5, n - X[-4])
+  w = smoothstep(t)
+  Yo1[X[-4] : ] = w * Y[-1]
+  Yo0[X[-4] : ] = (1 - w) * Y[-4]
 
-# W_pos, f_pos = remove_envelope(pos_env_X, pos_env_Y, pos_pulses)
-# W_normalized[0 : W_pos.size] += W_pos
+  t = np.linspace(0, 1, n - X[-5])
+  w = smoothstep(t)
+  Ye1[X[-5] : ] = w * Y[-2]
+  Ye0[X[-5] : ] = (1 - w) * Y[-5]
 
-# W_neg, f_neg = remove_envelope(neg_env_X, neg_env_Y, neg_pulses)
-# W_normalized[0 : W_neg.size] -= W_neg
+  YY = (Ye0 + Ye1 + Yo0 + Yo1) / 2
+  return Xs, YY, Ye0, Ye1, Yo0, Yo1
+
 
 
 
@@ -395,13 +431,73 @@ fig.add_trace(
   )
 )
 
-f = smooth(pos_env_X, pos_env_Y)
+Xs, YY, Ye0, Ye1, Yo0, Yo1 = smooth(pos_env_X, pos_env_Y, n)
 
 fig.add_trace(
   go.Scatter(
-    name="+ Envelope",
-    x=X,
-    y=f(X),
+    name="YY",
+    x=Xs,
+    y=YY,
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=1,
+        color="black",
+        # showscale=False
+    )
+  )
+)
+
+fig.add_trace(
+  go.Scatter(
+    name="Ye0",
+    x=Xs,
+    y=Ye0,
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=1,
+        color="blue",
+        # showscale=False
+    )
+  )
+)
+
+fig.add_trace(
+  go.Scatter(
+    name="Ye1",
+    x=Xs,
+    y=Ye1,
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=1,
+        color="blue",
+        # showscale=False
+    )
+  )
+)
+
+fig.add_trace(
+  go.Scatter(
+    name="Yo0",
+    x=Xs,
+    y=Yo0,
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=1,
+        color="blue",
+        # showscale=False
+    )
+  )
+)
+
+fig.add_trace(
+  go.Scatter(
+    name="Yo1",
+    x=Xs,
+    y=Yo1,
     # fill="toself",
     mode="lines",
     line=dict(
