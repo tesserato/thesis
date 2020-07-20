@@ -222,7 +222,7 @@ def remove_envelope(X, Y, pulses):
 ''' Read wav file '''
 '''==============='''
 
-name = "tom"
+name = "piano33"
 W, fps = read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 amplitude = np.max(np.abs(W))
@@ -251,9 +251,19 @@ def smoothstep(t):
   # return 3 * t**2 - 2 * t**3
   # return 6 * t**5 - 15 * t**4 + 10 * t**3
   # return -20 * t**7 + 70 * t**6 - 84 * t**5 + 35 * t**4
-  return t**2
+  return t
 
 def smooth(X, Y, n):
+
+  Yn = np.zeros(len(Y))
+
+  Yn[0] = (2 * np.sqrt(Y[0]) + np.sqrt(Y[1]))**2 / 9
+  Yn[-1] = (2 * np.sqrt(Y[-1]) + np.sqrt(Y[-2]))**2 / 9
+  
+  for i in range(1, len(Y) - 1):
+    Yn[i] = (np.sqrt(Y[i - 1]) + np.sqrt(Y[i]) + np.sqrt(Y[i +1]))**2 / 9
+  Y[:] = Yn[:]
+  
   X[0] = 0
   Xs = np.arange(n)
   Ye0 = np.zeros(n)
@@ -269,26 +279,29 @@ def smooth(X, Y, n):
   for i in range(0, len(X) - 5, 4):
     x0, x1, x2, x3, x4, x5 = X[i], X[i + 1], X[i + 2], X[i + 3], X[i + 4], X[i + 5]
     y0, y1, y2, y3, y4, y5 = Y[i], Y[i + 1], Y[i + 2], Y[i + 3], Y[i + 4], Y[i + 5]
+
     '''even'''
     t = np.linspace(0, 1, x2 - x0)
     w = smoothstep(t)
-    Ye1[x0 : x2] = w * y2
-    Ye0[x0 : x2] = (1 - w) * y0
-
+    Ye0[x0 : x2] = y0 * (1 - w)
+    Ye1[x0 : x2] = y2 * w
+    
     t = np.linspace(0, 1, x4 - x2)[::-1]
     w = smoothstep(t)
-    Ye1[x2 : x4] = w * y2
-    Ye0[x2 : x4] = (1 - w) * y4
+    Ye0[x2 : x4] = y4 * (1 - w)
+    Ye1[x2 : x4] = y2 * w
+    
     '''odd'''
     t = np.linspace(0, 1, x3 - x1)
     w = smoothstep(t)
-    Yo1[x1 : x3] = w * y3
-    Yo0[x1 : x3] = (1 - w) * y1
-
+    Yo0[x1 : x3] = y1 * (1 - w)
+    Yo1[x1 : x3] = y3 * w
+    
     t = np.linspace(0, 1, x5 - x3)[::-1]
     w = smoothstep(t)
-    Yo1[x3 : x5] = w * y3
-    Yo0[x3 : x5] = (1 - w) * y5
+    Yo0[x3 : x5] = y5 * (1 - w)
+    Yo1[x3 : x5] = y3 * w
+    
 
   t = np.linspace(0, .5, n - X[-4])
   w = smoothstep(t)
