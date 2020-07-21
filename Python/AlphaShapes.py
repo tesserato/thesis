@@ -1,4 +1,3 @@
-from numpy.core.numeric import False_
 import plotly.graph_objects as go
 from scipy.interpolate import interp1d, UnivariateSpline
 import numpy as np
@@ -218,11 +217,51 @@ def remove_envelope(X, Y, pulses):
     W[x0 : x1] = p.W / A
   return W, f
 
+
+def smooth(X, Y, n):
+  Yn = np.zeros(len(Y))
+
+  '''first value'''
+  s = Y[0] + Y[1] + Y[2]
+  h0, h1 = Y[0] / s, Y[1] / s
+
+  d = X[2] - X[0]
+  d0, d1 = 1, 1 - (X[1] - X[0]) / d
+
+  Yn[0] = (Y[0] * h0 * d0 + Y[1] * h1 * d1) / (h0 * d0 + h1 * d1)
+
+  '''last value''' 
+  s = Y[-2] + Y[-1]
+  h0, h1 = Y[-2] / s, Y[-1] / s
+
+  d = X[-1] - X[-3]
+  d0, d1 = 1, 1 - (X[-1] - X[-2]) / d
+
+  Yn[-1] = (Y[-2] * h0 * d0 + Y[-1] * h1 * d1) / (h0 * d0 + h1 * d1)
+  
+  for i in range(1, len(Y) - 1):
+    y0, y, y1 = Y[i - 1], Y[i], Y[i + 1]
+
+    d = X[i + 1] - X[i - 1]
+    d0 = 1 - (X[i] - X[i - 1]) / d
+    d1 = 1 - (X[i + 1] - X[i]) / d
+
+    s = y0 + y + y1
+    h = y / s
+    h0 = y0 / s
+    h1 = y1 / s
+
+    Yn[i] = (y * h + d0 * y0 * h0 + d1 * y1 * h1) / (h + h0 * d0 + h1 * d1)
+
+  f = UnivariateSpline(X, Yn, s=0)
+  return f(np.arange(n))
+
+
 '''==============='''
 ''' Read wav file '''
 '''==============='''
 
-name = "piano33"
+name = "tom"
 W, fps = read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 amplitude = np.max(np.abs(W))
@@ -245,78 +284,6 @@ pos_L, neg_L = np.array([p.len for p in pos_pulses]) , np.array([p.len for p in 
 pos_env_X, pos_env_Y = get_frontier(pos_X, pos_Y)
 
 neg_env_X, neg_env_Y = get_frontier(neg_X, neg_Y)
-
-def smoothstep(t):
-
-  # return 3 * t**2 - 2 * t**3
-  # return 6 * t**5 - 15 * t**4 + 10 * t**3
-  # return -20 * t**7 + 70 * t**6 - 84 * t**5 + 35 * t**4
-  return t
-
-def smooth(X, Y, n):
-
-  Yn = np.zeros(len(Y))
-
-  Yn[0] = (2 * np.sqrt(Y[0]) + np.sqrt(Y[1]))**2 / 9
-  Yn[-1] = (2 * np.sqrt(Y[-1]) + np.sqrt(Y[-2]))**2 / 9
-  
-  for i in range(1, len(Y) - 1):
-    Yn[i] = (np.sqrt(Y[i - 1]) + np.sqrt(Y[i]) + np.sqrt(Y[i +1]))**2 / 9
-  Y[:] = Yn[:]
-  
-  X[0] = 0
-  Xs = np.arange(n)
-  Ye0 = np.zeros(n)
-  Ye1 = np.zeros(n)
-  Yo0 = np.zeros(n)
-  Yo1 = np.zeros(n)
-
-  t = np.linspace(0, .5, X[1])[::-1]
-  w = smoothstep(t)
-  Yo1[0 : X[1]] = w * Y[0]
-  Yo0[0 : X[1]] = (1 - w) * Y[1]
-
-  for i in range(0, len(X) - 5, 4):
-    x0, x1, x2, x3, x4, x5 = X[i], X[i + 1], X[i + 2], X[i + 3], X[i + 4], X[i + 5]
-    y0, y1, y2, y3, y4, y5 = Y[i], Y[i + 1], Y[i + 2], Y[i + 3], Y[i + 4], Y[i + 5]
-
-    '''even'''
-    t = np.linspace(0, 1, x2 - x0)
-    w = smoothstep(t)
-    Ye0[x0 : x2] = y0 * (1 - w)
-    Ye1[x0 : x2] = y2 * w
-    
-    t = np.linspace(0, 1, x4 - x2)[::-1]
-    w = smoothstep(t)
-    Ye0[x2 : x4] = y4 * (1 - w)
-    Ye1[x2 : x4] = y2 * w
-    
-    '''odd'''
-    t = np.linspace(0, 1, x3 - x1)
-    w = smoothstep(t)
-    Yo0[x1 : x3] = y1 * (1 - w)
-    Yo1[x1 : x3] = y3 * w
-    
-    t = np.linspace(0, 1, x5 - x3)[::-1]
-    w = smoothstep(t)
-    Yo0[x3 : x5] = y5 * (1 - w)
-    Yo1[x3 : x5] = y3 * w
-    
-
-  t = np.linspace(0, .5, n - X[-4])
-  w = smoothstep(t)
-  Yo1[X[-4] : ] = w * Y[-1]
-  Yo0[X[-4] : ] = (1 - w) * Y[-4]
-
-  t = np.linspace(0, 1, n - X[-5])
-  w = smoothstep(t)
-  Ye1[X[-5] : ] = w * Y[-2]
-  Ye0[X[-5] : ] = (1 - w) * Y[-5]
-
-  YY = (Ye0 + Ye1 + Yo0 + Yo1) / 2
-  return Xs, YY, Ye0, Ye1, Yo0, Yo1
-
-
 
 
 '''============================================================================'''
@@ -444,12 +411,13 @@ fig.add_trace(
   )
 )
 
-Xs, YY, Ye0, Ye1, Yo0, Yo1 = smooth(pos_env_X, pos_env_Y, n)
+YY = smooth(pos_env_X, pos_env_Y, n)
+
 
 fig.add_trace(
   go.Scatter(
     name="YY",
-    x=Xs,
+    x=X,
     y=YY,
     # fill="toself",
     mode="lines",
@@ -461,65 +429,65 @@ fig.add_trace(
   )
 )
 
-fig.add_trace(
-  go.Scatter(
-    name="Ye0",
-    x=Xs,
-    y=Ye0,
-    # fill="toself",
-    mode="lines",
-    line=dict(
-        width=1,
-        color="blue",
-        # showscale=False
-    )
-  )
-)
+# fig.add_trace(
+#   go.Scatter(
+#     name="Ye0",
+#     x=Xs,
+#     y=Ye0,
+#     # fill="toself",
+#     mode="lines",
+#     line=dict(
+#         width=1,
+#         color="blue",
+#         # showscale=False
+#     )
+#   )
+# )
 
-fig.add_trace(
-  go.Scatter(
-    name="Ye1",
-    x=Xs,
-    y=Ye1,
-    # fill="toself",
-    mode="lines",
-    line=dict(
-        width=1,
-        color="blue",
-        # showscale=False
-    )
-  )
-)
+# fig.add_trace(
+#   go.Scatter(
+#     name="Ye1",
+#     x=Xs,
+#     y=Ye1,
+#     # fill="toself",
+#     mode="lines",
+#     line=dict(
+#         width=1,
+#         color="blue",
+#         # showscale=False
+#     )
+#   )
+# )
 
-fig.add_trace(
-  go.Scatter(
-    name="Yo0",
-    x=Xs,
-    y=Yo0,
-    # fill="toself",
-    mode="lines",
-    line=dict(
-        width=1,
-        color="blue",
-        # showscale=False
-    )
-  )
-)
+# fig.add_trace(
+#   go.Scatter(
+#     name="Yo0",
+#     x=Xs,
+#     y=Yo0,
+#     # fill="toself",
+#     mode="lines",
+#     line=dict(
+#         width=1,
+#         color="blue",
+#         # showscale=False
+#     )
+#   )
+# )
 
-fig.add_trace(
-  go.Scatter(
-    name="Yo1",
-    x=Xs,
-    y=Yo1,
-    # fill="toself",
-    mode="lines",
-    line=dict(
-        width=1,
-        color="blue",
-        # showscale=False
-    )
-  )
-)
+# fig.add_trace(
+#   go.Scatter(
+#     name="Yo1",
+#     x=Xs,
+#     y=Yo1,
+#     # fill="toself",
+#     mode="lines",
+#     line=dict(
+#         width=1,
+#         color="blue",
+#         # showscale=False
+#     )
+#   )
+# )
 
 # fig.add_trace(
 #   go.Scatter(
