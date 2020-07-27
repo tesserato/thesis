@@ -23,11 +23,8 @@ def save_wav(signal, name = 'test.wav', fps = 44100): #save .wav file to program
 
 
 
-
-
-
 #############################################################
-#############################################################
+####################### OLD FUNCTIONS #######################
 #############################################################
 
 def get_delaunay(X, Y):
@@ -45,7 +42,6 @@ def get_delaunay(X, Y):
     X_tri.append(xa), Y_tri.append(ya)
     X_tri.append(None), Y_tri.append(None)
   return X_tri, Y_tri
-
 
 def alpha_shape(points, alpha, only_outer=True):
     """
@@ -94,7 +90,6 @@ def alpha_shape(points, alpha, only_outer=True):
             add_edge(edges, ib, ic)
             add_edge(edges, ic, ia)
     return edges
-
 
 def get_curvature_3_points(X, Y):
   '''Return max curvatures, avg and r for the poly approximation of 3 pulses amplitude at a time'''
@@ -188,3 +183,341 @@ def old_smooth(X, Y, n):
 
   YY = (Ye0 + Ye1 + Yo0 + Yo1) / 2
   return Xs, YY, Ye0, Ye1, Yo0, Yo1
+
+def fit_nonnegative_line(X, Y):
+  '''y = ax + b'''
+  Y = np.abs(Y)
+
+  prob = pulp.LpProblem("LP", pulp.LpMinimize)
+
+  a = pulp.LpVariable("a")
+  b = pulp.LpVariable("b", 0)
+  
+  Z = []
+  for i in range(len(X)):
+    z_i = pulp.LpVariable(f"z_{i}", 0)
+    prob +=   Y[i] - (a * X[i] + b) <= z_i
+    prob += -(Y[i] - (a * X[i] + b)) <= z_i
+    Z.append(z_i)
+  prob += a * X[-1] + b >= 0
+  prob += pulp.lpSum([z for z in Z]) 
+
+  prob.writeLP("lp.lp")
+
+  status = prob.solve(pulp.CPLEX_CMD(path=r"C:\Program Files\IBM\ILOG\CPLEX_Studio1210\cplex\bin\x64_win64\cplex.exe"))
+
+  print(pulp.LpStatus[status])
+  a = pulp.value(a)
+  b = pulp.value(b)
+  print(a, b)
+  return a, b
+
+def get_average_curvature(X, Y):
+  '''Return average curvature and radius of the equivalent circle for the poly approximation of 4 points amplitude at a time'''
+  Ycurvatures = []
+  Xcurvatures = []
+  for i in range(len(X) - 3):
+    x0, x1, x2, x3 = X[i], X[i + 1], X[i + 2], X[i + 3]
+    y0, y1, y2, y3 = Y[i], Y[i + 1], Y[i + 2], Y[i + 3]
+    x, y = np.array([x0, x1, x2, x3]), np.array([y0, y1, y2, y3])
+    a0, a1, a2 = poly.polyfit(x, y, 2)
+    xc = (x0 + x1 + x2 + x3) / 4
+    yc = 2 * a2 / ((a1 + a2 * xc)**2 + 1)**(3/2) # curvature at x = (x1+x2)/2
+
+    # t1 = 2*a2*x3+a1 # average curvature, as per integral, at x = (x1+x2)/2
+    # t0 = 2*a2*x0+a1
+    # c = (t1 / np.sqrt(t1**2+1) - t0 / np.sqrt(t0**2+1)) / (x3 - x0)
+
+    Ycurvatures.append(yc)
+    Xcurvatures.append(xc)
+
+  # k = 3
+  # A = np.zeros((len(Ycurvatures), 3))
+  # for l in range(len(Ycurvatures)):
+  #   A[l, 0] = 1
+  #   A[l, 1] = Xcurvatures[l]
+  #   A[l, 2] = 0
+  # A[-1, -1] = -1
+  # coefs, _ = nnls(A, np.abs(Ycurvatures))
+  # coefs = np.linalg.lstsq(A, np.abs(Ycurvatures))[0]
+  # print(coefs)
+  # b, a, slack = coefs
+  # curvatures = poly.polyval(Xcurvatures, [b, a])
+
+  a, b = fit_nonnegative_line(Xcurvatures, Ycurvatures)
+
+  radius = lambda x : 1 / (a * x + b)
+
+  fig.add_trace(
+    go.Scatter(
+      name="curvatures",
+      x=Xcurvatures,
+      y=np.abs(Ycurvatures),
+      mode="markers",
+      marker=dict(
+          # size=8,
+          color="yellow",
+          # showscale=False
+      )
+    )
+  )
+
+  fig.add_trace(
+    go.Scatter(
+      name="curvatures appr",
+      x=Xcurvatures,
+      y=a * np.array(Xcurvatures) + b,
+      mode="lines",
+      line=dict(
+          # size=8,
+          color="pink",
+          # showscale=False
+      )
+    )
+  )
+
+  fig.add_trace(
+    go.Scatter(
+      name="curvatures appr",
+      x=[0],
+      y=[np.average(np.abs(Ycurvatures))],
+      mode="markers",
+      marker=dict(
+          # size=8,
+          color="green",
+          # showscale=False
+      )
+    )
+  )
+
+  return radius
+
+def get_average_curvature_direct(X, Y):
+  '''Return average curvature and radius of the equivalent circle for the poly approximation of 4 points amplitude at a time'''
+  curvatures = []
+  for i in range(2, len(X) - 2):
+    x0, x1, x2, x3, x4 = X[i - 2], X[i - 1], X[i], X[i + 1], X[i + 2]
+    y0, y1, y2, y3, y4 = Y[i - 1], Y[i - 1], Y[i], Y[i + 1], Y[i + 1]
+
+    yl1 = (y2 - y0) / (x2 - x0)
+    yl2 = (y3 - y1) / (x3 - x1)
+    yl3 = (y4 - y2) / (x4 - x2)
+
+    yll1 = (yl2 - yl1) / (x2 - x1)
+    yll2 = (yl3 - yl2) / (x3 - x2)
+
+    yl = (yl1 + yl2 + yl3) / 3
+    yll = (yll1 + yll2) / 2
+
+    c = yll / (1 + yl**2)**(3 / 2)
+
+    curvatures.append(c)
+
+  a, b = fit_nonnegative_line(X[2 : -2], np.abs(curvatures))
+
+  radius = lambda x : 1 / np.abs(np.average(curvatures)) # (a * x + b)
+
+  fig.add_trace(
+    go.Scatter(
+      name="curvatures",
+      x=X[1 : -1],
+      y=curvatures,
+      mode="markers",
+      marker=dict(
+          # size=8,
+          color="yellow",
+          # showscale=False
+      )
+    )
+  )
+
+  fig.add_trace(
+    go.Scatter(
+      name="curvatures appr",
+      x=X[1 : -1],
+      y=a * np.array(curvatures) + b,
+      mode="lines",
+      line=dict(
+          # size=8,
+          color="pink",
+          # showscale=False
+      )
+    )
+  )
+
+  fig.add_trace(
+    go.Scatter(
+      name="curvatures appr",
+      x=[0],
+      y=[np.average((curvatures))],
+      mode="markers",
+      marker=dict(
+          # size=8,
+          color="green",
+          # showscale=False
+      )
+    )
+  )
+
+  return radius
+
+def constrained_least_squares(X, Y, q=4, k=4):
+  '''constrained least squares with q intervals and k-1 polynomial'''
+  assert X.size == Y.size
+  n = X.size
+  l = n // q
+  U = np.zeros((n, k * q))
+  V = np.zeros((2 * (q-1), k * q))
+
+  '''populating U'''
+  for i1 in range(q):
+    for i2 in range(l * i1, l * (i1 + 1)):
+      for i3 in range(k):
+        U[i2, i1 * k + i3] = X[i2]**i3
+
+  '''populating V (constraints)'''
+  for i in range(q - 1):
+    for j in range(k):
+      V[2 * i, i * k + j] = X[(i + 1) * l]**j
+      V[2 * i, i * k + k + j] = -X[(i + 1) * l]**j
+  for i in range(q - 1):
+    for j in range(1, k):
+      V[2 * i + 1, i * k + j] = j * X[(i + 1) * l] ** (j - 1)
+      V[2 * i + 1, i * k + k + j] = -j * X[(i + 1) * l] ** (j - 1)
+
+  '''solving'''
+  UTUinv = np.linalg.inv(np.matmul(U.T, U))
+  tau = np.linalg.inv(np.matmul(np.matmul(V, UTUinv),V.T))
+  UTW = np.matmul(U.T, Y)
+  par1 = np.matmul(np.matmul(V, UTUinv), UTW)
+  A = np.matmul(UTUinv,UTW - np.matmul(np.matmul(V.T, tau),par1))
+  return np.reshape(A, (q, -1))
+
+def coefs_to_array(A, X): 
+  '''evaluates x E X from a coefficient matrix A'''
+  n = X.size
+  q = A.shape[0]
+  k = A.shape[1]
+  l = n // q
+  Y = []
+  for i in range(q):
+    for x in range(i * l, (i + 1) * l):
+      y = 0
+      for j in range(k):
+        y += A[i, j] * X[x]**j
+      Y.append(y)
+
+  x = len(Y)
+  while x < n:
+    y = 0
+    for i in range(k):
+      y += A[q-1, i] * X[x]**i
+    Y.append(y)
+    x += 1
+  return Y
+
+def remove_envelope(X, Y, pulses):
+  W = np.zeros(pulses[-1].start + pulses[-1].len)
+  f = interp1d((X), Y, kind="linear", fill_value='extrapolate', assume_sorted=True)
+  # f = UnivariateSpline(X, Y)
+  for p in pulses:
+    x0 = p.start
+    x1 = p.start + p.len
+    Xn = p.start + np.arange(p.len)
+    A = f(Xn)
+    W[x0 : x1] = p.W / A
+  return W, f
+
+def smooth(X, Y, n):
+  assert len(X) == len(Y), f"len(X)={len(X)} != len(Y)={len(Y)}"
+  Xs = np.zeros(len(X))
+  Ys = np.zeros(len(X))
+  Xs[0], Xs[-1] = 0, n
+  Ys[0], Ys[-1] = Y[0], Y[-1]
+  
+  for i in range(1, len(X) - 1):
+    Xs[i] = (X[i - 1] + X[i] + X[i + 1]) / 3
+    Ys[i] = (Y[i - 1] + Y[i] + Y[i + 1]) / 3
+  # print(Xs)
+  # f = interp1d(Xs, Ys, kind="quadratic")
+  f = UnivariateSpline(Xs, Ys)
+  Xf = np.arange(n)
+  Yf = f(Xf)
+
+  return Xf, Yf
+
+def line(x0, x1, y0, y1, t):
+  '''y = m x + b | 0 = x0, 1 = x1'''
+  x = x0 + t * (x1 - x0)
+  m = (y1 - y0) / (x1 - x0)
+  b = y0 - m * x0
+  f = lambda alpha : m * alpha + b
+  y = f(x)
+  return x, y
+
+def bezier_approximation(Xo, Yo, n):
+  Xp = []
+  Yp = []
+  Xp.append(Xo[0])
+  Yp.append(Yo[0])
+  for i in range(1, len(Xo)-2):
+    Xp.append(Xo[i]), Yp.append(Yo[i])
+    Xp.append((Xo[i] + Xo[i + 1]) / 2), Yp.append((Yo[i] + Yo[i + 1]) / 2)
+  Xp.append(Xo[-2])
+  Yp.append(Yo[-2])
+  Xp.append(Xo[-1])
+  Yp.append(Yo[-1])
+  # print(Xp)
+
+  X = []
+  Y = []
+  for i in range(0, len(Xp) - 3, 2):
+    distance = np.sqrt((Xp[i + 2] - Xp[i])**2 + (Yp[i + 2] - Yp[i])**2)
+    distance = np.int(np.ceil(distance))
+    mt = 1 * (distance - 1) / distance
+    for t in np.linspace(0, mt, distance):
+      x0, y0 = line(Xp[i], Xp[i + 1], Yp[i], Yp[i + 1], t)
+      x1, y1 = line(Xp[i + 1], Xp[i + 2], Yp[i + 1], Yp[i + 2], t)
+      x, y = line(x0, x1, y0, y1, t)
+      X.append(x)
+      Y.append(y)
+  distance = np.sqrt((Xp[-1] - Xp[-3])**2 + (Yp[-1] - Yp[-3])**2)
+  distance = np.int(np.ceil(distance))
+  for t in np.linspace(0, 1, distance):
+    x0, y0 = line(Xp[-3], Xp[-2], Yp[-3], Yp[-2], t)
+    x1, y1 = line(Xp[-2], Xp[-1], Yp[-2], Yp[-1], t)
+    x, y = line(x0, x1, y0, y1, t)
+    X.append(x)
+    Y.append(y)
+
+  f = interp1d(X, Y, kind="cubic", fill_value="extrapolate", assume_sorted=True)
+  X = np.arange(n)
+  Y = f(X)
+  return X, Y
+
+def get_knots_indices(X, Y, knots=10):
+  Y = np.abs(Y)
+  A = np.sum(Y) / (knots + 1)
+  Xa = []
+  Ya = []
+  i = 0
+  I = []
+  while len(I) < knots:
+    S = 0
+    Xinterm = []
+    Yinterm = []
+    while S < A:
+      S += Y[i]
+      Xinterm.append(X[i])
+      Yinterm.append(Y[i])
+      i += 1
+    I.append(i)
+    Xa.append(np.average(Xinterm))
+    Ya.append(np.average(Yinterm))
+  Xa.append(np.average(X[i:]))
+  Ya.append(np.average(Y[i:]))
+
+  f = interp1d(Xa, Ya, "cubic", fill_value="extrapolate")
+
+  print(I)
+  return X, f(X), I
