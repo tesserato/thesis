@@ -317,10 +317,10 @@ def bezier_approximation_interp(Xo, Yo):
 Xp = [0, 5, 9, 14, 20, 26, 30, 37]
 Yp = [3, 2, 4, 1, 5, 2, 3, 1]
 
-Xb, Yb, f = bezier_approximation_interp(Xp, Yp)
+Xb, Yb = bezier_approximation(Xp, Yp)
 
-X = np.arange(np.max(Xp) + 1)
-Y = f(X)
+# X = np.arange(np.max(Xp) + 1)
+# Y = f(X)
 
 
 '''============================================================================'''
@@ -375,18 +375,18 @@ fig.add_trace(
   )
 )
 
-fig.add_trace(
-  go.Scatter(
-    name="Interpolation",
-    x=X,
-    y=Y,
-    mode="markers+lines",
-    line=dict(
-        # size=8,
-        color="blue",
-        # showscale=False
-    )
-  )
-)
+# fig.add_trace(
+#   go.Scatter(
+#     name="Interpolation",
+#     x=X,
+#     y=Y,
+#     mode="markers+lines",
+#     line=dict(
+#         # size=8,
+#         color="blue",
+#         # showscale=False
+#     )
+#   )
+# )
 
 fig.show(config=dict({'scrollZoom': True}))
