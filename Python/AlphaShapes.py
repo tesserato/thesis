@@ -106,6 +106,7 @@ def bezier_3_points(X, Y):
 
 
 def get_curvature(X, Y, n):
+  Y = np.abs(Y)
   '''Return average curvature and radius of the equivalent circle for the poly approximation of 4 points amplitude at a time'''
   pos_curvatures_X = []
   pos_curvatures_Y = []
@@ -133,28 +134,22 @@ def get_curvature(X, Y, n):
       neg_curvatures_X.append(x2)
       neg_curvatures_Y.append(c)
 
-  if np.average(pos_curvatures_Y) < np.abs(np.average(neg_curvatures_Y)):
-    curvatures_X = pos_curvatures_X
-    curvatures_Y = pos_curvatures_Y
-  else:
-    curvatures_X = neg_curvatures_X
-    curvatures_Y = np.abs(neg_curvatures_Y)
 
   i = 0
-  lim = (X[-1] - X[0]) / 3
-  while curvatures_X[i] < lim:
+  lim = (X[-1] - X[0]) / 4
+  while pos_curvatures_X[i] < lim:
     i += 1
   p1 = i
-  while curvatures_X[i] < 2 * lim:
+  while pos_curvatures_X[i] < 3 * lim:
     i += 1
   p2 = i
 
   x0 = 0
-  y0 = np.average(curvatures_Y[0 : p1])
+  y0 = np.average(pos_curvatures_Y[0 : p1])
   x1 = (X[-1] - X[0]) / 2
-  y1 = np.average(curvatures_Y[p1 : p2])
+  y1 = np.average(pos_curvatures_Y[p1 : p2])
   x2 = n
-  y2 = np.average(curvatures_Y[p2 : ])
+  y2 = np.average(pos_curvatures_Y[p2 : ])
 
   #########
   # g = interp1d([x0, x1, x2], [y0, y1, y2], "quadratic")
@@ -163,30 +158,47 @@ def get_curvature(X, Y, n):
 
   # interp = bezier_3_points([x0, x1, x2], [y0, y1, y2])
   
+  avg = np.average(pos_curvatures_Y)
   aa = ((x0 - x1) * (y1 - y2) - (x1 - x2) * (y0 - y1)) / (2 * (-x0 + x2) * (x0 - x1) * (x1 - x2))
   bb = (-x0 * (x0 - x1) * (y1 - y2) + x2 * (x1 - x2) * (y0 - y1)) / ((-x0 + x2) * (x0 - x1) * (x1 - x2))
   cc = -aa * x0**2 - bb * x0 + y0
+
+
   # print("abc:",aa, bb, cc)
   # print("xxx:",x0, x1, x2)
   # print("yyy:",y0, y1, y2)
 
   def g(x):
     x = np.array(x, dtype=np.float64)
-    return (aa * x**2 + bb * x + cc)
+    return (aa * x**2 + bb * x + cc) * (avg / cc)
 
   def f(x):
     x = np.array(x, dtype=np.float64)
-    return 1 / (aa * x**2 + bb * x + cc)
+    return 1 / ( (aa * x**2 + bb * x + cc) * (avg / cc) )
 
   fig.add_trace(
     go.Scatter(
       name="curvatures",
-      x=curvatures_X,
-      y=curvatures_Y,
+      x=pos_curvatures_X,
+      y=pos_curvatures_Y,
       mode="markers",
       marker=dict(
           # size=8,
           color="yellow",
+          # showscale=False
+      )
+    )
+  )  
+
+  fig.add_trace(
+    go.Scatter(
+      name="avg curvatures",
+      x=[0 , n],
+      y=[avg, avg],
+      mode="lines",
+      line=dict(
+          # size=8,
+          color="blue",
           # showscale=False
       )
     )
@@ -207,7 +219,7 @@ def get_curvature(X, Y, n):
   )
 
   XX = np.arange(n)
-  np.savetxt("XX.csv", XX, delimiter=",")
+  # np.savetxt("XX.csv", XX, delimiter=",")
   fig.add_trace(
     go.Scatter(
       name="curvatures",
@@ -369,8 +381,11 @@ def get_frontier(X, Y, nn):
 '''==============='''
 fig = go.Figure()
 
-name = "piano33"
+name = "brass"
 W, fps = read_wav(f"Samples/{name}.wav")
+
+W = W [ : W.size // 5]
+
 W = W - np.average(W)
 amplitude = np.max(np.abs(W))
 W = W / amplitude
@@ -378,7 +393,7 @@ n = W.size
 print(n)
 X = np.arange(n)
 
-# W = W [ : W.size // 10]
+
 
 pulses = signal_to_pulses(W)
 
