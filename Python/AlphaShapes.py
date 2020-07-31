@@ -6,7 +6,7 @@ import numpy as np
 from Helper import read_wav
 from scipy.signal import savgol_filter
 import numpy.polynomial.polynomial as poly
-import pulp
+from scipy.signal import hilbert
 
 
 class Pulse:
@@ -105,7 +105,162 @@ def bezier_3_points(X, Y):
   return bez
 
 
+def parabola_3_points(X, Y):
+  assert len(X) == len(Y) and len(X) == 3
+  x0, x1, x2 = X[0], X[1], X[2]
+  y0, y1, y2 = Y[0], Y[1], Y[2]
+
+  den =  (-x0 + x2) * (x0 - x1) * (x1 - x2)
+
+  a = ((x0 - x1) * (y1 - y2) - (x1 - x2) * (y0 - y1)) / (2 * den)
+  b = (-x0 * (x0 - x1) * (y1 - y2) + x2 * (x1 - x2) * (y0 - y1)) / den
+  c = -a * x0**2 - b * x0 + y0
+  return a, b, c
+
+
+def cubic_3_points(X, Y):
+  '''y = a * x**3 + b * x**2 + c * x + d'''
+  assert len(X) == len(Y) and len(X) == 3
+  x0, x1, x2 = X[0], X[1], X[2]
+  y0, y1, y2 = Y[0], Y[1], Y[2]
+
+  den = (x0 - x1) * (x0 - x2)**3 * (x1 - x2)
+  ter = (x0 * y1 - x0 * y2 - x1 * y0 + x1 * y2 + x2 * y0 - x2 * y1)
+  a = (x0 - 2 * x1 + x2) * ter / den
+  b = -(2 * x0**2 - 3 * x0*x1 + 2 * x0 * x2 - 3 * x1 * x2 + 2 * x2**2) * ter / den
+  c = (-a*x0**3 + a*x2**3 - b*x0**2 + b*x2**2 + y0 - y2)/(x0 - x2)
+  d = y0 - (a * x0**3 + b * x0**2 + c * x0)
+  return a, b, c, d
+
+
 def get_curvature(X, Y, n):
+  Y = np.abs(Y)
+  '''Return average curvature and radius of the equivalent circle for the poly approximation of 4 points amplitude at a time'''
+  pos_curvatures_X = []
+  pos_curvatures_Y = []
+  neg_curvatures_X = []
+  neg_curvatures_Y = []
+  for i in range(1, len(X) - 1):
+    x0, x1, x2 = X[i - 1], X[i], X[i + 1]
+    y0, y1, y2 = Y[i - 1], Y[i], Y[i + 1]
+
+    a, b, c = parabola_3_points([x0, x1, x2], [y0, y1, y2])
+
+    t1 = 2*a*x1+b
+    t0 = 2*a*x0+b
+    avg_curv = (t1 / np.sqrt(t1**2+1) - t0 / np.sqrt(t0**2+1)) / (x1 - x0)
+
+    if avg_curv >= 0:
+      pos_curvatures_X.append(x1)
+      pos_curvatures_Y.append(avg_curv)
+    else:
+      neg_curvatures_X.append(x1)
+      neg_curvatures_Y.append(avg_curv)
+
+  avg = np.average(pos_curvatures_Y)
+
+  i = 0
+  lim = (X[-1] - X[0]) / 4
+  while pos_curvatures_X[i] < lim:
+    i += 1
+  p1 = i
+  while pos_curvatures_X[i] < 3 * lim:
+    i += 1
+  p2 = i
+
+  x0 = 0
+  y0 = np.average(pos_curvatures_Y[0 : p1])
+  x1 = (X[-1] - X[0]) / 2
+  y1 = np.average(pos_curvatures_Y[p1 : p2])
+  x2 = n
+  y2 = np.average(pos_curvatures_Y[p2 : ])
+
+  max_y = np.max([y0, y1, y2])
+
+  y0, y1, y2 = y0 * avg / max_y, y1 * avg / max_y, y2 * avg / max_y
+
+  #########
+  # g = interp1d([x0, x1, x2], [y0, y1, y2], "quadratic")
+  # f = lambda x : 1 / g(x)
+  #########
+
+
+  a, b, c = parabola_3_points([x0, x1, x2], [y0, y1, y2])
+
+  # print("abc:",aa, bb, cc)
+  # print("xxx:",x0, x1, x2)
+  # print("yyy:",y0, y1, y2)
+
+  def g(x):
+    x = np.array(x, dtype=np.float64)
+    return (a * x**2 + b * x + c) #* (avg / cc)
+
+  def f(x):
+    x = np.array(x, dtype=np.float64)
+    return 1 / ( (a * x**2 + b * x + c) )#* (avg / cc) )
+
+  fig.add_trace(
+    go.Scatter(
+      name="curvatures",
+      x=pos_curvatures_X,
+      y=pos_curvatures_Y,
+      mode="markers",
+      marker=dict(
+          # size=8,
+          color="yellow",
+          # showscale=False
+      )
+    )
+  )  
+
+  fig.add_trace(
+    go.Scatter(
+      name="avg curvatures",
+      x=[0 , n],
+      y=[avg, avg],
+      mode="lines",
+      line=dict(
+          # size=8,
+          color="blue",
+          # showscale=False
+      )
+    )
+  )
+
+  fig.add_trace(
+    go.Scatter(
+      name="curvature points",
+      x=[x0, x1, x2],
+      y=[y0, y1, y2],
+      mode="markers",
+      marker=dict(
+          # size=8,
+          color="pink",
+          # showscale=False
+      )
+    )
+  )
+
+  XX = np.arange(n)
+  # np.savetxt("XX.csv", XX, delimiter=",")
+  fig.add_trace(
+    go.Scatter(
+      name="curvatures",
+      x=XX,
+      y=g(XX),
+      mode="lines",
+      line=dict(
+          # size=8,
+          color="green",
+          # showscale=False
+      )
+    )
+  )
+
+  return f
+
+
+def get_curvature_direct(X, Y, n):
   Y = np.abs(Y)
   '''Return average curvature and radius of the equivalent circle for the poly approximation of 4 points amplitude at a time'''
   pos_curvatures_X = []
@@ -114,7 +269,7 @@ def get_curvature(X, Y, n):
   neg_curvatures_Y = []
   for i in range(2, len(X) - 2):
     x0, x1, x2, x3, x4 = X[i - 2], X[i - 1], X[i], X[i + 1], X[i + 2]
-    y0, y1, y2, y3, y4 = Y[i - 1], Y[i - 1], Y[i], Y[i + 1], Y[i + 1]
+    y0, y1, y2, y3, y4 = Y[i - 2], Y[i - 1], Y[i], Y[i + 1], Y[i + 2]
 
     yl1 = (y2 - y0) / (x2 - x0)
     yl2 = (y3 - y1) / (x3 - x1)
@@ -133,7 +288,6 @@ def get_curvature(X, Y, n):
     else:
       neg_curvatures_X.append(x2)
       neg_curvatures_Y.append(c)
-
 
   i = 0
   lim = (X[-1] - X[0]) / 4
@@ -156,13 +310,9 @@ def get_curvature(X, Y, n):
   # f = lambda x : 1 / g(x)
   #########
 
-  # interp = bezier_3_points([x0, x1, x2], [y0, y1, y2])
-  
   avg = np.average(pos_curvatures_Y)
-  aa = ((x0 - x1) * (y1 - y2) - (x1 - x2) * (y0 - y1)) / (2 * (-x0 + x2) * (x0 - x1) * (x1 - x2))
-  bb = (-x0 * (x0 - x1) * (y1 - y2) + x2 * (x1 - x2) * (y0 - y1)) / ((-x0 + x2) * (x0 - x1) * (x1 - x2))
-  cc = -aa * x0**2 - bb * x0 + y0
 
+  aa, bb, cc = parabola_3_points([x0, x1, x2], [y0, y1, y2])
 
   # print("abc:",aa, bb, cc)
   # print("xxx:",x0, x1, x2)
@@ -372,6 +522,9 @@ def get_frontier(X, Y, nn):
       envelope_Y.append(Y[idx2])
       idx1 = idx2
       idx2 += 1
+
+      draw_circle(xc, yc, r, fig)
+
   return envelope_X, envelope_Y
 
 
@@ -381,10 +534,10 @@ def get_frontier(X, Y, nn):
 '''==============='''
 fig = go.Figure()
 
-name = "brass"
+name = "piano33"
 W, fps = read_wav(f"Samples/{name}.wav")
 
-W = W [ : W.size // 5]
+# W = W [70000 : 100000]
 
 W = W - np.average(W)
 amplitude = np.max(np.abs(W))
@@ -457,19 +610,22 @@ fig.add_trace(
   )
 )
 
-# fig.add_trace(
-#   go.Scatter(
-#     name="Normalized Signal",
-#     x=np.arange(W.size),
-#     y=W_normalized,
-#     mode="lines",
-#     line=dict(
-#         # size=8,
-#         color="orange",
-#         # showscale=False
-#     )
-#   )
-# )
+analytic_signal = hilbert(W)
+amplitude_envelope = np.abs(analytic_signal)
+
+fig.add_trace(
+  go.Scatter(
+    name="Hilbert",
+    x=X,
+    y=amplitude_envelope,
+    mode="lines",
+    line=dict(
+        # size=8,
+        color="orange",
+        # showscale=False
+    )
+  )
+)
 
 ''' Pulses '''
 fig.add_trace(
