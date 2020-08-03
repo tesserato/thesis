@@ -3,10 +3,12 @@ from scipy.interpolate import interp1d, UnivariateSpline
 from scipy.linalg import block_diag
 from scipy.optimize import nnls
 import numpy as np
-from Helper import read_wav
+from Helper import read_wav, save_wav
 from scipy.signal import savgol_filter
 import numpy.polynomial.polynomial as poly
 from scipy.signal import hilbert
+from numpy.fft import rfft, irfft
+
 
 
 class Pulse:
@@ -135,14 +137,13 @@ def cubic_3_points(X, Y):
 
 def get_curvature(X, Y, n):
   Y = np.abs(Y)
-  '''Return average curvature and radius of the equivalent circle for the poly approximation of 4 points amplitude at a time'''
   pos_curvatures_X = []
   pos_curvatures_Y = []
   neg_curvatures_X = []
   neg_curvatures_Y = []
-  for i in range(1, len(X) - 1):
-    x0, x1, x2 = X[i - 1], X[i], X[i + 1]
-    y0, y1, y2 = Y[i - 1], Y[i], Y[i + 1]
+  for i in range(2, len(X) - 2):
+    x0, x1, x2 = (X[i - 2] + X[i - 1]) / 2, X[i], (X[i + 1] + X[i + 2]) / 2
+    y0, y1, y2 = (Y[i - 2] + Y[i - 1]) / 2, Y[i], (Y[i + 1] + Y[i + 2]) / 2
 
     a, b, c = parabola_3_points([x0, x1, x2], [y0, y1, y2])
 
@@ -176,7 +177,6 @@ def get_curvature(X, Y, n):
   y2 = np.average(pos_curvatures_Y[p2 : ])
 
   max_y = np.max([y0, y1, y2])
-
   y0, y1, y2 = y0 * avg / max_y, y1 * avg / max_y, y2 * avg / max_y
 
   #########
@@ -198,133 +198,6 @@ def get_curvature(X, Y, n):
   def f(x):
     x = np.array(x, dtype=np.float64)
     return 1 / ( (a * x**2 + b * x + c) )#* (avg / cc) )
-
-  fig.add_trace(
-    go.Scatter(
-      name="curvatures",
-      x=pos_curvatures_X,
-      y=pos_curvatures_Y,
-      mode="markers",
-      marker=dict(
-          # size=8,
-          color="yellow",
-          # showscale=False
-      )
-    )
-  )  
-
-  fig.add_trace(
-    go.Scatter(
-      name="avg curvatures",
-      x=[0 , n],
-      y=[avg, avg],
-      mode="lines",
-      line=dict(
-          # size=8,
-          color="blue",
-          # showscale=False
-      )
-    )
-  )
-
-  fig.add_trace(
-    go.Scatter(
-      name="curvature points",
-      x=[x0, x1, x2],
-      y=[y0, y1, y2],
-      mode="markers",
-      marker=dict(
-          # size=8,
-          color="pink",
-          # showscale=False
-      )
-    )
-  )
-
-  XX = np.arange(n)
-  # np.savetxt("XX.csv", XX, delimiter=",")
-  fig.add_trace(
-    go.Scatter(
-      name="curvatures",
-      x=XX,
-      y=g(XX),
-      mode="lines",
-      line=dict(
-          # size=8,
-          color="green",
-          # showscale=False
-      )
-    )
-  )
-
-  return f
-
-
-def get_curvature_direct(X, Y, n):
-  Y = np.abs(Y)
-  '''Return average curvature and radius of the equivalent circle for the poly approximation of 4 points amplitude at a time'''
-  pos_curvatures_X = []
-  pos_curvatures_Y = []
-  neg_curvatures_X = []
-  neg_curvatures_Y = []
-  for i in range(2, len(X) - 2):
-    x0, x1, x2, x3, x4 = X[i - 2], X[i - 1], X[i], X[i + 1], X[i + 2]
-    y0, y1, y2, y3, y4 = Y[i - 2], Y[i - 1], Y[i], Y[i + 1], Y[i + 2]
-
-    yl1 = (y2 - y0) / (x2 - x0)
-    yl2 = (y3 - y1) / (x3 - x1)
-    yl3 = (y4 - y2) / (x4 - x2)
-
-    yll1 = (yl2 - yl1) / (x2 - x1)
-    yll2 = (yl3 - yl2) / (x3 - x2)
-
-    yl = (yl1 + yl2 + yl3) / 3
-    yll = (yll1 + yll2) / 2
-
-    c = yll / (1 + yl**2)**(3 / 2)
-    if c >= 0:
-      pos_curvatures_X.append(x2)
-      pos_curvatures_Y.append(c)
-    else:
-      neg_curvatures_X.append(x2)
-      neg_curvatures_Y.append(c)
-
-  i = 0
-  lim = (X[-1] - X[0]) / 4
-  while pos_curvatures_X[i] < lim:
-    i += 1
-  p1 = i
-  while pos_curvatures_X[i] < 3 * lim:
-    i += 1
-  p2 = i
-
-  x0 = 0
-  y0 = np.average(pos_curvatures_Y[0 : p1])
-  x1 = (X[-1] - X[0]) / 2
-  y1 = np.average(pos_curvatures_Y[p1 : p2])
-  x2 = n
-  y2 = np.average(pos_curvatures_Y[p2 : ])
-
-  #########
-  # g = interp1d([x0, x1, x2], [y0, y1, y2], "quadratic")
-  # f = lambda x : 1 / g(x)
-  #########
-
-  avg = np.average(pos_curvatures_Y)
-
-  aa, bb, cc = parabola_3_points([x0, x1, x2], [y0, y1, y2])
-
-  # print("abc:",aa, bb, cc)
-  # print("xxx:",x0, x1, x2)
-  # print("yyy:",y0, y1, y2)
-
-  def g(x):
-    x = np.array(x, dtype=np.float64)
-    return (aa * x**2 + bb * x + cc) * (avg / cc)
-
-  def f(x):
-    x = np.array(x, dtype=np.float64)
-    return 1 / ( (aa * x**2 + bb * x + cc) * (avg / cc) )
 
   fig.add_trace(
     go.Scatter(
@@ -506,8 +379,8 @@ def get_frontier(X, Y, nn):
   n = len(X)
   idx1 = 0
   idx2 = 1
-  envelope_X = [X[0]]
-  envelope_Y = [Y[0]]
+  frontier_X = [0]
+  frontier_Y = [Y[0]]
   while idx2 < n:
     r = radius((X[idx1] + X[idx2]) / 2)
     xc, yc = get_circle(X[idx1], Y[idx1], X[idx2], Y[idx2], r)
@@ -518,14 +391,16 @@ def get_frontier(X, Y, nn):
         idx2 += 1
         break
     if empty:
-      envelope_X.append(X[idx2])
-      envelope_Y.append(Y[idx2])
+      frontier_X.append(X[idx2])
+      frontier_Y.append(Y[idx2])
       idx1 = idx2
       idx2 += 1
-
-      draw_circle(xc, yc, r, fig)
-
-  return envelope_X, envelope_Y
+      # draw_circle(xc, yc, r, fig)
+  frontier_X.append(nn)
+  frontier_Y.append(Y[-1])
+  f = interp1d(frontier_X, frontier_Y, kind="linear")
+  X = np.arange(nn)
+  return X, f(X)
 
 
 
@@ -534,14 +409,14 @@ def get_frontier(X, Y, nn):
 '''==============='''
 fig = go.Figure()
 
-name = "piano33"
+name = "amazing"
 W, fps = read_wav(f"Samples/{name}.wav")
 
 # W = W [70000 : 100000]
 
 W = W - np.average(W)
 amplitude = np.max(np.abs(W))
-W = W / amplitude
+# W = W / amplitude
 n = W.size
 print(n)
 X = np.arange(n)
@@ -558,17 +433,29 @@ pos_X, neg_X = np.array([p.x for p in pos_pulses]), np.array([p.x for p in neg_p
 pos_Y, neg_Y = np.array([p.y for p in pos_pulses]), np.array([p.y for p in neg_pulses])
 pos_L, neg_L = np.array([p.len for p in pos_pulses]) , np.array([p.len for p in neg_pulses])
 
+'''pos frontier'''
+scaling = np.average(pos_L) / np.average(pos_Y)
+W = W * scaling
+pos_Y = pos_Y * scaling
 pos_frontier_X, pos_frontier_Y = get_frontier(pos_X, pos_Y, n)
+
+
+'''neg frontier'''
+scaling = np.average(neg_L) / np.average(neg_Y)
+W = W * scaling
+neg_Y = neg_Y * scaling
 neg_frontier_X, neg_frontier_Y = get_frontier(neg_X, neg_Y, n)
 
-# pos_env_X, pos_env_Y = smooth(pos_frontier_X, pos_frontier_Y, n)
-# neg_env_X, neg_env_Y = smooth(neg_frontier_X, neg_frontier_Y, n)
+frontier = (pos_frontier_Y + neg_frontier_Y) / 2
 
-# XX, YY, II = get_knots_indices(pos_frontier_X, pos_frontier_Y, 2)
+# f = 500
+# recreated = np.cos(2 * np.pi * f * X / n) * frontier * 100
 
-# A = constrained_least_squares_arbitrary_intervals(pos_frontier_X, pos_frontier_Y, II, k=3)
-# YY = coefs_to_array_arbitrary_intervals(A, X, II, n)
-# XX = X
+freqs = irfft(np.random.normal(0, 1000, n // 2)) 
+
+recreated = freqs * frontier[:freqs.size]
+
+save_wav(recreated, f"Samples/{name}_r.wav")
 
 '''============================================================================'''
 '''                                    PLOT                                    '''
@@ -581,10 +468,12 @@ fig.update_layout(
   # title = name,
   xaxis_title="x",
   yaxis_title="Amplitude",
+
   # yaxis = dict(
   #   scaleanchor = "x",
   #   scaleratio = 1,
   # ),
+
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=5, r=5, b=5, t=5),
   font=dict(
@@ -610,22 +499,22 @@ fig.add_trace(
   )
 )
 
-analytic_signal = hilbert(W)
-amplitude_envelope = np.abs(analytic_signal)
+# analytic_signal = hilbert(W)
+# amplitude_envelope = np.abs(analytic_signal)
 
-fig.add_trace(
-  go.Scatter(
-    name="Hilbert",
-    x=X,
-    y=amplitude_envelope,
-    mode="lines",
-    line=dict(
-        # size=8,
-        color="orange",
-        # showscale=False
-    )
-  )
-)
+# fig.add_trace(
+#   go.Scatter(
+#     name="Hilbert",
+#     x=X,
+#     y=amplitude_envelope,
+#     mode="lines",
+#     line=dict(
+#         # size=8,
+#         color="orange",
+#         # showscale=False
+#     )
+#   )
+# )
 
 ''' Pulses '''
 fig.add_trace(
@@ -692,7 +581,7 @@ fig.add_trace(
   go.Scatter(
     name="- Frontier",
     x=neg_frontier_X,
-    y=neg_frontier_Y,
+    y=-neg_frontier_Y,
     # fill="toself",
     mode="lines",
     line=dict(
@@ -801,33 +690,3 @@ fig.add_trace(
 
 fig.show(config=dict({'scrollZoom': True}))
 # fig.write_image("./01ContinuousVsDiscrete.pdf", width=800, height=400, scale=1)
-
-
-#########################################################
-#########################################################
-#########################################################
-
-# rotate_ccw = np.array([[0, -1], [1, 0]])
-# squares_X = []
-# squares_Y = []
-# for i in range(pos_X.size - 1):
-#   x0, x1, y0, y1 = pos_X[i], pos_X[i + 1], pos_Y[i], pos_Y[i + 1]
-#   x, y = rotate_ccw @ np.array([x1 - x0, y1 - y0])
-#   squares_X.append(x0)     ; squares_Y.append(y0)
-#   squares_X.append(x0 + x) ; squares_Y.append(y0 + y)
-#   squares_X.append(x1 + x) ; squares_Y.append(y1 + y)
-#   squares_X.append(x1)     ; squares_Y.append(y1)
-#   squares_X.append(x0)     ; squares_Y.append(y0)
-#   squares_X.append(None)   ; squares_Y.append(None)
-
-# new_pos_pulses = []
-# for i, p in enumerate(pos_pulses):
-#   if pos_curvatures[i] >= avg_pos_curvature:
-#     p.noise = True
-#   else:
-#     new_pos_pulses.append(p)
-
-# srtd = np.argsort([p.y for p in pulses])
-# sorted_pulses = [pulses[i] for i in srtd]
-# X = [p.x for p in sorted_pulses]
-# Y = [p.y for p in sorted_pulses]

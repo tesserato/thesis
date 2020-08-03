@@ -521,3 +521,71 @@ def get_knots_indices(X, Y, knots=10):
 
   print(I)
   return X, f(X), I
+
+def get_curvature_direct(X, Y, n):
+  Y = np.abs(Y)
+  '''Return average curvature and radius of the equivalent circle for the poly approximation of 4 points amplitude at a time'''
+  pos_curvatures_X = []
+  pos_curvatures_Y = []
+  neg_curvatures_X = []
+  neg_curvatures_Y = []
+  for i in range(2, len(X) - 2):
+    x0, x1, x2, x3, x4 = X[i - 2], X[i - 1], X[i], X[i + 1], X[i + 2]
+    y0, y1, y2, y3, y4 = Y[i - 2], Y[i - 1], Y[i], Y[i + 1], Y[i + 2]
+
+    yl1 = (y2 - y0) / (x2 - x0)
+    yl2 = (y3 - y1) / (x3 - x1)
+    yl3 = (y4 - y2) / (x4 - x2)
+
+    yll1 = (yl2 - yl1) / (x2 - x1)
+    yll2 = (yl3 - yl2) / (x3 - x2)
+
+    yl = (yl1 + yl2 + yl3) / 3
+    yll = (yll1 + yll2) / 2
+
+    c = yll / (1 + yl**2)**(3 / 2)
+    if c >= 0:
+      pos_curvatures_X.append(x2)
+      pos_curvatures_Y.append(c)
+    else:
+      neg_curvatures_X.append(x2)
+      neg_curvatures_Y.append(c)
+
+  i = 0
+  lim = (X[-1] - X[0]) / 4
+  while pos_curvatures_X[i] < lim:
+    i += 1
+  p1 = i
+  while pos_curvatures_X[i] < 3 * lim:
+    i += 1
+  p2 = i
+
+  x0 = 0
+  y0 = np.average(pos_curvatures_Y[0 : p1])
+  x1 = (X[-1] - X[0]) / 2
+  y1 = np.average(pos_curvatures_Y[p1 : p2])
+  x2 = n
+  y2 = np.average(pos_curvatures_Y[p2 : ])
+
+  #########
+  # g = interp1d([x0, x1, x2], [y0, y1, y2], "quadratic")
+  # f = lambda x : 1 / g(x)
+  #########
+
+  avg = np.average(pos_curvatures_Y)
+
+  aa, bb, cc = parabola_3_points([x0, x1, x2], [y0, y1, y2])
+
+  # print("abc:",aa, bb, cc)
+  # print("xxx:",x0, x1, x2)
+  # print("yyy:",y0, y1, y2)
+
+  def g(x):
+    x = np.array(x, dtype=np.float64)
+    return (aa * x**2 + bb * x + cc) * (avg / cc)
+
+  def f(x):
+    x = np.array(x, dtype=np.float64)
+    return 1 / ( (aa * x**2 + bb * x + cc) * (avg / cc) )
+
+  return f
