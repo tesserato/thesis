@@ -8,7 +8,7 @@
 \DeclareMathOperator{\sign}{sign}
 \bibliography{bibli}
 
-\title{Interference Transform: Estimating the frequency and phase of low resolution samples}
+\title{Robust Envelope Estimation Via Geometric Properties of a Signal}
 \author{
   Carlos Tarjano
   \and 
@@ -42,23 +42,20 @@
 
 {\bf Keywords:} DSP, alpha-shapes, envelope detection
 
-\section{Introduction}
-
-
+\section{Introduction} % 500 words
 % Opener sentence
 % Literature review | Brief Context of Prior Research
-In many applications the temporal amplitude envelope of a signal plays a prominent role in the characteristics exhibited: According to Qi et al (\citedate{2017QiRelative}), for example, the envelope is at least as important as the fine structure of the soundwave in the context of the intelligibility of mandarin tones. That is also the case for English, according to \cite{1995ShannonSpeech}, where even envelopes modulating mostly noise were capable of conveying meaning. Still in the context of speech, the envelope helps to convey emotion and identity \parencite{2018ZhuContributions}.
+In many applications the temporal amplitude envelope of a signal plays a prominent role in the characteristics exhibited: According to \textcite{2017QiRelative}, for example, the envelope is at least as important as the fine structure of the soundwave in the context of the intelligibility of mandarin tones. That is also the case for English \parencite{1995ShannonSpeech}, where even envelopes modulating mostly noise were still capable of conveying meaning. The envelope helps to convey emotion and identity to the human voice \parencite{2018ZhuContributions}, and envelope preserving characteristics of concert halls are associated with their pleasantness \parencite{2011LokkiEngaging}.
 
+% enumerate some uses in diverse areas
 
-
-Also, the envelope is shown to add complexity to the spectral representation of a wave \parencite{2019TarjanoNeuro}, and a good description of the envelope would be helpful for a subsequent spectral analysis.
+Also, the envelope is shown to add complexity to the spectral representation of a wave \parencite{2019TarjanoNeuro}, and a accurate description of the envelope would be useful for a subsequent spectral analysis. In the context of sound synthesis, for example, one would be able to apply different methods for the recreation of the envelope, more in line with its smooth, slow varying and non periodic nature and an appropriate approach to the periodic and relatively fast changes of the temporal fine structure.
 
 % Restate Your Question as Something Not Known or Fully Understood by Prior Research
 % State the Significance of Your Question
 % State Your Claim | Objective | Hypothesis
 % brief outlook on the structure of the paper
 
-\subsection{Literature Review}
 
 \section{Methodology} % 1000 words
 
