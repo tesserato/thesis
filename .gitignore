@@ -19,3 +19,8 @@ Cpp/Execs/FT.csv
 *.sol
 *.ini
 *.pyc
+*.xml
+*.bcf
+*.bak
+*.sav
+Papers/02_Pulses_Envelope/words.md
