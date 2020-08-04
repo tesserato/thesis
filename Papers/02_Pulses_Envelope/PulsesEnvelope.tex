@@ -8,7 +8,7 @@
 \DeclareMathOperator{\sign}{sign}
 \bibliography{bibli}
 
-\title{Robust Envelope Estimation Via Geometric Properties of a Signal}
+\title{Robust Digital Envelope Estimation Via Geometric Properties of a Arbitrary Signal}
 \author{
   Carlos Tarjano
   \and 
@@ -22,20 +22,21 @@
 \begin{abstract} % 250 words
 
 % estimate parameters from the signal itself
+% broadband
 % Dominant frequency as by-product
 % we define several entities in the process, introducing a new measure of discrete curve curvature, hoping to consolidate the terminology in the area
 
   % background  
-  Despite being an elusive concept, only mathematically well defined in artificially generated waves, the temporal amplitude envelope of a signal is essential for its complete characterization, being the primary information carrying medium in spoken voice and telecommunications, for example.
-  intuitively, the temporal envelope can be understood as a smooth function on the same variable as the principal wave, or temporal fine structure, that modulates the signal, responsible for its outer shape. It is implied in this definition that the envelope modulates the instantaneous amplitude of the underlying signal, being non periodic in general and thus better addressed by specific techniques diverse from those used to analyse the wave it encompasses.
+  Despite being an elusive concept, mathematically well defined only for artificially generated waves, the temporal amplitude envelope of a signal is essential for its complete characterization, being the primary information carrying medium in spoken voice and telecommunications, for example.
+  intuitively, the temporal envelope can be understood as a smooth function on the same variable as the principal wave, or temporal fine structure, that modulates the signal, responsible for its outer shape. It is implied in this definition that the envelope is non periodic in general and is thus better addressed by specific techniques diverse from those used in the analysis of the periodic, rapidly changing wave it encompasses.
   % motivation
-  Envelope detection techniques have applications in areas like health, sound classification and synthesis, seismology and speech recognition.
+  Envelope detection techniques have applications in areas like health, sound classification and synthesis, seismology and speech recognition. Despite of that, a general approach to envelope detection of signals with rich spectral content seems to be lacking, and most methods involve manual intervention, like filter design, based on prior knowledge about the wave under investigation.
   % objective
   In this paper we propose a framework that uses intrinsic characteristics of a signal to estimate its envelope, eliminating the necessity of parameter tuning.
   % methods
-  The approach here described draws inspiration from geometric algorithms, most notably the concept of alpha-shapes and concave hulls, to identify the frontier of an arbitrary signal. By defining a pulse as the atomic entity of a signal we greatly reduce the dimensionality and randomness of the problem.
+  The approach here described draws inspiration from general and differential geometry to isolate the frontier of an arbitrary signal. The concepts of alpha-shapes, concave hulls, arc-length parametrization and discrete curve curvature are adapted. We also define a pulse in the context of a arbitrary digital signal as a means to reduce dimensionality and subsequently, the complexity of the algorithm.
   % results
-
+  
   % implications
 
 \end{abstract}
@@ -44,17 +45,24 @@
 
 \section{Introduction} % 500 words
 % Opener sentence
+Despite being ubiquitous in digital signal processing, the literature about envelope detection is very fragmented \parencite{2017LyonsDigital}. Besides, most envelope detection techniques are designed to account for very specific settings, like pure sinusoids with moderate noise contents, in line with the most common usages of those algorithms with artificial signals in the context of analog telecommunications.
 % Literature review | Brief Context of Prior Research
-In many applications the temporal amplitude envelope of a signal plays a prominent role in the characteristics exhibited: According to \textcite{2017QiRelative}, for example, the envelope is at least as important as the fine structure of the soundwave in the context of the intelligibility of mandarin tones. That is also the case for English \parencite{1995ShannonSpeech}, where even envelopes modulating mostly noise were still capable of conveying meaning. The envelope helps to convey emotion and identity to the human voice \parencite{2018ZhuContributions}, and envelope preserving characteristics of concert halls are associated with their pleasantness \parencite{2011LokkiEngaging}.
+In many natural signals, however, the temporal amplitude envelope of a signal plays a prominent role in the characteristics exhibited: According to \textcite{2017QiRelative}, for example, the envelope is at least as important as the fine structure of the soundwave in the context of the intelligibility of mandarin tones. That is also the case for English \parencite{1995ShannonSpeech}, where even envelopes modulating mostly noise were still capable of conveying meaning. The envelope helps to convey emotion and identity to the human voice \parencite{2018ZhuContributions}, and envelope preserving characteristics of concert halls are associated with their pleasantness \parencite{2011LokkiEngaging}.
 
 % enumerate some uses in diverse areas
 
-Also, the envelope is shown to add complexity to the spectral representation of a wave \parencite{2019TarjanoNeuro}, and a accurate description of the envelope would be useful for a subsequent spectral analysis. In the context of sound synthesis, for example, one would be able to apply different methods for the recreation of the envelope, more in line with its smooth, slow varying and non periodic nature and an appropriate approach to the periodic and relatively fast changes of the temporal fine structure.
+Also, the envelope is shown to add complexity to the spectral representation of a wave \parencite{2019TarjanoNeuro}, and a accurate description of the envelope would be useful for a subsequent spectral analysis. In the context of sound synthesis, for example, one would be able to apply different methods for the recreation of the envelope, more in line with its smooth, slow varying and non periodic nature and an different approach to the periodic and relatively fast changes of the temporal fine structure.
+
+% Cite current algorithms
 
 % Restate Your Question as Something Not Known or Fully Understood by Prior Research
+Thus, in this paper we formulate a general approach to envelope detection, examining the intrinsic characteristics of a generic, spectrally complex wave in order to avoid parameter tuning.
 % State the Significance of Your Question
+While the robustness of the proposed approach allows it to be used as a plug in replacement for many methods encountered in the literature, we feel that it would be particularly useful for sound synthesis.
 % State Your Claim | Objective | Hypothesis
 % brief outlook on the structure of the paper
+
+
 
 
 \section{Methodology} % 1000 words
