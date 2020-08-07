@@ -68,14 +68,18 @@ In the context of sound synthesis, one would be able to apply specific methods f
 \section{Methodology} % 1000 words
 
 % Essential background information
-We start by defining a pulse as a series of consecutive samples in a discrete wave with the same signal. More formally, let $ W[i] \in \mathbb{R} \forall i \in \mathbb{N}_0, i < n \in \mathbb{N}_0 $ be a real, discrete and finite signal indexed, without loss of generality, over a subset of the natural numbers. This definition relates closely to the concept of an array or vector in programming languages, and is used in the interest of simplicity. A pulse $ P[j], j \in \mathbb{N}_0 $ in $ W $ can then be defined as a sequence of samples indexed by $ i $ such that $ \sign(W[a-1]) \ne \sign(W[a]) = \sign(W[a+1]) = \dots = \sign(W[b-1]) = \sign(W[b]) \ne \sign(W[b+1]) \forall a \le i \le b | a,b \in \mathbb{N}_0 $; that is to say, a cluster of samples between the change of sign. For a continuous function, that would correspond to the pieces between roots, and would be equal to half the cycle of a sinusoid.
+We start by defining a pulse as a series of consecutive samples in a discrete wave with the same signal. More formally, let $ W[i] \in \mathbb{R} \forall i \in \mathbb{N}_0, i < n \in \mathbb{N}_0 $ be a real, discrete and finite signal indexed, without loss of generality, over a subset of the natural numbers. This definition relates closely to the concept of an array or vector in programming languages, and is used in the interest of simplicity. A pulse $ P[j], j \in \mathbb{N}_0 $ in $ W $ can then be defined as a sequence of samples indexed by $ i $ such that $ \sign(W[a-1]) \ne \sign(W[a]) = \sign(W[a+1]) = \dots = \sign(W[b-1]) = \sign(W[b]) \ne \sign(W[b+1]) \forall a \le i \le b | a,b \in \mathbb{N}_0 $; that is to say, a cluster of samples between the change of sign. For a continuous function, that would correspond to the pieces between roots, and would be equal to half the cycle of a sinusoid. Thus, in our analogy, two consecutive, opposed pulses have the potential do delimitate a pseudo-cycle, as illustrated in figure \ref{fig:pulses}. For that to be true, however, the pulses need to make part of the frontier, as will be defined later.
 
-% pulse, simplified pulse, pseudo-cycle image
+  \begin{figure}[h!]
+    \centering
+      \includegraphics[width=0.8\linewidth]{01Pulses.pdf}
+    \caption{The grey areas encompass the simplified convex hulls of the pulses. The dashed lines mark the frontier between pseudo-cycles}
+    \label{fig:pulses}
+  \end{figure}
 
 As we are seeking a geometric treatment of the subject, it is necessary to make abscissa and ordinate units consistent. this can be accomplished by multiplying each sample of the signal by the average length of the pulses, after having divided by the average of signal amplitudes, putting both axes in the same time related units. One can call this approach arc length regularization, as it translates the widespread approach of arc length parametrization to a non parametric setting.
 
 It is useful now to introduce the concept of a frontier as the set of points $ (i, W[i]) $ that bound the smooth, continuous envelope of the signal. Because we are interested in a smooth function over the whole domain of the wave, we can assume that, in the scale of a pulse, this function will be very close to a straight line and, thus, won't touch any point inside the convex hull defined by the pulse. By the same token, as the change in amplitude from one pulse to the next is motivated by changes in the envelope, one can assume that $ \max(P[j]) \approx \max(P[j+1]) $ and approximate the convex hull of a pulse with the triangle defined by the points where it crosses the horizontal axis and it's point of max amplitude; this will allow a considerable dimension reduction as this triangular pulse becomes the atomic unit for the rest of the method. 
-
 
 Besides, those definitions will allow us to derive the frontier of a wave using an alpha-shapes inspired algorithm without the need to compute the Delaunay triangulation first. Translating the intuitive explanation of alpha-shapes in \textcite{1994EdelsbrunnerThree}, we can say that the points in the frontier are those touched by a circle outside the signal that is not allowed to contain any point of the signal; one can picture a circle being rolled above (or below, in the case of the negative envelope) the signal, and marking the points it touches as frontier points.
 
@@ -100,12 +104,7 @@ Therefore, the definition of the curvature becomes $ \kappa(x) = \frac{2 a}{\big
 
 % \subsection{Theory}
 
-  % \begin{figure}[h!]
-  %   \centering
-  %     \includegraphics[width=0.8\linewidth]{images/01ContinuousVsDiscrete.pdf}
-  %   \caption{Discrete samples (black points) from a continuous wave (grey line). Note that the amplitude is also truncated}
-  %   \label{fig:ContinuousVsDiscrete}
-  % \end{figure}
+
   
 \section{Results}
 
