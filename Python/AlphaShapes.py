@@ -7,14 +7,14 @@ from Helper import read_wav, signal_to_pulses, get_pulses_area, split_pulses, ge
 '''==============='''
 fig = go.Figure()
 
-name = "alto"
+name = "piano33"
 W, fps = read_wav(f"Samples/{name}.wav")
 
 # W = W [70000 : 100000]
 
 W = W - np.average(W)
 amplitude = np.max(np.abs(W))
-# W = W / amplitude
+W = W / amplitude
 n = W.size
 print(n)
 X = np.arange(n)
@@ -37,6 +37,7 @@ scaling = np.average(pos_L) / np.average(pos_Y)
 pos_Y = pos_Y * scaling
 pos_frontier_X, pos_frontier_Y = get_frontier(pos_X, pos_Y, n)
 pos_frontier_Y = pos_frontier_Y / scaling
+pos_Y = pos_Y / scaling
 
 '''neg frontier'''
 scaling = np.average(neg_L) / np.average(neg_Y)
@@ -44,6 +45,7 @@ scaling = np.average(neg_L) / np.average(neg_Y)
 neg_Y = neg_Y * scaling
 neg_frontier_X, neg_frontier_Y = get_frontier(neg_X, neg_Y, n)
 neg_frontier_Y = -neg_frontier_Y / scaling
+neg_Y = neg_Y / scaling
 
 
 frontier = (pos_frontier_Y + neg_frontier_Y) / 2

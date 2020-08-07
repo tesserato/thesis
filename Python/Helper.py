@@ -84,10 +84,11 @@ def get_pulses_area(pulses):
   X, Y = [], []
   for p in pulses:
     X.append(p.start - .5); Y.append(0)
-    X.append(p.start - .5); Y.append(p.y)
-    X.append(p.end - .5)  ; Y.append(p.y)
-    X.append(p.end - .5)  ; Y.append(0)
-    X.append(None)        ; Y.append(None)
+    X.append(p.x )        ; Y.append(p.y)
+    # X.append(p.end - .5)  ; Y.append(0)
+    # X.append(p.start - .5); Y.append(0)
+    # X.append(None)        ; Y.append(None)
+  X.append(pulses[-1].end - .5)  ; Y.append(0)
   return X, Y
 
 
@@ -96,13 +97,16 @@ def parabola_3_points(X, Y):
   x0, x1, x2 = X[0], X[1], X[2]
   y0, y1, y2 = Y[0], Y[1], Y[2]
 
-  den = (-x0 + x2) * (x0 - x1) * (x1 - x2)
+  den = (x2 - x0) * (x0 - x1) * (x1 - x2)
 
   a = ((x0 - x1) * (y1 - y2) - (x1 - x2) * (y0 - y1)) / (2 * den)
   b = (-x0 * (x0 - x1) * (y1 - y2) + x2 * (x1 - x2) * (y0 - y1)) / den
   c = -a * x0**2 - b * x0 + y0
   return a, b, c
 
+# for i in range(1, len(X) - 1):
+#   x0, x1, x2 = (X[i - 1] + X[i]) / 2, X[i], (X[i] + X[i + 1]) / 2
+#   y0, y1, y2 = (Y[i - 1] + Y[i]) / 2, Y[i], (Y[i] + Y[i + 1]) / 2
 
 def get_curvature(X, Y, n):
   Y = np.abs(Y)
