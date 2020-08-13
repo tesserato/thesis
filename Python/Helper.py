@@ -9,6 +9,7 @@ from scipy.signal import savgol_filter
 import numpy.polynomial.polynomial as poly
 from scipy.signal import hilbert
 from scipy.spatial import Delaunay
+import plotly.graph_objects as go
 
 
 def read_wav(path): 
@@ -29,7 +30,7 @@ def save_wav(signal, name = 'test.wav', fps = 44100):
   o.close()
 
 
-class Pulse:
+class Pulse_old:
   def __init__(self, x0, W, is_noise = False):
     self.W = W
     self.start = x0
@@ -38,6 +39,18 @@ class Pulse:
     idx = np.argmax(np.abs(W)) #
     self.y = W[idx]            # np.average(W)
     self.x = x0 + idx               # np.sum(np.linspace(0, 1, self.len) * np.abs(W) / np.sum(np.abs(W)))
+    self.noise = is_noise
+
+
+class Pulse:
+  def __init__(self, x0, W, is_noise = False):
+    # self.W = W
+    self.x0 = x0 - .5
+    self.len = W.size
+    self.x1 = self.x0 + self.len
+    idx = np.argmax(np.abs(W)) #
+    self.y = W[idx]            # np.average(W)
+    self.x = x0 + idx
     self.noise = is_noise
 
 
@@ -83,12 +96,11 @@ def get_pulses_area(pulses):
   ''' Return X & Y pulses area vectors '''
   X, Y = [], []
   for p in pulses:
-    X.append(p.start - .5); Y.append(0)
-    X.append(p.x )        ; Y.append(p.y)
-    # X.append(p.end - .5)  ; Y.append(0)
-    # X.append(p.start - .5); Y.append(0)
-    # X.append(None)        ; Y.append(None)
-  X.append(pulses[-1].end - .5)  ; Y.append(0)
+    X.append(p.x0)  ; Y.append(0)
+    X.append(p.x0 ) ; Y.append(p.y)
+    X.append(p.x1)  ; Y.append(p.y)
+    X.append(p.x1)  ; Y.append(0)
+    X.append(None)  ; Y.append(None)
   return X, Y
 
 
@@ -168,12 +180,11 @@ def get_curvature(X, Y, n):
   #   x = np.array(x, dtype=np.float64)
   #   return (a * x**2 + b * x + c) #* (avg / cc)
 
-  def f(x):
+  def radius(x):
     x = np.array(x, dtype=np.float64)
     return 1 / ( (a * x**2 + b * x + c) )#* (avg / cc) )
 
-
-  return f
+  return radius
 
 
 def constrained_least_squares_arbitrary_intervals(X, Y, I, k=3):
@@ -279,6 +290,7 @@ def draw_circle(xc, yc, r, fig, n=100):
       x=X,
       y=Y,
       showlegend=False,
+      visible = "legendonly",
       mode="lines",
       line=dict(
           width=1,
@@ -316,7 +328,7 @@ def get_frontier(X, Y, nn):
   frontier_Y.append(Y[-1])
   f = interp1d(frontier_X, frontier_Y, kind="linear")
   X = np.arange(nn)
-  return X, f(X)
+  return X, f(X), radius(X)
 
 
 
@@ -933,3 +945,88 @@ def cubic_3_points(X, Y):
   c = (-a*x0**3 + a*x2**3 - b*x0**2 + b*x2**2 + y0 - y2)/(x0 - x2)
   d = y0 - (a * x0**3 + b * x0**2 + c * x0)
   return a, b, c, d
+
+def get_discrete_curvature_old_old(X, Y):
+  radius_X = []
+  radius_Y = []
+  for i in range(1, len(X) - 1):
+    x0, x1, x2 = (X[i - 1] + X[i]) / 2, X[i], (X[i] + X[i + 1]) / 2
+    y0, y1, y2 = (Y[i - 1] + Y[i]) / 2, Y[i], (Y[i] + Y[i + 1]) / 2
+
+    # k = np.arccos(((x0 - x1)*(x1 - x2) + (y0 - y1)*(y1 - y2))/(np.sqrt((x0 - x1)**2 + (y0 - y1)**2)*np.sqrt((x1 - x2)**2 + (y1 - y2)**2)))/(np.sqrt((x0/2 - x1/2)**2 + (y0/2 - y1/2)**2) + np.sqrt((x1/2 - x2/2)**2 + (y1/2 - y2/2)**2))
+
+    # k = np.arccos(((-x0/2 + x1/2)*(-x1/2 + x2/2) + (-y0/2 + y1/2)*(-y1/2 + y2/2))/(np.sqrt((x0/2 - x1/2)**2 + (y0/2 - y1/2)**2)*np.sqrt((x1/2 - x2/2)**2 + (y1/2 - y2/2)**2)))/(np.sqrt((x0/2 - x1/2)**2 + (y0/2 - y1/2)**2) + np.sqrt((x1/2 - x2/2)**2 + (y1/2 - y2/2)**2))
+
+    k = -np.arctan(((x0 - x1)*(y1 - y2) + (x1 - x2)*(-y0 + y1))/((x0 - x1)*(x1 - x2) + (y0 - y1)*(y1 - y2)))
+
+    # if k >= 0:
+    radius_X.append(x1)
+    radius_Y.append(k)
+
+  # radius_Y = np.array(radius_Y)
+  # radius_Y = radius_Y / np.average(radius_Y)
+      
+  # coefs = poly.polyfit(radius_X, radius_Y, 2)
+  # radius_Y = poly.polyval(radius_X, coefs)
+
+  return radius_X, radius_Y
+
+def get_discrete_curvature_old(X, Y, segments=5):
+  lim = np.sum(Y) / segments
+  X_idxs = []
+  cr_idx = 0
+  for i in range(segments - 1):
+    cr_sum = 0
+    while cr_sum < lim:
+      cr_sum += Y[cr_idx]
+      cr_idx += 1
+    X_idxs.append(cr_idx)
+  XX = []
+  YY = []
+  XCC = []
+  YCC = []
+  X_idxs = [0] + X_idxs + [len(X) - 1]
+  for i in range(len(X_idxs) - 1):
+    idx0 = X_idxs[i]
+    idx1 = X_idxs[i + 1]
+    segmentX = np.arange(int(X[idx0]), int(X[idx1]), 1, dtype=np.float64)
+    c, b, a = poly.polyfit(X[idx0 : idx1], Y[idx0 : idx1], 2)
+    if a > 0:
+      XCC.append((X[idx0] + X[idx1]) / 2)
+      YCC.append(2 * a)
+
+    segmentY = a * segmentX**2 + b * segmentX + c
+    for x, y in zip(segmentX, segmentY):
+      XX.append(x)
+      YY.append(y)
+
+  f = interp1d(XCC, 1 / np.abs(YCC), fill_value="extrapolate")
+      
+  return XX, f(XX), XCC, 1 / np.abs(YCC), f
+
+def get_curvature_function_(X, Y):
+  X = np.array(X, dtype=np.float64)
+  Y = np.array(Y, dtype=np.float64)
+
+  curvatures_X = X[:-1] + (X[1:] - X[:-1]) / 2
+  curvatures_Y = np.sqrt((Y[1: ] - Y[ :-1])**2 + (X[1: ] - X[ :-1])**2) * 100
+
+  # curvatures_Y = np.array(curvatures_Y)
+  coefs = poly.polyfit(curvatures_X, curvatures_Y, 0)
+  smooth_curvatures_Y = poly.polyval(curvatures_X, coefs)
+
+  k_of_x = interp1d(curvatures_X, smooth_curvatures_Y, fill_value="extrapolate")
+
+  return k_of_x, curvatures_X, curvatures_Y, curvatures_X, smooth_curvatures_Y
+
+def get_pulses_area_triangle(pulses):
+  ''' Return X & Y pulses area vectors '''
+  X, Y = [], []
+  for p in pulses:
+    X.append(p.start - .5); Y.append(0)
+    X.append(p.x )        ; Y.append(p.y)
+    # X.append(p.end - .5)  ; Y.append(0)
+    # X.append(p.start - .5); Y.append(0)
+    # X.append(None)        ; Y.append(None)
+  X.append(pulses[-1].end - .5)  ; Y.append(0)
+  return X, Y
