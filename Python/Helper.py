@@ -92,7 +92,7 @@ def split_pulses(pulses):
   return pos_pulses, neg_pulses, pos_noises, neg_noises
 
 
-def get_pulses_area(pulses):
+def get_pulses_area_rectangle(pulses):
   ''' Return X & Y pulses area vectors '''
   X, Y = [], []
   for p in pulses:
@@ -101,6 +101,18 @@ def get_pulses_area(pulses):
     X.append(p.x1)  ; Y.append(p.y)
     X.append(p.x1)  ; Y.append(0)
     X.append(None)  ; Y.append(None)
+  return X, Y
+
+
+def get_pulses_area(pulses):
+  ''' Return X & Y pulses area vectors '''
+  X, Y = [], []
+  for p in pulses:
+    X.append(p.x0)  ; Y.append(0)
+    X.append(p.x )  ; Y.append(p.y)
+    # X.append(p.x1)  ; Y.append(0)
+    # X.append(None)  ; Y.append(None)
+  X.append(pulses[-1].x1 )  ; Y.append(0)
   return X, Y
 
 

@@ -5,9 +5,6 @@ from Helper import draw_circle, read_wav, get_pulses_area, split_pulses, get_cir
 import numpy.polynomial.polynomial as poly
 
 
-
-
-
 def signal_to_pulses(W):
   ''' returns a list of instances of the Pulses class'''
   n = W.size
@@ -77,8 +74,8 @@ def get_frontier(Pulses):
   n = len(Pulses)
   while idx2 < n:
     r = r_of_x((Pulses[idx1].x + Pulses[idx2].x) / 2)
-    xc, yc = get_circle(Pulses[idx1].x1, Pulses[idx1].y, Pulses[idx2].x0, Pulses[idx2].y, r)
-    # xc, yc = get_circle(Pulses[idx1].x, Pulses[idx1].y, Pulses[idx2].x, Pulses[idx2].y, r)
+    # xc, yc = get_circle(Pulses[idx1].x1, Pulses[idx1].y, Pulses[idx2].x0, Pulses[idx2].y, r) # Square
+    xc, yc = get_circle(Pulses[idx1].x, Pulses[idx1].y, Pulses[idx2].x, Pulses[idx2].y, r) # Triangle
     empty = True
     for i in range(idx2 + 1, n):
       if np.sqrt((xc - Pulses[i].x0)**2 + (yc - Pulses[i].y)**2) < r:
@@ -103,7 +100,7 @@ def get_frontier(Pulses):
 '''==============='''
 fig = go.Figure()
 
-name = "piano33"
+name = "brass"
 W, fps = read_wav(f"Samples/{name}.wav")
 
 # W = W [:10000]
@@ -114,7 +111,6 @@ W = W / amplitude
 n = W.size
 print(n)
 X = np.arange(n)
-
 
 
 pulses = signal_to_pulses(W)
