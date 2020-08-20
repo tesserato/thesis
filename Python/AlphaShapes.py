@@ -1,6 +1,9 @@
 import plotly.graph_objects as go
 import numpy as np
-from Helper import read_wav, signal_to_pulses, get_pulses_area, split_pulses, get_frontier#, save_wav
+from scipy.interpolate.interpolate import interp1d
+from Helper import draw_circle, read_wav, get_pulses_area, split_pulses, get_circle, signal_to_pulses, get_curvature_function, get_frontier#, save_wav, get_frontier
+import numpy.polynomial.polynomial as poly
+
 
 '''==============='''
 ''' Read wav file '''
@@ -10,7 +13,7 @@ fig = go.Figure()
 name = "piano33"
 W, fps = read_wav(f"Samples/{name}.wav")
 
-# W = W [70000 : 100000]
+# W = W [:10000]
 
 W = W - np.average(W)
 amplitude = np.max(np.abs(W))
@@ -18,7 +21,6 @@ W = W / amplitude
 n = W.size
 print(n)
 X = np.arange(n)
-
 
 
 pulses = signal_to_pulses(W)
@@ -33,31 +35,21 @@ pos_L, neg_L = np.array([p.len for p in pos_pulses]) , np.array([p.len for p in 
 
 '''pos frontier'''
 scaling = np.average(pos_L) / np.average(pos_Y)
-# W = W * scaling
-pos_Y = pos_Y * scaling
-pos_frontier_X, pos_frontier_Y = get_frontier(pos_X, pos_Y, n)
+
+for p in pos_pulses:
+  p.y = p.y * scaling
+
+pos_frontier_X, pos_frontier_Y = get_frontier(pos_pulses)
 pos_frontier_Y = pos_frontier_Y / scaling
-pos_Y = pos_Y / scaling
 
 '''neg frontier'''
 scaling = np.average(neg_L) / np.average(neg_Y)
-# W = W * scaling
-neg_Y = neg_Y * scaling
-neg_frontier_X, neg_frontier_Y = get_frontier(neg_X, neg_Y, n)
-neg_frontier_Y = -neg_frontier_Y / scaling
-neg_Y = neg_Y / scaling
 
+for p in neg_pulses:
+  p.y = p.y * scaling
 
-frontier = (pos_frontier_Y + neg_frontier_Y) / 2
-
-# # f = 500
-# # recreated = np.cos(2 * np.pi * f * X / n) * frontier * 100
-
-# freqs = irfft(np.random.normal(0, 1000, n // 2)) 
-
-# recreated = freqs * frontier[:freqs.size]
-
-# save_wav(recreated, f"Samples/{name}_r.wav")
+neg_frontier_X, neg_frontier_Y = get_frontier(neg_pulses)
+neg_frontier_Y = np.array(neg_frontier_Y) / scaling
 
 '''============================================================================'''
 '''                                    PLOT                                    '''
@@ -71,10 +63,10 @@ fig.update_layout(
   xaxis_title="x",
   yaxis_title="Amplitude",
 
-  # yaxis = dict(
-  #   scaleanchor = "x",
-  #   scaleratio = 1,
-  # ),
+  # yaxis = dict(        # <|<|<|<|<|<|<|<|<|<|<|<|
+  #   scaleanchor = "x", # <|<|<|<|<|<|<|<|<|<|<|<|
+  #   scaleratio = 1,    # <|<|<|<|<|<|<|<|<|<|<|<|
+  # ),                   # <|<|<|<|<|<|<|<|<|<|<|<|
 
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=5, r=5, b=5, t=5),
@@ -85,10 +77,9 @@ fig.update_layout(
   )
 )
 
-''' Signal '''
 fig.add_trace(
   go.Scatter(
-    name="Signal",
+    name="Signal", # <|<|<|<|<|<|<|<|<|<|<|<|
     x=X,
     y=W,
     mode="lines",
@@ -101,27 +92,9 @@ fig.add_trace(
   )
 )
 
-# analytic_signal = hilbert(W)
-# amplitude_envelope = np.abs(analytic_signal)
-
-# fig.add_trace(
-#   go.Scatter(
-#     name="Hilbert",
-#     x=X,
-#     y=amplitude_envelope,
-#     mode="lines",
-#     line=dict(
-#         # size=8,
-#         color="orange",
-#         # showscale=False
-#     )
-#   )
-# )
-
-''' Pulses '''
 fig.add_trace(
   go.Scatter(
-    name="Pulses",
+    name="Pulses", # <|<|<|<|<|<|<|<|<|<|<|<|
     x=areas_X,
     y=areas_Y,
     fill="tozeroy",
@@ -133,11 +106,11 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="+ Amplitudes",
+    name="+Amps", # <|<|<|<|<|<|<|<|<|<|<|<|
     x=pos_X,
     y=pos_Y,
     # hovertext=np.arange(len(pos_pulses)),
-    mode="markers",
+    mode="lines+markers",
     marker=dict(
         size=6,
         color="black",
@@ -149,11 +122,11 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="- Amplitudes",
+    name="-Amps", # <|<|<|<|<|<|<|<|<|<|<|<|
     x=neg_X,
     y=neg_Y,
     # hovertext=np.arange(len(pos_pulses)),
-    mode="markers",
+    mode="lines+markers",
     marker=dict(
         size=6,
         color="black",
@@ -165,23 +138,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Frontier",
-    x=X,
-    y=frontier,
-    # fill="toself",
-    mode="lines",
-    line=dict(
-        width=1,
-        color="blue",
-        # showscale=False
-    ),
-    visible = "legendonly"
-  )
-)
-
-fig.add_trace(
-  go.Scatter(
-    name="+ Frontier",
+    name="+Frontier", # <|<|<|<|<|<|<|<|<|<|<|<|
     x=pos_frontier_X,
     y=pos_frontier_Y,
     # fill="toself",
@@ -197,9 +154,9 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="- Frontier",
+    name="-Frontier", # <|<|<|<|<|<|<|<|<|<|<|<|
     x=neg_frontier_X,
-    y=-neg_frontier_Y,
+    y=neg_frontier_Y,
     # fill="toself",
     mode="lines",
     line=dict(
@@ -211,100 +168,20 @@ fig.add_trace(
   )
 )
 
-# fig.add_trace(
-#   go.Scatter(
-#     name="Knots",
-#     x=np.array([[pos_frontier_X[i], pos_frontier_X[i], None] for i in II]).flat,
-#     y=np.array([[-1, 1, None] for _ in II]).flat,
-#     # fill="toself",
-#     mode="lines",
-#     line=dict(
-#         width=1,
-#         color="black",
-#         # showscale=False
-#     ),
-#     visible = "legendonly"
-#   )
-# )
-
-# fig.add_trace(
-#   go.Scatter(
-#     name="Pos Envelope Avgs",
-#     x=XX,
-#     y=YY,
-#     # fill="toself",
-#     mode="lines",
-#     line=dict(
-#         # width=1,
-#         color="blue",
-#         # showscale=False
-#     ),
-#     visible = "legendonly"
-#   )
-# )
-
-fig.show(config=dict({'scrollZoom': True}))
-
-
-
-'''============================================================================'''
-'''                                     FT                                     '''
-'''============================================================================'''
-
-FT = np.abs(np.fft.rfft(W))
-FT = FT / np.max(FT)
-FT_normalized = np.abs(np.fft.rfft(W / frontier))
-FT_normalized = FT_normalized / np.max(FT_normalized)
-
-fig = go.Figure()
-fig.layout.template ="plotly_white"
-# fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
-fig.update_layout(
-  # title = name,
-  xaxis_title="x",
-  yaxis_title="Amplitude",
-  # yaxis = dict(
-  #   scaleanchor = "x",
-  #   scaleratio = 1,
-  # ),
-  legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
-  margin=dict(l=5, r=5, b=5, t=5),
-  font=dict(
-  family="Computer Modern",
-  color="black",
-  size=18
-  )
-)
-
 fig.add_trace(
   go.Scatter(
-    name="Original FT",
-    # x=pos_X,
-    y=FT,
-    # hovertext=np.arange(len(pos_pulses)),
+    name="avg vector", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=[0, np.average(pos_X[1:]-pos_X[:-1])],
+    y=[0, np.average(pos_Y[1:]-pos_Y[:-1])],
+    # fill="toself",
     mode="lines",
     line=dict(
-        # size=6,
-        color="black",
-        # showscale=False
-    )
-  )
-)
-
-fig.add_trace(
-  go.Scatter(
-    name="Normalized FT",
-    # x=pos_X,
-    y=FT_normalized,
-    # hovertext=np.arange(len(pos_pulses)),
-    mode="lines",
-    line=dict(
-        # size=6,
+        width=1,
         color="red",
         # showscale=False
-    )
+    ),
+    visible = "legendonly"
   )
 )
 
 fig.show(config=dict({'scrollZoom': True}))
-# fig.write_image("./01ContinuousVsDiscrete.pdf", width=800, height=400, scale=1)
