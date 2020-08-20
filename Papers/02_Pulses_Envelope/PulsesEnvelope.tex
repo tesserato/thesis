@@ -8,7 +8,7 @@
 \DeclareMathOperator{\sign}{sign}
 \bibliography{bibli}
 
-\title{Robust Digital Envelope Estimation Via Geometric Properties of an Arbitrary Signal}
+\title{Robust Digital Envelope Estimation Via Geometric Properties of an Arbitrary Real Signal}
 \author{
   Carlos Tarjano
   \and 
@@ -46,8 +46,10 @@
 \section{Introduction} % 500 words
 % Opener sentence
 Despite being ubiquitous in digital signal processing, the literature about envelope detection is very fragmented \parencite{2017LyonsDigital}. Besides, most envelope detection techniques are designed to account for very specific settings, like pure sinusoids with moderate noise contents, in line with the most common usages of those algorithms with artificial signals in the context of analog telecommunications.
+
 % Literature review | Brief Context of Prior Research
 In many natural signals, however, the temporal amplitude envelope of a signal plays a prominent role in the characteristics exhibited: According to \textcite{2017QiRelative}, for example, the envelope is at least as important as the fine structure of the soundwave in the context of the intelligibility of mandarin tones. That is also the case for English \parencite{1995ShannonSpeech}, where even envelopes modulating mostly noise were still capable of conveying meaning. The envelope helps to convey emotion and identity to the human voice \parencite{2018ZhuContributions}, and envelope preserving characteristics of concert halls are associated with their pleasantness \parencite{2011LokkiEngaging}.
+
 % Cite current algorithms
 When dealing with broadband signals, approaches tailored to specific applications are prevalent, such as the one presented by \textcite{2014YangFast} for the distributed monitoring of fibre optic or the one formulated by \textcite{2018AssefModeling} in the context of medical ultrasound imaging.
 
@@ -57,9 +59,11 @@ This approach is used in areas such as the detection of features in images \pare
 
 % Restate Your Question as Something Not Known or Fully Understood by Prior Research
 Thus, in this paper we formulate a general approach to envelope detection, exploiting the intrinsic characteristics of a generic, spectrally complex, wave in order to avoid the need to manual intervention or parameter tuning.
+
 % State the Significance of Your Question
 While the robustness of the proposed approach allows it to be used as a plug in replacement for many methods encountered in the literature, we feel that it would be particularly useful for sound synthesis. 
 The envelope is shown to add complexity to the spectral representation of a wave \parencite{2019TarjanoNeuro}, and a accurate description of the envelope would be useful for a cleaner spectral analysis. Moreover, the algorithm naturally divides a signal in pseudo-cycles, that could serve pragmatic building blocks for the reconstruction of the fine structure of the wave.
+
 % State Your Claim | Objective | Hypothesis
 In the context of sound synthesis, one would be able to apply specific methods for the recreation of the envelope, more in line with its smooth, slow varying and non periodic nature and a different approach to the periodic and relatively fast changes of the temporal fine structure.
 % brief outlook on the structure of the paper
@@ -68,9 +72,13 @@ In the context of sound synthesis, one would be able to apply specific methods f
 \section{Methodology} % 1000 words
 
 % Essential background information
-We start by defining a pulse as a series of consecutive samples in a discrete wave with the same sign. More formally, let $ W[i] \in \mathbb{R} \forall i \in \mathbb{N}_0, i < n \in \mathbb{N}_0 $ be a real, discrete and finite signal indexed, without loss of generality, over a subset of the natural numbers. This definition relates closely to the concept of an array or vector in most programming languages, and is used in the interest of simplicity. A pulse $ P[j], j \in \mathbb{N}_0, j < q $ in $ W $ can then be defined as a sequence of samples indexed by $ i $ such that $ \sign(W[a-1]) \ne \sign(W[a]) = \sign(W[a+1]) = \dots = \sign(W[b-1]) = \sign(W[b]) \ne \sign(W[b+1]) \forall i, a \le i \le b | a,b \in \mathbb{N}_0 $. 
-In other words, each pulse is a unique subset of $ W $ with its members being the maximum sequence of samples in $ W $ with the same signal and $ P[0] \cup P[0] \cup \cdots \cup P[q-1] = W $. Naturally, each pulse can be classified as positive or negative, based on the signal of its samples, which must be the same.
-For a continuous function, then, a pulse would correspond to the pieces between it's roots, and would be equal to half the cycle of a sinusoid. Thus, in our analogy, two consecutive pulses, naturally with opposing signs, have the potential do delimitate a pseudo-cycle, as illustrated in figure \ref{fig:pulses}. For that to be true, however, the pulses need to make part of the frontier, as will be defined later.
+We start by defining a pulse as a series of consecutive samples in a discrete wave with the same sign. More formally, let $ W[i] \in \mathbb{R} \forall i \in \mathbb{N}_0, i < n \in \mathbb{N}_0 $ be a real, discrete and finite signal indexed, without loss of generality, over a subset of the natural numbers. This definition relates closely to the concept of an array or vector in most programming languages, and is used in the interest of simplicity. 
+
+A pulse $ P[j], j \in \mathbb{N}_0, j < q $ in $ W $ can then be defined as a sequence of samples indexed by $ i $ such that $ \sign(W[a-1]) \ne \sign(W[a]) = \sign(W[a+1]) = \dots = \sign(W[b-1]) = \sign(W[b]) \ne \sign(W[b+1]) \forall i, a \le i \le b | a,b \in \mathbb{N}_0 $. 
+In other words, each pulse is a unique subset of $ W $ with its members being the maximum sequence of samples in $ W $ with the same signal and $ P[0] \cup P[0] \cup \cdots \cup P[q-1] = W $. 
+
+Naturally, each pulse can be classified as positive or negative, based on the signal of its samples, which must be the same.
+For a continuous function, then, a pulse would correspond to the pieces between it's roots, and would be equal to half the cycle of a sinusoid. Thus, in our analogy, two consecutive pulses, naturally with opposing signs, have the potential do delimitate a pseudo-cycle, as illustrated in figure \ref{fig:pulses}. For that to be true, however, the pulses need to make part of the frontiers of the signal, as will be defined later.
 
   \begin{figure}[h!]
     \centering
@@ -79,10 +87,22 @@ For a continuous function, then, a pulse would correspond to the pieces between 
     \label{fig:pulses}
   \end{figure}
 
+The most mathematically sound definition of an envelope involves its representation as an analytic signal, introduced by Gabor in 1946 \parencite{2007HahnHistory}. In his work, Gabor applies the then relatively new mathematical machinery of the quantum mechanics to unify time and frequency representations of a wave, showing how the Hilbert transform could be applied to a real signal in order to obtain a complex signal that would become known as the analytic signal.
 
-% TODO Define envelope, Hilbert, etc
+This analytic signal is of the form $ a(t) = s(t) + j \mathbb{H}(s(t)) $ \parencite{2016HePraat} where $ s(t) $ is the original real signal, that becomes the real part of the analytic signal. $ \mathbb{H}(s(t)) $, the Hilbert transform of the original signal becomes, then, the imaginary part of the analytic signal; the envelope of a signal thus represented can be straightforwardly obtained by the computation of its complex modulus.
 
-In practice, however, is not uncommon for a discrete wave, specially in the case of sound, to present somewhat different positive and negative contours; As our method will eventually have to be applied separately to both sides, superior and inferior, of the discrete wave, it is only natural to introduce such separation as soon as possible. To do so we will define the positive (upper) frontier and negative (lower) frontier as the set of points $ (i, |W[i]|) $ that are closest to the unknown smooth, continuous envelope of the signal. The set of all these points such that $ W[i] > 0 $ will be called the positive, piecewise linear frontier denoted by $ F_+ $; similarly, $ F_- $ denotes the negative frontier of $ W $, defined by the subset of points $ (i, W[i]) $ where $ W[i] < 0 $. To identify such points, we need to address the different units in which the amplitude and horizontal distance of our wave are expressed.
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=0.8\linewidth]{02AnalyticSignal.pdf}
+  \caption{Envelope of a pure sinusoid modulated by a polynomial of degree 3, as obtained by the Hilbert Transform. In the first half the sinusoid is free of noise, while in the second half white gaussian noise with a standard deviation of 1/10 of the max amplitude of the wave was added to the base signal}
+  \label{fig:AnalyticSignal}
+\end{figure}
+
+Figure \ref{fig:AnalyticSignal} shows the envelope obtained via the Hilbert transform, for a pure sinusoid of local frequency 20, modulated by a polynomial of the third degree, in the presence and absence of gaussian white noise with standard deviation of $ 1/10 $ of the wave's maximum amplitude. It is readily noticeable that, as soon as noise is introduced in the original signal, it is reflected in the envelope, breaking our assumption of smoothness. Other than that, this definition yields a unique, positive envelope.
+
+In practice, however, is not uncommon for a discrete wave, specially in the case of sound, to present somewhat different positive and negative contours; as our method will forcibly have to be applied separately to both sides, superior and inferior, of the discrete wave, it is only natural to introduce such separation as soon as possible. 
+
+To do so we will define the positive (upper) frontier and negative (lower) frontier as the set of points $ (i, |W[i]|) $ that are closest to the unknown smooth, continuous envelope of the signal. The set of all these points such that $ W[i] > 0 $ will be called the positive, piecewise linear frontier and will be denoted by $ F_+ $; similarly, $ F_- $ denotes the negative frontier of $ W $, defined by the subset of points $ (i, W[i]) $ where $ W[i] < 0 $. To identify such points, we need to address the different units in which the amplitude and horizontal distance of our wave are expressed.
 
 % TODO envelope, positive and negative frontiers image
 
