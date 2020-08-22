@@ -1,8 +1,6 @@
 import plotly.graph_objects as go
 import numpy as np
-from scipy.interpolate.interpolate import interp1d
-from Helper import draw_circle, read_wav, get_pulses_area, split_pulses, get_circle, signal_to_pulses, get_curvature_function, get_frontier#, save_wav, get_frontier
-import numpy.polynomial.polynomial as poly
+from Helper import read_wav, get_pulses_area, split_pulses, signal_to_pulses, get_frontier
 
 
 '''==============='''

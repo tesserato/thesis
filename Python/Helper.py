@@ -30,18 +30,6 @@ def save_wav(signal, name = 'test.wav', fps = 44100):
   o.close()
 
 
-class Pulse_old:
-  def __init__(self, x0, W, is_noise = False):
-    self.W = W
-    self.start = x0
-    self.len = W.size
-    self.end = self.start + self.len
-    idx = np.argmax(np.abs(W)) #
-    self.y = W[idx]            # np.average(W)
-    self.x = x0 + idx               # np.sum(np.linspace(0, 1, self.len) * np.abs(W) / np.sum(np.abs(W)))
-    self.noise = is_noise
-
-
 class Pulse:
   def __init__(self, x0, W, is_noise = False):
     # self.W = W
@@ -55,22 +43,6 @@ class Pulse:
 
 
 def signal_to_pulses(W):
-  ''' returns a list of instances of the Pulses class'''
-  n = W.size
-  pulses = []
-  sign = np.sign(W[0])
-  x0 = 0
-  for x in range(n):
-    if sign != np.sign(W[x]):
-      p = Pulse(x0, W[x0 : x])
-      pulses.append(p)
-      x0 = x
-      assert(np.all(np.sign(W[x0 : x]) == sign))
-      sign = np.sign(W[x])
-  pulses.append(Pulse(x0, W[x0 : n]))
-  return pulses
-
-def signal_to_pulses_old(W):
   ''' returns a list of instances of the Pulses class'''
   n = W.size
   pulses = []
@@ -108,18 +80,6 @@ def split_pulses(pulses):
   return pos_pulses, neg_pulses, pos_noises, neg_noises
 
 
-def get_pulses_area_rectangle(pulses):
-  ''' Return X & Y pulses area vectors '''
-  X, Y = [], []
-  for p in pulses:
-    X.append(p.x0)  ; Y.append(0)
-    X.append(p.x0 ) ; Y.append(p.y)
-    X.append(p.x1)  ; Y.append(p.y)
-    X.append(p.x1)  ; Y.append(0)
-    X.append(None)  ; Y.append(None)
-  return X, Y
-
-
 def get_pulses_area(pulses):
   ''' Return X & Y pulses area vectors '''
   X, Y = [], []
@@ -143,76 +103,6 @@ def parabola_3_points(X, Y):
   b = (-x0 * (x0 - x1) * (y1 - y2) + x2 * (x1 - x2) * (y0 - y1)) / den
   c = -a * x0**2 - b * x0 + y0
   return a, b, c
-
-# for i in range(1, len(X) - 1):
-#   x0, x1, x2 = (X[i - 1] + X[i]) / 2, X[i], (X[i] + X[i + 1]) / 2
-#   y0, y1, y2 = (Y[i - 1] + Y[i]) / 2, Y[i], (Y[i] + Y[i + 1]) / 2
-
-def get_curvature(X, Y, n):
-  Y = np.abs(Y)
-  pos_curvatures_X = []
-  pos_curvatures_Y = []
-  neg_curvatures_X = []
-  neg_curvatures_Y = []
-  for i in range(2, len(X) - 2):
-    x0, x1, x2 = (X[i - 2] + X[i - 1]) / 2, X[i], (X[i + 1] + X[i + 2]) / 2
-    y0, y1, y2 = (Y[i - 2] + Y[i - 1]) / 2, Y[i], (Y[i + 1] + Y[i + 2]) / 2
-
-    a, b, c = parabola_3_points([x0, x1, x2], [y0, y1, y2])
-
-    t1 = 2*a*x1+b
-    t0 = 2*a*x0+b
-    avg_curv = (t1 / np.sqrt(t1**2+1) - t0 / np.sqrt(t0**2+1)) / (x1 - x0)
-
-    if avg_curv >= 0:
-      pos_curvatures_X.append(x1)
-      pos_curvatures_Y.append(avg_curv)
-    else:
-      neg_curvatures_X.append(x1)
-      neg_curvatures_Y.append(avg_curv)
-
-  avg = np.average(pos_curvatures_Y)
-
-  i = 0
-  lim = (X[-1] - X[0]) / 4
-  while pos_curvatures_X[i] < lim:
-    i += 1
-  p1 = i
-  while pos_curvatures_X[i] < 3 * lim:
-    i += 1
-  p2 = i
-
-  x0 = 0
-  y0 = np.average(pos_curvatures_Y[0 : p1])
-  x1 = (X[-1] - X[0]) / 2
-  y1 = np.average(pos_curvatures_Y[p1 : p2])
-  x2 = n
-  y2 = np.average(pos_curvatures_Y[p2 : ])
-
-  max_y = np.max([y0, y1, y2])
-  y0, y1, y2 = y0 * avg / max_y, y1 * avg / max_y, y2 * avg / max_y
-
-  #########
-  # g = interp1d([x0, x1, x2], [y0, y1, y2], "quadratic")
-  # f = lambda x : 1 / g(x)
-  #########
-
-
-  a, b, c = parabola_3_points([x0, x1, x2], [y0, y1, y2])
-
-  # print("abc:",aa, bb, cc)
-  # print("xxx:",x0, x1, x2)
-  # print("yyy:",y0, y1, y2)
-
-  # def g(x):
-  #   x = np.array(x, dtype=np.float64)
-  #   return (a * x**2 + b * x + c) #* (avg / cc)
-
-  def radius(x):
-    x = np.array(x, dtype=np.float64)
-    return 1 / ( (a * x**2 + b * x + c) )#* (avg / cc) )
-
-  return radius
 
 
 def constrained_least_squares_arbitrary_intervals(X, Y, I, k=3):
@@ -329,36 +219,6 @@ def draw_circle(xc, yc, r, fig, n=100):
   return X, Y
 
 
-def get_frontier_old(X, Y, nn):
-  '''extracts the envelope via snowball method'''
-  radius = get_curvature(X, Y, nn)
-  n = len(X)
-  idx1 = 0
-  idx2 = 1
-  frontier_X = [0]
-  frontier_Y = [Y[0]]
-  while idx2 < n:
-    r = radius((X[idx1] + X[idx2]) / 2)
-    xc, yc = get_circle(X[idx1], Y[idx1], X[idx2], Y[idx2], r)
-    empty = True
-    for i in range(idx2 + 1, n):
-      if np.sqrt((xc - X[i])**2 + (yc - Y[i])**2) < r:
-        empty = False
-        idx2 += 1
-        break
-    if empty:
-      frontier_X.append(X[idx2])
-      frontier_Y.append(Y[idx2])
-      idx1 = idx2
-      idx2 += 1
-      # draw_circle(xc, yc, r, fig)
-  frontier_X.append(nn)
-  frontier_Y.append(Y[-1])
-  f = interp1d(frontier_X, frontier_Y, kind="linear")
-  X = np.arange(nn)
-  return X, f(X), radius(X)
-
-
 def get_curvature_function(X, Y):
   X = np.array(X)
   Y = np.array(Y)
@@ -386,7 +246,7 @@ def get_curvature_function(X, Y):
   return k_of_x, curvatures_X, curvatures_Y, curvatures_X, smooth_curvatures_Y
 
 
-def get_frontier(Pulses):
+def get_frontier(pulses):
   '''extracts the envelope via snowball method'''
 
   # fig.add_trace(
@@ -404,18 +264,18 @@ def get_frontier(Pulses):
   #   )
   # )
 
-  r_of_x, _, _, _, _ = get_curvature_function([p.x for p in Pulses], [p.y for p in Pulses])
+  r_of_x, _, _, _, _ = get_curvature_function([p.x for p in pulses], [p.y for p in pulses])
   idx1 = 0
   idx2 = 1
-  Frontier = [Pulses[0]]
-  n = len(Pulses)
+  Frontier = [pulses[0]]
+  n = len(pulses)
   while idx2 < n:
-    r = r_of_x((Pulses[idx1].x + Pulses[idx2].x) / 2)
+    r = r_of_x((pulses[idx1].x + pulses[idx2].x) / 2)
     # xc, yc = get_circle(Pulses[idx1].x1, Pulses[idx1].y, Pulses[idx2].x0, Pulses[idx2].y, r) # Square
-    xc, yc = get_circle(Pulses[idx1].x, Pulses[idx1].y, Pulses[idx2].x, Pulses[idx2].y, r) # Triangle
+    xc, yc = get_circle(pulses[idx1].x, pulses[idx1].y, pulses[idx2].x, pulses[idx2].y, r) # Triangle
     empty = True
     for i in range(idx2 + 1, n):
-      if np.sqrt((xc - Pulses[i].x0)**2 + (yc - Pulses[i].y)**2) < r:
+      if np.sqrt((xc - pulses[i].x0)**2 + (yc - pulses[i].y)**2) < r:
         empty = False
         idx2 += 1
         break
@@ -423,10 +283,10 @@ def get_frontier(Pulses):
 
       # draw_circle(xc, yc, r, fig)
 
-      Frontier.append(Pulses[idx2])
+      Frontier.append(pulses[idx2])
       idx1 = idx2
       idx2 += 1
-  Frontier.append(Pulses[-1])
+  Frontier.append(pulses[-1])
   # f = interp1d(frontier_X, frontier_Y, kind="linear")
   # X = np.arange(nn)
   return [p.x for p in Frontier], [p.y for p in Frontier]
@@ -435,6 +295,17 @@ def get_frontier(Pulses):
 #####################################################################################################################
 ################################################### OLD FUNCTIONS ###################################################
 #####################################################################################################################
+
+class Pulse_old:
+  def __init__(self, x0, W, is_noise = False):
+    self.W = W
+    self.start = x0
+    self.len = W.size
+    self.end = self.start + self.len
+    idx = np.argmax(np.abs(W)) #
+    self.y = W[idx]            # np.average(W)
+    self.x = x0 + idx               # np.sum(np.linspace(0, 1, self.len) * np.abs(W) / np.sum(np.abs(W)))
+    self.noise = is_noise
 
 def get_delaunay(X, Y):
   points = np.array([[x, y] for x, y in zip(pos_X, pos_Y)])
@@ -1129,4 +1000,130 @@ def get_pulses_area_triangle(pulses):
     # X.append(p.start - .5); Y.append(0)
     # X.append(None)        ; Y.append(None)
   X.append(pulses[-1].end - .5)  ; Y.append(0)
+  return X, Y
+
+def signal_to_pulses_old(W):
+  ''' returns a list of instances of the Pulses class'''
+  n = W.size
+  pulses = []
+  sign = np.sign(W[0])
+  x0 = 0
+  for x in range(n):
+    if sign != np.sign(W[x]):
+      p = Pulse(x0, W[x0 : x])
+      pulses.append(p)
+      x0 = x
+      assert(np.all(np.sign(W[x0 : x]) == sign))
+      sign = np.sign(W[x])
+  pulses.append(Pulse(x0, W[x0 : n]))
+  return pulses
+
+# for i in range(1, len(X) - 1):
+#   x0, x1, x2 = (X[i - 1] + X[i]) / 2, X[i], (X[i] + X[i + 1]) / 2
+#   y0, y1, y2 = (Y[i - 1] + Y[i]) / 2, Y[i], (Y[i] + Y[i + 1]) / 2
+
+def get_curvature(X, Y, n):
+  Y = np.abs(Y)
+  pos_curvatures_X = []
+  pos_curvatures_Y = []
+  neg_curvatures_X = []
+  neg_curvatures_Y = []
+  for i in range(2, len(X) - 2):
+    x0, x1, x2 = (X[i - 2] + X[i - 1]) / 2, X[i], (X[i + 1] + X[i + 2]) / 2
+    y0, y1, y2 = (Y[i - 2] + Y[i - 1]) / 2, Y[i], (Y[i + 1] + Y[i + 2]) / 2
+
+    a, b, c = parabola_3_points([x0, x1, x2], [y0, y1, y2])
+
+    t1 = 2*a*x1+b
+    t0 = 2*a*x0+b
+    avg_curv = (t1 / np.sqrt(t1**2+1) - t0 / np.sqrt(t0**2+1)) / (x1 - x0)
+
+    if avg_curv >= 0:
+      pos_curvatures_X.append(x1)
+      pos_curvatures_Y.append(avg_curv)
+    else:
+      neg_curvatures_X.append(x1)
+      neg_curvatures_Y.append(avg_curv)
+
+  avg = np.average(pos_curvatures_Y)
+
+  i = 0
+  lim = (X[-1] - X[0]) / 4
+  while pos_curvatures_X[i] < lim:
+    i += 1
+  p1 = i
+  while pos_curvatures_X[i] < 3 * lim:
+    i += 1
+  p2 = i
+
+  x0 = 0
+  y0 = np.average(pos_curvatures_Y[0 : p1])
+  x1 = (X[-1] - X[0]) / 2
+  y1 = np.average(pos_curvatures_Y[p1 : p2])
+  x2 = n
+  y2 = np.average(pos_curvatures_Y[p2 : ])
+
+  max_y = np.max([y0, y1, y2])
+  y0, y1, y2 = y0 * avg / max_y, y1 * avg / max_y, y2 * avg / max_y
+
+  #########
+  # g = interp1d([x0, x1, x2], [y0, y1, y2], "quadratic")
+  # f = lambda x : 1 / g(x)
+  #########
+
+
+  a, b, c = parabola_3_points([x0, x1, x2], [y0, y1, y2])
+
+  # print("abc:",aa, bb, cc)
+  # print("xxx:",x0, x1, x2)
+  # print("yyy:",y0, y1, y2)
+
+  # def g(x):
+  #   x = np.array(x, dtype=np.float64)
+  #   return (a * x**2 + b * x + c) #* (avg / cc)
+
+  def radius(x):
+    x = np.array(x, dtype=np.float64)
+    return 1 / ( (a * x**2 + b * x + c) )#* (avg / cc) )
+
+  return radius
+
+def get_frontier_old(X, Y, nn):
+  '''extracts the envelope via snowball method'''
+  radius = get_curvature(X, Y, nn)
+  n = len(X)
+  idx1 = 0
+  idx2 = 1
+  frontier_X = [0]
+  frontier_Y = [Y[0]]
+  while idx2 < n:
+    r = radius((X[idx1] + X[idx2]) / 2)
+    xc, yc = get_circle(X[idx1], Y[idx1], X[idx2], Y[idx2], r)
+    empty = True
+    for i in range(idx2 + 1, n):
+      if np.sqrt((xc - X[i])**2 + (yc - Y[i])**2) < r:
+        empty = False
+        idx2 += 1
+        break
+    if empty:
+      frontier_X.append(X[idx2])
+      frontier_Y.append(Y[idx2])
+      idx1 = idx2
+      idx2 += 1
+      # draw_circle(xc, yc, r, fig)
+  frontier_X.append(nn)
+  frontier_Y.append(Y[-1])
+  f = interp1d(frontier_X, frontier_Y, kind="linear")
+  X = np.arange(nn)
+  return X, f(X), radius(X)
+
+def get_pulses_area_rectangle(pulses):
+  ''' Return X & Y pulses area vectors '''
+  X, Y = [], []
+  for p in pulses:
+    X.append(p.x0)  ; Y.append(0)
+    X.append(p.x0 ) ; Y.append(p.y)
+    X.append(p.x1)  ; Y.append(p.y)
+    X.append(p.x1)  ; Y.append(0)
+    X.append(None)  ; Y.append(None)
   return X, Y
