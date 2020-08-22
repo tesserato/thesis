@@ -1,13 +1,7 @@
-# import random
-# random.seed(2)
 import sys
 sys.path.append("c:/Users/tesse/Desktop/Files/Dropbox/0_Thesis/Python")
-# import site
-# site.addsitedir("c:/Users/tesse/Desktop/Files/Dropbox/0_Thesis/Python")
 import numpy as np
-
 import plotly.graph_objects as go
-
 from Helper import signal_to_pulses, get_pulses_area
 
 '''Generating Wave'''
@@ -36,9 +30,7 @@ pulses_X, pulses_Y = get_pulses_area(pulses)
 
 '''Plotting'''
 fig = go.Figure()
-
-fig.layout.template ="plotly_white"
- 
+fig.layout.template ="plotly_white" 
 fig.update_layout(
   xaxis_title="$i$",
   yaxis_title="Amplitude",
@@ -50,7 +42,6 @@ fig.update_layout(
   size=18
   )
 )
-
 fig.update_xaxes(showline=False, showgrid=False, zeroline=False)
 fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=2, zerolinecolor='gray')
 

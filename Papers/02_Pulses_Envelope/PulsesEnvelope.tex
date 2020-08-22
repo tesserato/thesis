@@ -55,7 +55,7 @@ When dealing with broadband signals, approaches tailored to specific application
 
 If one adresses the different units in the horizontal and vertical axes, one can transform the DSP problem of envelope detection in the geometric problem of defining the shape of a set of points in $ \mathbb{R}^2 $. For that purpose \textcite{1983Edelsbrunnershape} introduced the concept of alpha-shapes, a mathematically well defined extension to the convex hull of a finite set of points, related to the Delaunay triangulation and Voronoi diagrams of those points.
 
-This approach is used in areas such as the detection of features in images \parencite{2016VarytimidisAlpha}, reconstruction of surfaces from a cloud of points \parencite{2015WuAutomated} and Spectroscopy \parencite{2019XuModeling}, with the last work, that involves the estimation and removal of the Blaze function -a kind of envelope- of a echelle spectrograph, being particularly align with what is intended here.
+This approach is used in areas such as the detection of features in images \parencite{2016VarytimidisAlpha}, reconstruction of surfaces from a cloud of points \parencite{2015WuAutomated} and Spectroscopy \parencite{2019XuModeling}, with the last work, that involves the estimation and removal of the Blaze function (a kind of envelope) of a echelle spectrograph, being particularly align with what is intended here.
 
 % Restate Your Question as Something Not Known or Fully Understood by Prior Research
 Thus, in this paper we formulate a general approach to envelope detection, exploiting the intrinsic characteristics of a generic, spectrally complex, wave in order to avoid the need to manual intervention or parameter tuning.
@@ -66,7 +66,7 @@ The envelope is shown to add complexity to the spectral representation of a wave
 
 % State Your Claim | Objective | Hypothesis
 In the context of sound synthesis, one would be able to apply specific methods for the recreation of the envelope, more in line with its smooth, slow varying and non periodic nature and a different approach to the periodic and relatively fast changes of the temporal fine structure.
-% brief outlook on the structure of the paper
+% TODO brief outlook on the structure of the paper
 
 
 \section{Methodology} % 1000 words
@@ -74,27 +74,28 @@ In the context of sound synthesis, one would be able to apply specific methods f
 % Essential background information
 We start by defining a pulse as a series of consecutive samples in a discrete wave with the same sign. More formally, let $ W[i] \in \mathbb{R} \forall i \in \mathbb{N}_0, i < n \in \mathbb{N}_0 $ be a real, discrete and finite signal indexed, without loss of generality, over a subset of the natural numbers. This definition relates closely to the concept of an array or vector in most programming languages, and is used in the interest of simplicity. 
 
-A pulse $ P[j], j \in \mathbb{N}_0, j < q $ in $ W $ can then be defined as a sequence of samples indexed by $ i $ such that $ \sign(W[a-1]) \ne \sign(W[a]) = \sign(W[a+1]) = \dots = \sign(W[b-1]) = \sign(W[b]) \ne \sign(W[b+1]) \forall i, a \le i \le b | a,b \in \mathbb{N}_0 $. 
-In other words, each pulse is a unique subset of $ W $ with its members being the maximum sequence of samples in $ W $ with the same signal and $ P[0] \cup P[0] \cup \cdots \cup P[q-1] = W $. 
+A pulse $ P[j], j \in \mathbb{N}_0, j < q $ in $ W $ can then be defined as a sequence of samples indexed by $ i $ such that $ \sign(W[a-1]) \ne \sign(W[a]) = \sign(W[a+1]) = \dots = \sign(W[b-1]) = \sign(W[b]) \ne \sign(W[b+1]) \forall i, a \le i \le b | a,b \in \mathbb{N}_0 $.
+
+In other words, each pulse is a unique subset of $ W $ with its members being the maximum sequence of samples in $ W $ with the same signal and $ P[0] \cup P[0] \cup \cdots \cup P[q-1] = W $. It is convenient to attribute to each pulse a pair of coordinates: those will be the coordinates of the sample with the maximum amplitude in each pulse.
 
 Naturally, each pulse can be classified as positive or negative, based on the signal of its samples, which must be the same.
-For a continuous function, then, a pulse would correspond to the pieces between it's roots, and would be equal to half the cycle of a sinusoid. Thus, in our analogy, two consecutive pulses, naturally with opposing signs, have the potential do delimitate a pseudo-cycle, as illustrated in figure \ref{fig:pulses}. For that to be true, however, the pulses need to make part of the frontiers of the signal, as will be defined later.
+For a continuous function, then, a pulse would correspond to the pieces between it's roots, and would be equal to half the cycle of a sinusoid. Thus, in our analogy, two consecutive pulses, naturally with opposing signs, have the potential do delimitate a pseudo-cycle, as illustrated in figure \ref{fig:Pulses}. For that to be true, however, the pulses need to make part of the frontiers of the signal, as will be defined later.
 
   \begin{figure}[h!]
     \centering
       \includegraphics[width=0.8\linewidth]{01Pulses.pdf}
-    \caption{The grey areas encompass the simplified convex hulls of the pulses. The dashed lines mark the frontier between pseudo-cycles}
-    \label{fig:pulses}
+    \caption{The grey areas encompass the simplified convex hulls of the pulses. The dashed lines mark the frontier between pseudo-cycles.}
+    \label{fig:Pulses}
   \end{figure}
 
-The most mathematically sound definition of an envelope involves its representation as an analytic signal, introduced by Gabor in 1946 \parencite{2007HahnHistory}. In his work, Gabor applies the then relatively new mathematical machinery of the quantum mechanics to unify time and frequency representations of a wave, showing how the Hilbert transform could be applied to a real signal in order to obtain a complex signal that would become known as the analytic signal.
+The most mathematically sound definition of an envelope involves its representation as an analytic signal, introduced by Gabor in 1946 \parencite{2007HahnHistory}. In his work, \textcite{1946GaborTheory} applies the then relatively new mathematical machinery of the quantum mechanics to unify time and frequency representations of a wave, showing how the Hilbert transform could be applied to a real signal in order to obtain a complex signal that would become known as the analytic signal.
 
 This analytic signal is of the form $ a(t) = s(t) + j \mathbb{H}(s(t)) $ \parencite{2016HePraat} where $ s(t) $ is the original real signal, that becomes the real part of the analytic signal. $ \mathbb{H}(s(t)) $, the Hilbert transform of the original signal becomes, then, the imaginary part of the analytic signal; the envelope of a signal thus represented can be straightforwardly obtained by the computation of its complex modulus.
 
 \begin{figure}[h!]
   \centering
     \includegraphics[width=0.8\linewidth]{02AnalyticSignal.pdf}
-  \caption{Envelope of a pure sinusoid modulated by a polynomial of degree 3, as obtained by the Hilbert Transform. In the first half the sinusoid is free of noise, while in the second half white gaussian noise with a standard deviation of 1/10 of the max amplitude of the wave was added to the base signal}
+  \caption{Envelope of a pure sinusoid modulated by a polynomial of degree 3, as obtained by the Hilbert Transform. In the first half the sinusoid is free of noise, while in the second half white gaussian noise with a standard deviation of $ 1/10 $ of the maximum amplitude of the wave was added to the base signal.}
   \label{fig:AnalyticSignal}
 \end{figure}
 
@@ -102,36 +103,50 @@ Figure \ref{fig:AnalyticSignal} shows the envelope obtained via the Hilbert tran
 
 In practice, however, is not uncommon for a discrete wave, specially in the case of sound, to present somewhat different positive and negative contours; as our method will forcibly have to be applied separately to both sides, superior and inferior, of the discrete wave, it is only natural to introduce such separation as soon as possible. 
 
-To do so we will define the positive (upper) frontier and negative (lower) frontier as the set of points $ (i, |W[i]|) $ that are closest to the unknown smooth, continuous envelope of the signal. The set of all these points such that $ W[i] > 0 $ will be called the positive, piecewise linear frontier and will be denoted by $ F_+ $; similarly, $ F_- $ denotes the negative frontier of $ W $, defined by the subset of points $ (i, W[i]) $ where $ W[i] < 0 $. To identify such points, we need to address the different units in which the amplitude and horizontal distance of our wave are expressed.
+To do so we will define the positive (upper) frontier and negative (lower) frontier as the set of points $ (i, |W[i]|) $ that are, necessarily but not sufficiently, the point of maximum amplitude of their respective pulses. The set of all these points such that $ W[i] > 0 $ will be called the positive, piecewise linear frontier and will be denoted by $ F_+ $; similarly, $ F_- $ will denote the negative frontier of $ W $, defined by the subset of points $ (i, W[i]) $ where $ W[i] < 0 $, as is shown in figure \ref{fig:Frontiers}. To identify such points, we need to address the different units in which the amplitude and horizontal distance of our wave are expressed.
 
-% TODO envelope, positive and negative frontiers image
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=0.8\linewidth]{03Frontiers.pdf}
+  \caption{Positive and negative frontiers, envelope and pseudo-cycles for a fragment of piano sound. While we have only one (positive) envelope, here mirrored in the inferior space, we have two frontiers, the superior and inferior.}
+  \label{fig:Frontiers}
+\end{figure}
 
-% TODO clarify this part
-To make abscissa and ordinate units consistent for the computation of the frontier, and proceed with a geometric treatment of the subject, we consider the set of positive and negative pulses separately. For each set, we can multiply all pulses by the average length of the pulses in the set, after having divided by the average of pulses amplitudes, putting both axes in the same frame related unit $i$, that relates to time by the equation $i = t \ \mathit{fps}$. One can call this approach arc length regularization, as it translates the widespread approach of arc length parametrization to a non parametric setting.
+To make abscissa and ordinate units consistent for the computation of the frontier, and proceed with a geometric treatment of the subject, we consider the set of positive and negative pulses separately. For each set, we multiply all pulses by the average length of the pulses in the set, after having divided by the average of the pulses' amplitudes, putting both axes in the same frame related unit $i$, related to time by the equation $i = t \ \mathit{fps}$.
 
-Before proceeding, some simplifications based on the smoothness of the temporal envelope will unburden the future development of the method. Because we are interested in approximating a function that is smooth over the whole domain of the wave, we can assume that, in the scale of a pulse, this function will be very close to a horizontal straight line and, thus, won't touch any point inside the convex hull defined by the pulse. By the same token, as the change in amplitude from one pulse to the next pulse with the same sign is motivated by changes in this same envelope, one can reasonably suppose that $ \max(P[j]) \approx \max(P[j+2]) $ and approximate the convex hull of a pulse with the triangle defined by the points where the pulse crosses the horizontal the point of max amplitude; this will allow a considerable dimension reduction as this triangular pulse can become the atomic unit for the rest of the method. This definition also makes clear that only one point of an arbitrary pulse can be in the frontier, namely, its point of max amplitude.
+Because we are interested in approximating a function that is smooth over the whole domain of the wave, we can assume that, in the scale of a pulse, this function will be very close to a horizontal straight line and, thus, won't touch any point inside the convex hull defined by the pulse. 
 
-Those definitions will allow us to derive the frontiers of a wave using an alpha-shapes inspired algorithm without the need to compute the Delaunay triangulation first. Translating the intuitive explanation of alpha-shapes in \textcite{1994EdelsbrunnerThree}, we can say that the points in the frontier are those touched by a circle outside the signal that is not allowed to contain any point of the signal; The pulses that contain said points can be seen as frontier pulses. Intuitively, one can picture a circle being rolled above (or below, in the case of the negative envelope) the signal, and marking the points it touches as frontier points.
-We can therefore revisit the concept of a pseudo-cycle, only hinted at before, defining it as the samples of the original wave that belong to two successive pulses that belong to their respective frontiers, including eventual pulses between them.
+By the same token, as the change in amplitude from one pulse to the next pulse with the same sign is motivated by changes in this same envelope, one can reasonably suppose that $ \max(P[j]) \approx \max(P[j+2]) $. That justifies the approximation of the convex hull of a pulse by the triangle defined by the points where the pulse crosses the horizontal the point of maximum amplitude; this will allow a considerable dimension reduction as this triangular pulse can become the atomic unit for the rest of the method. 
 
-% TODO pseudo cycles image
+This definition also makes clear that only one point of an arbitrary pulse can be in the frontier, namely, its point of maximum amplitude; those definitions will allow us to derive the frontiers of a wave using an alpha-shapes inspired algorithm without the need to compute the Delaunay triangulation first.
+
+Translating the intuitive explanation of alpha-shapes in \textcite{1994EdelsbrunnerThree} to our context, we can say that the points in the frontier are those touched by a circle outside the signal that is not allowed to contain any point of the signal; The pulses that contain said points can be seen as frontier pulses.
+Intuitively, one can picture a circle being rolled above (or below, in the case of the negative frontier) the signal, and marking the points it touches as frontier points.
+
+We can therefore revisit the concept of a pseudo-cycle, only hinted at before, defining it as the samples of the original wave that belong to two successive pulses that belong to their respective frontiers, including eventual pulses between them, as can be seen in figure \ref{fig:Frontiers}.
 
 % TODO snowball image
 
-It is now necessary to infer the appropriate radius of such a circle and, to that end, a measure of the curvature of a discrete function is needed. Discrete curvature estimation is an important task in image processing \parencite{2010FleischmannNovel} for which no default definition exists; The two possible approaches are the derivation of direct methods that use characteristics of the discrete wave to calculate its curvature at each point, or the calculation of the curvature of a curve fitted to the discrete wave \parencite{2001CoeurjollyDiscrete}. 
-To fit a polynomial to the a generic wave two approaches are readily available: the least mean squares approach, that seeks to minimize the dependant variable errors and the total least squares problem, that treat both variables symmetrically \parencite{1980GolubAnalysis}.
+It is now necessary to infer the appropriate radius of such a circle and, to that end, a measure of the curvature of a discrete function is needed. Discrete curvature estimation is an important task in image processing \parencite{2010FleischmannNovel} for which no default definition exists; The two possible approaches are the derivation of direct methods that use characteristics of the discrete wave to calculate its curvature at each point, or the calculation of the curvature of a curve fitted to the discrete wave \parencite{2001CoeurjollyDiscrete}.
+
+To fit a polynomial to the a generic wave two approaches are readily available: the least mean squares approach, that seeks to minimize the dependant variable errors and the total least squares problem, that treats both variables symmetrically \parencite{1980GolubAnalysis}.
+
 The geometric, symmetrical nature of the problem excludes the more computationally economic least mean squares approach however, leaving us with the total least squares, for which no general closed form solutions are available \parencite{2007MarkovskyOverview}; this leads us to turn our attention to direct approaches of curvature estimation.
 
 \subsection{Discrete Curvature Estimation - The Equivalent Circle Approach}
 
-As previously stated, no default discrete curvature definition exists; \textcite{2014CarrollSurvey}, for example, derives 3 such different definitions based on the approximation of a circle by inscribed, centred e circumscribed polygon.
+As previously stated, no default discrete curvature definition exists; \textcite{2014CarrollSurvey}, for example, derives 3 such different definitions based on the approximation of a circle by an inscribed, centred e circumscribed polygon. In the context of 3d meshes, \textcite{2016VasaMultivariate} evaluates multiple estimators from a multivariate point o view.
 
-The approach here presented differs from most others found in the literature in that it is defined over the edges linking the points that forma the discrete wave. The idea is to find the equivalent circle whose tangent presents the same change in direction, in the same horizontal distance, as the edge of interest.
-Formally, we define $ n-1 $ vectors
+For our needs, however, it is more convenient to define our own discrete curvature estimator; the approach here presented differs from most others found in the literature in that the curvature is defined over the edges linking the points that form the discrete wave, instead of the vertices.
 
-As an edge defines only one direction, there is a need for a referential initial direction, which wav chosen in this work as the direction of the average vector.
+To that end we are going to apply the definition of smooth curvature as the rate of change of the unit tangent to a curve, noting that this is equivalente to that of the osculating circle \parencite{2016VasaMesh}.
+The idea is to find the equivalent circle whose tangent presents the same change in direction, in the same horizontal distance, as the edge of interest.
 
-% osculating circle image, fitted line
+Formally, for each frontier, positive or negative, we define $ m - 1 $ vectors, $ m $ being the number of positive or negative pulses respectively, as the coordinates of the posterior pulse with the relevant signal minus the preceding pulse: $\vec{v}[l]^\pm = (P[l+1]_x^\pm - P[l]_x^\pm, P[l+1]_y^\pm - P[l]_y^\pm), \forall 0 \le l < m - 1 $, recalling that the $x$ coordinate of a pulse was defined as the $x$ coordinate of its sample with maximum amplitude, while the $y$ coordinate of a pulse is this amplitude itself.
+
+Since an edge defines only one direction, there remains the need for a reference. As we are interested in the relative curvature, it is natural to use the average direction of all vectors, $ \vec{\overline{v}} = \frac{1}{m-1} \sum_{l=0}^{m-1} \vec{v}[l] $, so as to measure the relative change of direction of each edge. 
+
+% TODO osculating circle image, average vector
 
 % For a continuous, twice differentiable function $ y = f(x); x, y \in \mathbb{R} $, the curvature as a function of the independent variable is given by $ \kappa(x) = \frac{f''(x)}{(f'(x)^2 + 1)^{\frac{3}{2}}} $ which is also the inverse of the radius of the osculating circle tangent to the curve at $ x $. Since we are assuming smoothness of envelope in the neighbourhood of a pulse, it makes sense to approximate it with a parabola $ y(x)=ax^2+bx+c $, since a higher order polynomial would provide unnecessary complexity. Besides some characteristics of the parabola derived from its relation with Bezier curves will be useful later.
 
