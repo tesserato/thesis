@@ -194,7 +194,7 @@ def get_circle(x0, y0, x1, y1, r):
   return xc, yc
 
 
-def draw_circle(xc, yc, r, fig, n=100):
+def draw_circle(xc, yc, r, fig, n=100, color="silver"):
   '''draws circle as plotly scatter from center and radius'''
   X = []
   Y = []
@@ -204,15 +204,15 @@ def draw_circle(xc, yc, r, fig, n=100):
   fig.add_trace(
     go.Scatter(
       name="",
-      legendgroup="Circles",
+      # legendgroup="Circles",
       x=X,
       y=Y,
       showlegend=False,
-      visible = "legendonly",
+      # visible = "legendonly",
       mode="lines",
       line=dict(
           width=1,
-          color="green"
+          color=color
       )
     )
   )
@@ -241,9 +241,9 @@ def get_curvature_function(X, Y):
   coefs = poly.polyfit(curvatures_X, curvatures_Y, 0)
   smooth_curvatures_Y = poly.polyval(curvatures_X, coefs)
 
-  k_of_x = interp1d(curvatures_X, 2/np.abs(smooth_curvatures_Y), fill_value="extrapolate")
+  r_of_x = interp1d(curvatures_X, 1/np.abs(smooth_curvatures_Y), fill_value="extrapolate")
 
-  return k_of_x, curvatures_X, curvatures_Y, curvatures_X, smooth_curvatures_Y
+  return r_of_x, curvatures_X, curvatures_Y, curvatures_X, smooth_curvatures_Y
 
 
 def get_frontier(pulses):
@@ -1127,3 +1127,29 @@ def get_pulses_area_rectangle(pulses):
     X.append(p.x1)  ; Y.append(0)
     X.append(None)  ; Y.append(None)
   return X, Y
+
+def get_curvature_function_arclen(X, Y):
+  X = np.array(X)
+  Y = np.array(Y)
+  xa = np.average(X[1:] - X[:-1])
+  ya = np.average(Y[1:] - Y[:-1])
+  m0 = ya / xa
+  radius_X = []
+  radius_Y = []
+  for i in range(len(X) - 1):
+    x0, y0, x1, y1 =X[i], Y[i], X[i + 1], Y[i + 1]
+    m1 = (y1 - y0) / (x1 - x0)
+    theta = np.arctan( (m1 - m0) / (1 + m1 * m0) )
+
+    r = (np.sqrt((y1 - y0)**2 + (x1 - x0)**2)) / theta
+
+    radius_X.append((x1 + x0) / 2)
+    radius_Y.append(r)
+    
+  radius_Y = np.array(radius_Y)
+  coefs = poly.polyfit(radius_X, radius_Y, 0)
+  smooth_radius_Y = poly.polyval(radius_X, coefs)
+
+  r_of_x = interp1d(radius_X, smooth_radius_Y, fill_value="extrapolate")
+
+  return r_of_x, radius_X, radius_Y, radius_X, smooth_radius_Y

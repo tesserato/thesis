@@ -8,7 +8,7 @@ from Helper import read_wav, get_pulses_area, split_pulses, signal_to_pulses, ge
 '''==============='''
 fig = go.Figure()
 
-name = "piano33"
+name = "bend"
 W, fps = read_wav(f"Samples/{name}.wav")
 
 # W = W [:10000]
@@ -52,7 +52,6 @@ neg_frontier_Y = np.array(neg_frontier_Y) / scaling
 '''============================================================================'''
 '''                                    PLOT                                    '''
 '''============================================================================'''
-
 
 fig.layout.template ="plotly_white"
 # fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
