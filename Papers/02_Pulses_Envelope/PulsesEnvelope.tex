@@ -1,4 +1,6 @@
 \documentclass{article}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
 \usepackage{amsfonts} % \mathbb
 \usepackage[margin=0.5in]{geometry}
 \usepackage[utf8]{inputenc}
@@ -81,7 +83,7 @@ In other words, each pulse is a unique subset of $ W $ with its members being th
 Naturally, each pulse can be classified as positive or negative, based on the signal of its samples, which must be the same.
 For a continuous function, then, a pulse would correspond to the pieces between it's roots, and would be equal to half the cycle of a sinusoid. Thus, in our analogy, two consecutive pulses, naturally with opposing signs, have the potential do delimitate a pseudo-cycle, as illustrated in figure \ref{fig:Pulses}. For that to be true, however, the pulses need to make part of the frontiers of the signal, as will be defined later.
 
-  \begin{figure}[h!]
+  \begin{figure}[ht!]
     \centering
       \includegraphics[width=0.8\linewidth]{01Pulses.pdf}
     \caption{The grey areas encompass the simplified convex hulls of the pulses. The dashed lines mark the frontier between pseudo-cycles.}
@@ -92,7 +94,7 @@ The most mathematically sound definition of an envelope involves its representat
 
 This analytic signal is of the form $ a(t) = s(t) + j \mathbb{H}(s(t)) $ \parencite{2016HePraat} where $ s(t) $ is the original real signal, that becomes the real part of the analytic signal. $ \mathbb{H}(s(t)) $, the Hilbert transform of the original signal becomes, then, the imaginary part of the analytic signal; the envelope of a signal thus represented can be straightforwardly obtained by the computation of its complex modulus.
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
   \centering
     \includegraphics[width=0.8\linewidth]{02AnalyticSignal.pdf}
   \caption{Envelope of a pure sinusoid modulated by a polynomial of degree 3, as obtained by the Hilbert Transform. In the first half the sinusoid is free of noise, while in the second half white gaussian noise with a standard deviation of $ 1/10 $ of the maximum amplitude of the wave was added to the base signal.}
@@ -105,7 +107,7 @@ In practice, however, is not uncommon for a discrete wave, specially in the case
 
 To do so we will define the positive (upper) frontier and negative (lower) frontier as the set of points $ (i, |W[i]|) $ that are, necessarily but not sufficiently, the point of maximum amplitude of their respective pulses. The set of all these points such that $ W[i] > 0 $ will be called the positive, piecewise linear frontier and will be denoted by $ F_+ $; similarly, $ F_- $ will denote the negative frontier of $ W $, defined by the subset of points $ (i, W[i]) $ where $ W[i] < 0 $, as is shown in figure \ref{fig:Frontiers}. To identify such points, we need to address the different units in which the amplitude and horizontal distance of our wave are expressed.
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
   \centering
     \includegraphics[width=0.8\linewidth]{03Frontiers.pdf}
   \caption{Positive and negative frontiers, envelope and pseudo-cycles for a fragment of piano sound. While we have only one (positive) envelope, here mirrored in the inferior space, we have two frontiers, the superior and inferior.}
@@ -135,20 +137,39 @@ The geometric, symmetrical nature of the problem excludes the more computational
 
 \subsection{Discrete Curvature Estimation - The Equivalent Circle Approach}
 
-As previously stated, no default discrete curvature definition exists; \textcite{2014CarrollSurvey}, for example, derives 3 such different definitions based on the approximation of a circle by an inscribed, centred e circumscribed polygon. In the context of 3d meshes, \textcite{2016VasaMultivariate} evaluates multiple estimators from a multivariate point o view.
+As previously stated, no default discrete curvature definition exists; \textcite{2014CarrollSurvey}, for example, derives 3 such different definitions based on the approximation of a circle by an inscribed, centred e circumscribed polygon. In the context of 3d meshes, \textcite{2016VasaMultivariate} evaluate a range of estimators from a multivariate point o view.
 
 For our needs, however, it is more convenient to define our own discrete curvature estimator; the approach here presented differs from most others found in the literature in that the curvature is defined over the edges linking the points that form the discrete wave, instead of the vertices.
 
-To that end we are going to apply the definition of smooth curvature as the rate of change of the unit tangent to a curve, noting that this is equivalente to that of the osculating circle \parencite{2016VasaMesh}.
-The idea is to find the equivalent circle whose tangent presents the same change in direction, in the same horizontal distance, as the edge of interest.
+To that end we are going to apply the definition of smooth curvature as the rate of change of the unit tangent to a curve, noting that this is equivalent to that of the osculating circle \parencite{2016VasaMesh}.
+The idea is to find the equivalent circle whose tangent presents the same change in direction, in the same horizontal distance, as the edge of interest. This approach presents the convenience of estimating the radius directly.
+
+\begin{figure}[ht!]
+  \centering
+    \includegraphics[width=0.5\linewidth]{04DiscreteCurvature.pdf}
+  \caption{Change of direction from horizontal, in $x_0$, until an angle of $\theta$, in $x_1$, that is equivalent to the angle between the average direction and the direction of the vector $\vec{v}[l]$ whose radius of curvature is being calculated. $x_0$ and $x_1$} correspond to the the horizontal coordinates of the tale and tip of $\vec{v}[l]$, respectively.
+  \label{fig:DiscreteCurvature}
+\end{figure}
 
 Formally, for each frontier, positive or negative, we define $ m - 1 $ vectors, $ m $ being the number of positive or negative pulses respectively, as the coordinates of the posterior pulse with the relevant signal minus the preceding pulse: $\vec{v}[l]^\pm = (P[l+1]_x^\pm - P[l]_x^\pm, P[l+1]_y^\pm - P[l]_y^\pm), \forall 0 \le l < m - 1 $, recalling that the $x$ coordinate of a pulse was defined as the $x$ coordinate of its sample with maximum amplitude, while the $y$ coordinate of a pulse is this amplitude itself.
 
-Since an edge defines only one direction, there remains the need for a reference. As we are interested in the relative curvature, it is natural to use the average direction of all vectors, $ \vec{\overline{v}} = \frac{1}{m-1} \sum_{l=0}^{m-1} \vec{v}[l] $, so as to measure the relative change of direction of each edge. 
+Since an edge defines only one direction, there remains the need for a reference. As we are interested in the relative curvature, it is natural to use the average direction of all vectors, $ \vec{\overline{v}}^\pm = \frac{1}{m-1} \sum_{l=0}^{m-1} \vec{v}[l]^\pm $, so as to measure the relative change of direction of each edge. This procedure, as well as the circles generated by it, are illustrated in figure \ref{fig:Curvatures}
 
-% TODO osculating circle image, average vector
+\begin{figure}[ht!]
+  \centering
+    \includegraphics[width=0.8\linewidth]{05Curvatures.pdf}
+  \caption{The equivalent circles obtained via the procedure described for the positive frontier. $\theta$, the angle between $ \vec{\overline{v}}^+$ and each of the $\vec{v}[l]^+$ is used, as is the horizontal component of each $\vec{v}[l]^+$ to obtain the radii of the circles.}
+  \label{fig:Curvatures}
+\end{figure}
 
-% For a continuous, twice differentiable function $ y = f(x); x, y \in \mathbb{R} $, the curvature as a function of the independent variable is given by $ \kappa(x) = \frac{f''(x)}{(f'(x)^2 + 1)^{\frac{3}{2}}} $ which is also the inverse of the radius of the osculating circle tangent to the curve at $ x $. Since we are assuming smoothness of envelope in the neighbourhood of a pulse, it makes sense to approximate it with a parabola $ y(x)=ax^2+bx+c $, since a higher order polynomial would provide unnecessary complexity. Besides some characteristics of the parabola derived from its relation with Bezier curves will be useful later.
+After this procedure one obtains a set of points in $ \mathbb{R}^2 $ % TODO
+
+\begin{figure}[ht!]
+  \centering
+    \includegraphics[width=0.8\linewidth]{06AvgCircle.pdf}
+  \caption{The positive frontier as obtained by the use of the circle representing the average curvature of the discrete wave illustrated.}
+  \label{fig:AvgCircle}
+\end{figure}
 
 % Therefore, the definition of the curvature becomes $ \kappa(x) = \frac{2 a}{\big( (b + 2 a x)^2 + 1 \big)^\frac{3}{2}} $ with the average curvature between points $ x_0 $ and $ x_1 $ given by equation \ref{eq:1}.
 
@@ -166,6 +187,8 @@ Since an edge defines only one direction, there remains the need for a reference
 
   
 \section{Results}
+
+\subsection{Robustness}
 
 \subsection{Fundamental Frequency as a Welcome Side-effect}
 
