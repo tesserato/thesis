@@ -2,6 +2,7 @@ from scipy.signal import hilbert
 import numpy as np
 import plotly.graph_objects as go
 import numpy.polynomial.polynomial as poly
+import sys
 
 '''Generating Wave'''
 
@@ -43,7 +44,7 @@ fig.update_layout(
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=5, r=5, b=5, t=5),
   font=dict(
-  family="Computer Modern",
+  family="Latin Modern",
   color="black",
   size=18
   )
@@ -93,4 +94,6 @@ fig.add_trace(
 )
 
 # fig.show()
-fig.write_image("./02AnalyticSignal.pdf", width=800, height=400, scale=1)
+save_name = "./" + sys.argv[0].split('/')[-1].replace(".py", ".pdf")
+fig.write_image(save_name, width=800, height=400, scale=1, engine="kaleido")
+print("saved:", save_name)

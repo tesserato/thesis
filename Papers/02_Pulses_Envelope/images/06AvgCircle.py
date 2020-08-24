@@ -5,7 +5,7 @@ from pathlib import Path
 import plotly.graph_objects as go
 import numpy as np
 from scipy.interpolate.interpolate import interp1d
-from Helper import read_wav, get_pulses_area, split_pulses, signal_to_pulses, get_frontier#, save_wav, get_frontier
+from Helper import read_wav, get_pulses_area, split_pulses, signal_to_pulses, get_frontier, draw_circle, get_curvature_function
 from scipy.signal import savgol_filter
 
 # os.path.dirname(os.path.dirname(path))
@@ -20,15 +20,14 @@ print(parent_path)
 name = "piano33"
 W, fps = read_wav(f"{parent_path}/Python/Samples/{name}.wav")
 
-W = W[100103 : 100775]
+W = W[100103 : 100103 + 585] #* 1000 / np.max(np.abs(W[100103 : 100775]))
 
 W = W - np.average(W)
-amplitude = np.max(np.abs(W))
-W = W / amplitude
+# amplitude = np.max(np.abs(W))
+W = W * .5
 n = W.size
 print(n)
 X = np.arange(n)
-
 
 pulses = signal_to_pulses(W)
 
@@ -47,6 +46,10 @@ for p in pos_pulses:
   p.y = p.y * scaling
 
 pos_frontier_X, pos_frontier_Y = get_frontier(pos_pulses)
+
+pos_frontier_X = np.array(pos_frontier_X)
+pos_frontier_Y = np.array(pos_frontier_Y)
+
 pos_frontier_Y = pos_frontier_Y / scaling
 
 '''neg frontier'''
@@ -58,11 +61,11 @@ for p in neg_pulses:
 neg_frontier_X, neg_frontier_Y = get_frontier(neg_pulses)
 neg_frontier_Y = np.array(neg_frontier_Y) / scaling
 
-f_pos = interp1d(pos_frontier_X, pos_frontier_Y, fill_value="extrapolate", kind="linear")
-f_neg = interp1d(neg_frontier_X, neg_frontier_Y, fill_value="extrapolate", kind="linear")
-XX = np.linspace(0, n, 4 * n)
-envelope = (f_pos(XX) - f_neg(XX)) / 2
-envelope = savgol_filter(envelope, 101, 3)
+# f_pos = interp1d(pos_frontier_X, pos_frontier_Y, fill_value="extrapolate", kind="linear")
+# f_neg = interp1d(neg_frontier_X, neg_frontier_Y, fill_value="extrapolate", kind="linear")
+# XX = np.linspace(0, n, 4 * n)
+# envelope = (f_pos(XX) - f_neg(XX)) / 2
+# envelope = savgol_filter(envelope, 101, 3)
 
 
 '''============================================================================'''
@@ -74,7 +77,8 @@ fig = go.Figure()
 fig.layout.template ="plotly_white" 
 fig.update_layout(
   xaxis_title="$i$",
-  yaxis_title="Amplitude",
+  yaxis_title="$i$",
+  yaxis = dict(scaleanchor = "x", scaleratio = 1), # <|<|<|<|<|<|<|<|<|<|<|<|
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=5, r=5, b=5, t=5),
   font=dict(
@@ -83,20 +87,24 @@ fig.update_layout(
   size=18
   )
 )
-fig.update_xaxes(showline=False, showgrid=False, zeroline=False)#, range=[100103, 100773])
-fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=2, zerolinecolor='gray')#, range=[-.1, .1])
-
+fig.update_xaxes(showline=False, showgrid=False, zeroline=False, range=[0, 500])
+fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=1, zerolinecolor='silver', range=[0, 600])
 
 fig.add_trace(
   go.Scatter(
     name="Signal", # <|<|<|<|<|<|<|<|<|<|<|<|
     x=X,
     y=W,
-    mode="lines",
+    mode="markers+lines",
     line=dict(
         width=.8,
         color="gray",
         # showscale=False
+    ),
+    marker=dict(
+      size=3,
+      color="gray",
+      # showscale=False
     ),
     # visible = "legendonly"
   )
@@ -131,102 +139,81 @@ fig.add_trace(
   )
 )
 
-fig.add_trace(
-  go.Scatter(
-    name="-Amps", # <|<|<|<|<|<|<|<|<|<|<|<|
-    showlegend=False,
-    x=neg_X,
-    y=neg_Y,
-    # hovertext=np.arange(len(pos_pulses)),
-    mode="markers",
-    marker=dict(
-        size=6,
-        color="black",
-        # showscale=False
-    ),
-    # visible = "legendonly"
-  )
-)
+# fig.add_trace(
+#   go.Scatter(
+#     name="-Amps", # <|<|<|<|<|<|<|<|<|<|<|<|
+#     showlegend=False,
+#     x=neg_X,
+#     y=neg_Y,
+#     # hovertext=np.arange(len(pos_pulses)),
+#     mode="markers",
+#     marker=dict(
+#         size=6,
+#         color="black",
+#         # showscale=False
+#     ),
+#     # visible = "legendonly"
+#   )
+# )
+
+
+
+args = get_curvature_function(pos_X, pos_Y)
+r = args[0](0)
+
+'''Positive Vectors'''
+avg_pos_X = np.average(pos_frontier_X[1:] - pos_frontier_X[:-1])
+avg_pos_Y = np.average(pos_frontier_Y[1:] - pos_frontier_Y[:-1])
+avg_pos_m = avg_pos_Y / avg_pos_X #np.sqrt(avg_pos_X**2 + avg_pos_Y**2)
+
+for i in range(len(pos_frontier_X) - 1):
+  x0, y0 = pos_frontier_X[i]     , pos_frontier_Y[i]
+  x1, y1 = pos_frontier_X[i + 1] , pos_frontier_Y[i + 1]
+
+  m = (y1 - y0) / (x1 - x0)
+  # theta = np.arctan( (m - avg_pos_m) / (1 + avg_pos_m * m) )
+  # k = np.sin(theta) / (x1 - x0)
+  # r = 2 / np.abs(k)
+  sq = np.sqrt(4*m**2*r**2 - m**2*y0**2 + 2*m**2*y0*y1 - m**2*y1**2 - 2*m*x0*y0 + 2*m*x0*y1 + 2*m*x1*y0 - 2*m*x1*y1 + 4*r**2 - x0**2 + 2*x0*x1 - x1**2)
+  xc = (2*m**2*x0 - m*y0 + m*y1 - m*sq + x0 + x1)/(2*(m**2 + 1))
+  yc = (m*(y0 + y1) - 2*xc + x0 + x1)/(2*m)
+
+  draw_circle(xc, yc, r, fig, 1000)
+
+  # fig.add_annotation(
+  #   x=x1,  # arrows' head
+  #   y=y1,  # arrows' head
+  #   ax=x0,  # arrows' tail
+  #   ay=y0,  # arrows' tail
+  #   xref='x',
+  #   yref='y',
+  #   axref='x',
+  #   ayref='y',
+  #   text='',  # if you want only the arrow
+  #   showarrow=True,
+  #   arrowhead=2,
+  #   arrowsize=1,
+  #   arrowwidth=2,
+  #   arrowcolor="black"
+  # )
 
 fig.add_trace(
   go.Scatter(
-    name="Frontiers", # <|<|<|<|<|<|<|<|<|<|<|<|
+    name="Positive Frontier", # <|<|<|<|<|<|<|<|<|<|<|<|
     x=pos_frontier_X,
     y=pos_frontier_Y,
-    # fill="toself",
     mode="lines",
     line=dict(
-        width=1,
+        width=2,
         color="black",
         # showscale=False
     ),
+    # marker=dict(
+    #   size=3,
+    #   color="gray",
+    #   # showscale=False
+    # ),
     # visible = "legendonly"
-  )
-)
-
-fig.add_trace(
-  go.Scatter(
-    name="Negative Frontier", # <|<|<|<|<|<|<|<|<|<|<|<|
-    showlegend=False,
-    x=neg_frontier_X,
-    y=neg_frontier_Y,
-    # fill="toself",
-    mode="lines",
-    line=dict(
-        width=1,
-        color="black",
-        # showscale=False
-    ),
-    # visible = "legendonly"
-  )
-)
-
-fig.add_trace(
-  go.Scatter(
-    name="Envelope", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=X,
-    y=envelope,
-    # fill="toself",
-    mode="lines",
-    line=dict(
-        width=1,
-        color="silver",
-        # showscale=False
-    ),
-    # visible = "legendonly"
-  )
-)
-fig.add_trace(
-  go.Scatter(
-    name="Envelope", # <|<|<|<|<|<|<|<|<|<|<|<|
-    showlegend=False,
-    x=X,
-    y=-envelope,
-    # fill="toself",
-    mode="lines",
-    line=dict(
-        width=1,
-        color="silver",
-        # showscale=False
-    ),
-    # visible = "legendonly"
-  )
-)
-
-fig.add_trace(
-  go.Scatter(
-    name="Pseudo-Cycles",
-    x=[167.5, 167.5, None, 419.5, 419.5],
-    y=[-1, 1, None, -1, 1],
-    # marker_symbol="line-ns",
-    mode="lines",
-    line=dict(
-      # width=5,
-      color="black",
-      dash="dash"
-    )
-    # marker_line_width=2, 
-    # marker_size=50,
   )
 )
 
