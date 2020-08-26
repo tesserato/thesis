@@ -36,7 +36,7 @@
   % objective
   In this paper we propose a framework that uses intrinsic characteristics of a signal to estimate its envelope, eliminating the necessity of parameter tuning.
   % methods
-  The approach here described draws inspiration from general, computational and differential geometry to isolate the frontier of an arbitrary signal. The concepts of alpha-shapes, concave hulls, arc-length parametrization and discrete curve curvature are adapted. We also define a pulse in the context of a arbitrary digital signal as a means to reduce dimensionality and the complexity of the proposed algorithm.
+  The approach here described draws inspiration from general, computational and differential geometry to isolate the frontiers and thus estimate the temporal envelope of an arbitrary signal; to that end The concepts of alpha-shapes, concave hulls, and discrete curve curvature are explored. We also define a pulse in the context of a arbitrary digital signal as a means to reduce dimensionality and the complexity of the proposed algorithm.
   % results
   
   % implications
@@ -92,7 +92,7 @@ For a continuous function, then, a pulse would correspond to the pieces between 
 
 The most mathematically sound definition of an envelope involves its representation as an analytic signal, introduced by Gabor in 1946 \parencite{2007HahnHistory}. In his work, \textcite{1946GaborTheory} applies the then relatively new mathematical machinery of the quantum mechanics to unify time and frequency representations of a wave, showing how the Hilbert transform could be applied to a real signal in order to obtain a complex signal that would become known as the analytic signal.
 
-This analytic signal is of the form $ a(t) = s(t) + j \mathbb{H}(s(t)) $ \parencite{2016HePraat} where $ s(t) $ is the original real signal, that becomes the real part of the analytic signal. $ \mathbb{H}(s(t)) $, the Hilbert transform of the original signal becomes, then, the imaginary part of the analytic signal; the envelope of a signal thus represented can be straightforwardly obtained by the computation of its complex modulus.
+This analytic signal is of the form $ a(t) = s(t) + \mathbb{H}(s(t)) \ \text{i} $ \parencite{2016HePraat} where $ s(t) $ is the original real signal, that becomes the real part of the analytic signal. $ \mathbb{H}(s(t)) $, the Hilbert transform of the original signal becomes, then, the imaginary part of the analytic signal; the envelope of a signal thus represented can be straightforwardly obtained by the computation of its complex modulus.
 
 \begin{figure}[ht!]
   \centering
@@ -127,8 +127,6 @@ Intuitively, one can picture a circle being rolled above (or below, in the case 
 
 We can therefore revisit the concept of a pseudo-cycle, only hinted at before, defining it as the samples of the original wave that belong to two successive pulses that belong to their respective frontiers, including eventual pulses between them, as can be seen in figure \ref{fig:Frontiers}.
 
-% TODO snowball image
-
 It is now necessary to infer the appropriate radius of such a circle and, to that end, a measure of the curvature of a discrete function is needed. Discrete curvature estimation is an important task in image processing \parencite{2010FleischmannNovel} for which no default definition exists; The two possible approaches are the derivation of direct methods that use characteristics of the discrete wave to calculate its curvature at each point, or the calculation of the curvature of a curve fitted to the discrete wave \parencite{2001CoeurjollyDiscrete}.
 
 To fit a polynomial to the a generic wave two approaches are readily available: the least mean squares approach, that seeks to minimize the dependant variable errors and the total least squares problem, that treats both variables symmetrically \parencite{1980GolubAnalysis}.
@@ -146,23 +144,25 @@ The idea is to find the equivalent circle whose tangent presents the same change
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=0.5\linewidth]{04DiscreteCurvature.pdf}
-  \caption{Change of direction from horizontal, in $x_0$, until an angle of $\theta$, in $x_1$, that is equivalent to the angle between the average direction and the direction of the vector $\vec{v}[l]$ whose radius of curvature is being calculated. $x_0$ and $x_1$} correspond to the the horizontal coordinates of the tale and tip of $\vec{v}[l]$, respectively.
+    \includegraphics[width=0.3\linewidth]{04DiscreteCurvature.pdf}
+  \caption{Change of direction from horizontal, in $ \hat{u}_0 $, until an angle of $ \theta $, in $ \hat{u}_1 $, that is equivalent to the angle between the average direction and the direction of the vector $ \vec{v}_l $ whose radius of curvature is being calculated, shown in the picture in grey.}
   \label{fig:DiscreteCurvature}
 \end{figure}
 
-Formally, for each frontier, positive or negative, we define $ m - 1 $ vectors, $ m $ being the number of positive or negative pulses respectively, as the coordinates of the posterior pulse with the relevant signal minus the preceding pulse: $\vec{v}[l]^\pm = (P[l+1]_x^\pm - P[l]_x^\pm, P[l+1]_y^\pm - P[l]_y^\pm), \forall 0 \le l < m - 1 $, recalling that the $x$ coordinate of a pulse was defined as the $x$ coordinate of its sample with maximum amplitude, while the $y$ coordinate of a pulse is this amplitude itself.
+Formally, for each frontier, positive or negative, we define $ m-1 $ vectors, $ m $ being the number of positive or negative pulses respectively, as the coordinates of the posterior pulse with the relevant signal minus the preceding pulse: $\vec{v}_l^\pm = (P[l+1]_x^\pm - P[l]_x^\pm, P[l+1]_y^\pm - P[l]_y^\pm), \forall 0 \ \le l < m - 1 $, recalling that the $x$ coordinate of a pulse was defined as the $x$ coordinate of its sample with maximum amplitude, while the $y$ coordinate of a pulse is this amplitude itself.
 
-Since an edge defines only one direction, there remains the need for a reference. As we are interested in the relative curvature, it is natural to use the average direction of all vectors, $ \vec{\overline{v}}^\pm = \frac{1}{m-1} \sum_{l=0}^{m-1} \vec{v}[l]^\pm $, so as to measure the relative change of direction of each edge. This procedure, as well as the circles generated by it, are illustrated in figure \ref{fig:Curvatures}
+Since an edge defines only one direction, there remains the need for a reference. As we are interested in the relative curvature, it is natural to use the average direction of all vectors, $ \vec{\overline{v}}^\pm = \frac{1}{m-1} \sum_{l=0}^{m-1} \vec{v}_l^\pm $, so as to measure the relative change of direction of each edge. This procedure, as well as the circles generated by it, are illustrated in figure \ref{fig:Curvatures}. 
+
+The angle $ \theta $ between the average direction and each of the vectors can be obtained via the relation of the slope of the respective lines, as in the expression $ \theta = \arctan( (m - \overline{m}) / (1 + m * \overline{m}) ) $. The radii of the equivalent circles are thus given by $ r_l = x_l / \sin (\theta_l) $ with the curvature given by $\kappa_l =1/r_l=\sin (\theta_l) / x_l$.
 
 \begin{figure}[ht!]
   \centering
     \includegraphics[width=0.8\linewidth]{05Curvatures.pdf}
-  \caption{The equivalent circles obtained via the procedure described for the positive frontier. $\theta$, the angle between $ \vec{\overline{v}}^+$ and each of the $\vec{v}[l]^+$ is used, as is the horizontal component of each $\vec{v}[l]^+$ to obtain the radii of the circles.}
+  \caption{The equivalent circles obtained via the procedure described for the positive frontier. $\theta$, the angle between $ \vec{\overline{v}}^+$ and each of the $\vec{v}_l^+$ is used, as is the horizontal component of each $\vec{v}_l^+$ to obtain the radii of the circles.}
   \label{fig:Curvatures}
 \end{figure}
 
-After this procedure one obtains a set of points in $ \mathbb{R}^2 $ % TODO
+After this procedure one obtains a set of points in $ \mathbb{R}^2 $ where the ordinate represents the instantaneous radius, with its localization in the space of the wave given by the ordinates. Given the robustness of the method, for an average wave of a couple of seconds at an ordinary rate of 44100 $ \mathit{fps} $ the average of the radius values is sufficient to assure the identification of the frontier. However, a curve fitting method can be used in the case of longer waves. An example of the use of the average equivalent circle can be seen in figure \ref{fig:AvgCircle}.
 
 \begin{figure}[ht!]
   \centering
@@ -188,9 +188,19 @@ After this procedure one obtains a set of points in $ \mathbb{R}^2 $ % TODO
   
 \section{Results}
 
+Applying the method to a diverse set of sound waves, we can have an idea of its generality.
+% Revisit purpose and methods
+% Overview of results
+% Key results in details
+
+
 \subsection{Robustness}
 
 \subsection{Fundamental Frequency as a Welcome Side-effect}
+% Comparison with results in other works
+% Comparison with predictions
+% Problems with results
+% Possible implications
 
 \section{Discussion + Conclusion}
 
