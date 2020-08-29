@@ -1,4 +1,5 @@
 \documentclass{article}
+% \usepackage{svg}
 \usepackage{lmodern}
 \usepackage[T1]{fontenc}
 \usepackage{amsfonts} % \mathbb
@@ -187,12 +188,18 @@ After this procedure one obtains a set of points in $ \mathbb{R}^2 $ where the o
 
   
 \section{Results}
-
-Applying the method to a diverse set of sound waves, we can have an idea of its generality.
+% TODO
+Figure \ref{fig:FullFrontiers} illustrates the frontiers obtained by the application of the method to 6 diverse discrete sound waves.
 % Revisit purpose and methods
 % Overview of results
 % Key results in details
 
+\begin{figure}[ht!]
+  \centering
+    \includegraphics[width=0.8\linewidth]{07FullFrontiers.pdf}
+  \caption{Positive and negative frontiers of 6 digital waves. For each wave, the region highlighted in black is shown in detail. For each wave the horizontal axis is the sample number $i$, while the vertical axis is the normalized amplitude. All 6 waves were recorded at 44100 $ \mathit{fps} $.}
+  \label{fig:FullFrontiers}
+\end{figure}
 
 \subsection{Robustness}
 
