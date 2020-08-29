@@ -8,7 +8,7 @@ from Helper import read_wav, get_pulses_area, split_pulses, signal_to_pulses, ge
 '''==============='''
 fig = go.Figure()
 
-name = "bend"
+name = "tom"
 W, fps = read_wav(f"Samples/{name}.wav")
 
 # W = W [:10000]
@@ -101,37 +101,37 @@ fig.add_trace(
   )
 )
 
-fig.add_trace(
-  go.Scatter(
-    name="+Amps", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=pos_X,
-    y=pos_Y,
-    # hovertext=np.arange(len(pos_pulses)),
-    mode="lines+markers",
-    marker=dict(
-        size=6,
-        color="black",
-        # showscale=False
-    ),
-    visible = "legendonly"
-  )
-)
+# fig.add_trace(
+#   go.Scatter(
+#     name="+Amps", # <|<|<|<|<|<|<|<|<|<|<|<|
+#     x=pos_X,
+#     y=pos_Y,
+#     # hovertext=np.arange(len(pos_pulses)),
+#     mode="lines+markers",
+#     marker=dict(
+#         size=6,
+#         color="black",
+#         # showscale=False
+#     ),
+#     visible = "legendonly"
+#   )
+# )
 
-fig.add_trace(
-  go.Scatter(
-    name="-Amps", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=neg_X,
-    y=neg_Y,
-    # hovertext=np.arange(len(pos_pulses)),
-    mode="lines+markers",
-    marker=dict(
-        size=6,
-        color="black",
-        # showscale=False
-    ),
-    visible = "legendonly"
-  )
-)
+# fig.add_trace(
+#   go.Scatter(
+#     name="-Amps", # <|<|<|<|<|<|<|<|<|<|<|<|
+#     x=neg_X,
+#     y=neg_Y,
+#     # hovertext=np.arange(len(pos_pulses)),
+#     mode="lines+markers",
+#     marker=dict(
+#         size=6,
+#         color="black",
+#         # showscale=False
+#     ),
+#     visible = "legendonly"
+#   )
+# )
 
 fig.add_trace(
   go.Scatter(

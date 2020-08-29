@@ -219,7 +219,7 @@ def draw_circle(xc, yc, r, fig, n=100, color="silver"):
   return X, Y
 
 
-def get_curvature_function(X, Y):
+def get_radius_function(X, Y):
   X = np.array(X)
   Y = np.array(Y)
   # avg_Y = np.average(Y)
@@ -264,7 +264,7 @@ def get_frontier(pulses):
   #   )
   # )
 
-  r_of_x, _, _, _, _ = get_curvature_function([p.x for p in pulses], [p.y for p in pulses])
+  r_of_x, _, _, _, _ = get_radius_function([p.x for p in pulses], [p.y for p in pulses])
   idx1 = 0
   idx2 = 1
   Frontier = [pulses[0]]
