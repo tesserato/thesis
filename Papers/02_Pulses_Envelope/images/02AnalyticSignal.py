@@ -44,7 +44,7 @@ fig.update_layout(
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=5, r=5, b=5, t=5),
   font=dict(
-  family="Latin Modern",
+  family="Latin Modern Roman",
   color="black",
   size=18
   )
