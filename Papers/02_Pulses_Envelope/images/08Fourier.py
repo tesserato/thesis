@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import sys
 import argparse
+from plotly.subplots import make_subplots
 
 def read_wav(path): 
   """returns signal & fps"""
@@ -92,57 +93,11 @@ def get_frontier(X, Y):
   frontierY = np.array(frontierY) / scaling
   return frontierX, frontierY
 
-'''Creating Parser'''
-parser = argparse.ArgumentParser()
-
-parser.add_argument(
-  "--name",
-  type=str,
-)
-
-parser.add_argument(
-  "--x0",
-  type=int,
-)
-
-parser.add_argument(
-  "--x1",
-  type=int,
-)
-
-parser.add_argument(
-  "--y0",
-  type=float,
-)
-
-parser.add_argument(
-  "--y1",
-  type=float,
-)
-
-parser.add_argument(
-  "--detailed",
-  type=bool,
-  default=False
-)
-
-
-args = vars(parser.parse_args())
-print(f"Original args: {args}")
-name = args["name"]
-detailed = args["detailed"]
-x0_plot = args["x0"]
-x1_plot = args["x1"]
-y0_plot = args["y0"]
-y1_plot = args["y1"]
-print(f"name:{name} detailed:{detailed} x0:{x0_plot} x1:{x1_plot} y0:{y0_plot} y1:{y1_plot}")
-
 
 '''==============='''
 ''' Read wav file '''
 '''==============='''
-fig = go.Figure()
-
+name = "piano33"
 parent_path = str(Path(os.path.abspath('./')).parents[1])
 path = f"{parent_path}/Python/Samples/{name}.wav"
 print(path)
@@ -188,29 +143,35 @@ posX, posY, negX, negY = np.array(posX), np.array(posY), np.array(negX), np.arra
 pos_frontierX, pos_frontierY = get_frontier(posX, posY)
 neg_frontierX, neg_frontierY = get_frontier(negX, negY)
 
-# frontierX = np.concatenate([pos_frontierX, neg_frontierX])
-# frontierY = np.concatenate([pos_frontierY, np.abs(neg_frontierY)])
+frontierX = np.concatenate([pos_frontierX, neg_frontierX])
+frontierY = np.concatenate([pos_frontierY, np.abs(neg_frontierY)])
 
-# idxs = np.argsort(frontierX)
-# frontierX = frontierX[idxs]
-# frontierY = frontierY[idxs]
+idxs = np.argsort(frontierX)
+frontierX = frontierX[idxs]
+frontierY = frontierY[idxs]
+
+f = interp1d(frontierX, frontierY, fill_value="extrapolate", assume_sorted=True)
+
+FT = np.abs(np.fft.rfft(W) * 2 / n)
+# FT = FT / np.max(FT)
+
+normalized_W = W / f(X)
+normalized_W = normalized_W / np.average(np.abs(normalized_W)) * np.average(np.abs(W))
+normalized_W = normalized_W - np.average(normalized_W)
+normalized_FT = np.abs(np.fft.rfft(normalized_W) * 2 / n)
+# normalized_FT = normalized_FT / np.max(normalized_FT)
+
 
 '''============================================================================'''
-'''                                    PLOT                                    '''
+'''                                    PLOT FT                                    '''
 '''============================================================================'''
+fig = make_subplots(
+    rows=2, cols=1,
+    subplot_titles=("Frequency Domain", "Time Domain")
+    )
 
 fig.layout.template ="plotly_white"
-# fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
 fig.update_layout(
-  # title = name,
-  xaxis_title="$i$",
-  yaxis_title="Amplitude",
-
-  # yaxis = dict(        # <|<|<|<|<|<|<|<|<|<|<|<|
-  #   scaleanchor = "x", # <|<|<|<|<|<|<|<|<|<|<|<|
-  #   scaleratio = 1,    # <|<|<|<|<|<|<|<|<|<|<|<|
-  # ),                   # <|<|<|<|<|<|<|<|<|<|<|<|
-
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=5, r=5, b=5, t=5),
   font=dict(
@@ -220,92 +181,73 @@ fig.update_layout(
   )
 )
 
-if detailed:
-  fig.update_xaxes(showline=False, showgrid=False, zeroline=False, range=[x0_plot, x1_plot])
-  fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=1, zerolinecolor='silver', range=[y0_plot, y1_plot])
-else:
-  fig.update_xaxes(showline=False, showgrid=False, zeroline=False)
-  fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=1, zerolinecolor='silver')
+fig.update_xaxes(row=2, col=1, title_text="Frequency", showline=False, showgrid=False, zeroline=False, range=[0, 5000])
+fig.update_yaxes(row=2, col=1, title_text="Power", showline=False, showgrid=False, zerolinewidth=1, zerolinecolor='silver', range=[0, 0.005])
 
 
 fig.add_trace(
   go.Scatter(
-    name="Signal", # <|<|<|<|<|<|<|<|<|<|<|<|
+    name="Original Signal", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=X,
+    y=FT,
+    mode="none",
+    fill="tozeroy",
+    fillcolor="black",
+  ),
+  row=2, col=1
+)
+
+fig.add_trace(
+  go.Scatter(
+    name="Normalized Signal", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=X,
+    y=normalized_FT,
+    mode="none",
+    fill="tozeroy",
+    fillcolor="rgba(128,128,128,0.9)",
+  ),
+  row=2, col=1
+)
+
+
+
+'''============================================================================'''
+'''                                    PLOT SIGNAL                                   '''
+'''============================================================================'''
+
+fig.update_xaxes(row=1, col=1, title_text="$i$", showline=False, showgrid=False, zeroline=False)
+fig.update_yaxes(row=1, col=1, title_text="Amplitude", showline=False, showgrid=False, zerolinewidth=1)
+
+
+fig.add_trace(
+  go.Scatter(
+    name="Original Signal", # <|<|<|<|<|<|<|<|<|<|<|<|
     x=X,
     y=W,
     mode="lines",
-    line=dict(
-        # size=8,
-        color="gray",
-        # showscale=False
-    ),
-    # visible = "legendonly"
-  )
+    line=dict(color="black"),
+    showlegend=False,
+  ),
+  row=1, col=1
 )
 
 fig.add_trace(
   go.Scatter(
-    name="Frontiers", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=pos_frontierX,
-    y=pos_frontierY,
+    name="Normalized Signal", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=X,
+    y=normalized_W,
     mode="lines",
-    line=dict(
-        width=3,
-        color="black",
-        # showscale=False
-    ),
-    # visible = "legendonly"
-  )
+    line=dict(color="rgba(128,128,128,0.9)"),
+    showlegend=False,
+  ),
+  row=1, col=1
 )
 
-fig.add_trace(
-  go.Scatter(
-    name="Negative Frontier", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=neg_frontierX,
-    y=neg_frontierY,
-    mode="lines",
-    line=dict(
-        width=3,
-        color="black",
-        # showscale=False
-    ),
-    # visible = "legendonly"
-    showlegend=False
-  )
-)
+fig.layout.annotations[0].update(x=0.875)
+fig.layout.annotations[1].update(x=0.875)
 
-if not detailed:
-  fig.add_trace(
-    go.Scatter(
-      name="Limits", # <|<|<|<|<|<|<|<|<|<|<|<|
-      x=[x0_plot, x1_plot],
-      y=[0, 0],
-      mode="markers",
-      marker=dict(
-        size=1,
-        color="black",
-        # showscale=False
-      ),
-      # visible = "legendonly"
-      showlegend=False
-    )
-  )
+# fig.show(config=dict({'scrollZoom': True}))
 
-  fig.show(config=dict({'scrollZoom': True}))
-
-
-if detailed:
-  suffix = "_d"
-  height = 100
-  width = 400
-else:
-  suffix = ""
-  height = 300
-  width = 800
-
-
-save_name = "./images/07FullFrontiers/" + sys.argv[0].split('\\')[-1].replace(".py", "") + "-" + name + suffix + ".svg"
-fig.write_image(save_name, width=width, height=height, scale=1, engine="kaleido")
+save_name = "./" + sys.argv[0].split('/')[-1].replace(".py", ".pdf")
+fig.write_image(save_name, width=800, height=400, scale=1, engine="kaleido")
 print("saved:", save_name)
-
-# _ = input("PRESS ENTER TO CONTINUE.")

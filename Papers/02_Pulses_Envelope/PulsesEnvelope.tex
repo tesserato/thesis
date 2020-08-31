@@ -23,32 +23,25 @@
 \maketitle
 
 \begin{abstract} % 250 words
-
-% estimate parameters from the signal itself
-% broadband
-% Dominant frequency as by-product
-% we define several entities in the process, introducing a new measure of discrete curve curvature, hoping to consolidate the terminology in the area
-
-  % background  
-  Despite being an elusive concept, mathematically well defined only for artificially generated waves, the temporal amplitude envelope of a signal is essential for its complete characterization, being the primary information carrying medium in spoken voice and telecommunications, for example.
-  intuitively, the temporal envelope can be understood as a smooth function on the same variable as the principal wave, or temporal fine structure, that modulates the signal, responsible for its outer shape. It is implied in this definition that the envelope is non periodic in general and is thus better addressed by specific techniques diverse from those used in the analysis of the periodic, rapidly changing wave it encompasses.
-  % motivation
-  Envelope detection techniques have applications in areas like health, sound classification and synthesis, seismology and speech recognition. Despite of that, a general approach to envelope detection of signals with rich spectral content seems to be lacking, and most methods involve manual intervention, like filter design, based on prior knowledge about the wave under investigation.
-  % objective
-  In this paper we propose a framework that uses intrinsic characteristics of a signal to estimate its envelope, eliminating the necessity of parameter tuning.
-  % methods
-  The approach here described draws inspiration from general, computational and differential geometry to isolate the frontiers and thus estimate the temporal envelope of an arbitrary signal; to that end The concepts of alpha-shapes, concave hulls, and discrete curve curvature are explored. We also define a pulse in the context of a arbitrary digital signal as a means to reduce dimensionality and the complexity of the proposed algorithm.
-  % results
-  
-  % implications
-
+% background  
+Despite being an elusive concept, the temporal amplitude envelope of a signal is essential for its complete characterization, being the primary information carrying medium in spoken voice and telecommunications, for example.
+intuitively, the temporal envelope can be understood as a smooth function, that modulates the signal, being responsible for its outer shape.
+% motivation
+Envelope detection techniques have applications in areas like health, sound classification and synthesis, seismology and speech recognition. Despite of that, a general approach to envelope detection of signals with rich spectral content seems to be lacking, and most methods involve manual intervention, like filter design or smoothing, based on prior knowledge about the wave under investigation.
+% objective
+In this paper we propose a framework that uses intrinsic characteristics of a signal to estimate its envelope, completely eliminating the necessity of parameter tuning.
+% methods
+The approach here described draws inspiration from general, computational and differential geometry to isolate the frontiers and thus estimate the temporal envelope of an arbitrary signal; to that end The concepts of alpha-shapes, concave hulls, and discrete curvature are explored. We also define a pulse in the context of a arbitrary digital signal as a means to reduce dimensionality and the complexity of the proposed algorithm.
+% results
+We find that the algorithm accurate in the identification of the frontiers of a range of digital sound signal with very diverse characteristics, while providing the dominant frequency of the wave as a by-product. The algorithm also compares favourably with a common detection technique based on the Hilbert Transform.
+While the results are satisfactory per se, we define several geometric entities in this work, including a new measure of discrete curvature; we hope to consolidate theory in the area, while providing a solid basis for the development of new techniques, specially in sound synthesis.
 \end{abstract}
 
 {\bf Keywords:} DSP, alpha-shapes, envelope detection
 
 \section{Introduction} % 500 words
 % Opener sentence
-Despite being ubiquitous in digital signal processing, the literature about envelope detection is very fragmented \parencite{2017LyonsDigital}. Besides, most envelope detection techniques are designed to account for very specific settings, like pure sinusoids with moderate noise contents, in line with the most common usages of those algorithms with artificial signals in the context of analog telecommunications.
+Despite being ubiquitous in both analog and digital signal processing, the literature about envelope detection is very fragmented \parencite{2017LyonsDigital}. Besides, most envelope detection techniques are designed to account for very specific settings, like pure sinusoids with moderate noise contents, in line with the most common usages of those algorithms with artificial signals in the context of analog telecommunications; that limitation arises in part by the lack of a mathematical definition for a temporal envelope \parencite{2013Mengempirical}.
 
 % Literature review | Brief Context of Prior Research
 In many natural signals, however, the temporal amplitude envelope of a signal plays a prominent role in the characteristics exhibited: According to \textcite{2017QiRelative}, for example, the envelope is at least as important as the fine structure of the soundwave in the context of the intelligibility of mandarin tones. That is also the case for English \parencite{1995ShannonSpeech}, where even envelopes modulating mostly noise were still capable of conveying meaning. The envelope helps to convey emotion and identity to the human voice \parencite{2018ZhuContributions}, and envelope preserving characteristics of concert halls are associated with their pleasantness \parencite{2011LokkiEngaging}.
@@ -189,9 +182,12 @@ After this procedure one obtains a set of points in $ \mathbb{R}^2 $ where the o
   
 \section{Results}
 % TODO
-Figure \ref{fig:FullFrontiers} illustrates the frontiers obtained by the application of the method to 6 diverse discrete sound waves.
 % Revisit purpose and methods
 % Overview of results
+Figure \ref{fig:FullFrontiers} illustrates the frontiers obtained to six diverse discrete sound waves, as well as a detail view of a shorter segment for each wave. All waves are records of physical sounds, chosen to represent the applicability of the algorithm in real world scenarios.
+
+We can see that the frontier is satisfactorily detected in harmonic an inharmonic sounds, and presents robustness in relation to the number of samples and the frequencies of the waves.
+
 % Key results in details
 
 \begin{figure}[ht!]
@@ -200,6 +196,17 @@ Figure \ref{fig:FullFrontiers} illustrates the frontiers obtained by the applica
   \caption{Positive and negative frontiers of 6 digital waves. For each wave, the region highlighted in black is shown in detail. For each wave the horizontal axis is the sample number $i$, while the vertical axis is the normalized amplitude. All 6 waves were recorded at 44100 $ \mathit{fps} $.}
   \label{fig:FullFrontiers}
 \end{figure}
+
+The impact of the normalization of the wave with the frontiers obtained can be seen in figure \ref{fig:Fourier}, which shows the original and normalized wave in the case of a recording of the key 33 of a piano both in the time and frequency domains.
+
+\begin{figure}[ht!]
+  \centering
+    \includegraphics[width=0.8\linewidth]{08Fourier.pdf}
+  \caption{Original and normalized views of a recording of key 33 (F3, 175 Hz) from a grand piano both in time and frequency domains.}
+  \label{fig:Fourier}
+\end{figure}
+
+
 
 \subsection{Robustness}
 
