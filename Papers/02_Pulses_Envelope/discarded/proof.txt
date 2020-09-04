@@ -1,0 +1,21 @@
+While a theoretical basis for the normalization of the amplitude is given, and is justified in practice by the computational stability issues that might arise with arbitrary values, the algorithm is, from a pure mathematical point of view, impervious to amplitude scaling, as we now prove.
+
+let $ s $ be a positive real number that multiplies every sample of a discrete wave $ W $. The subdivision in pulses of such a wave is unchanged by the vertical scaling operation, and we can write the slope of a line segment from a pulse to the next pulse with the same sign as $ m_l = (s y_{l + 1} - s y_l) / (x_{l + 1} - x_l) $.
+
+Assuming, for the sake of simplicity, $ \overline{m} = 0 $, the radius of the equivalent circle of such a segment, as per equation \ref{eq:1}, is
+
+$$ r_l =\left\lvert \frac{\sqrt{\left(s {y}_{l + 1} - s {y}_{l}\right)^{2} + \left({x}_{l + 1} - {x}_{l}\right)^{2}} \left({x}_{l + 1} - {x}_{l}\right)}{s {y}_{l + 1} - s {y}_{l}} \right\rvert $$
+
+And the square of the distance $ d_l $ from the center of a circle $ C $ with that radius passing through the points defined by the coordinates of both pulses to the median point $\overline{p} = \big((x_l + x_{l + 1}) / 2, (y_l + y_{l + 1}) / 2\big) $ of the line segment is
+
+$$ d_l^2 = - \frac{\left(s {y}_{l + 1} - s {y}_{l} - 2 {x}_{l + 1} + 2 {x}_{l}\right) \left(s {y}_{l + 1} - s {y}_{l} + 2 {x}_{l + 1} - 2 {x}_{l}\right) \left(s^{2} {y}_{l + 1}^{2} - 2 s^{2} {y}_{l + 1} {y}_{l} + s^{2} {y}_{l}^{2} + {x}_{l + 1}^{2} - 2 {x}_{l + 1} {x}_{l} + {x}_{l}^{2}\right)}{4 s^{2} \left({y}_{l + 1} - {y}_{l}\right)^{2}} $$
+
+Assuming invariance to vertical scaling, $ \overline{p} $ lying inside or outside the circle must not depend on $ s $; $ |d_l| \le |r_l| \iff d_l^2 / r_l^2 \le 1 \iff \overline{p} \in C $.
+
+$$ \frac{d_l^2}{r_l^2} = \frac{- \frac{s^{2} \left({y}_{i + 1}^{2} + {y}_{i}^{2}\right)}{4} + \frac{s^{2} {y}_{i + 1} {y}_{i}}{2} + ({x}_{i + 1} - {x}_{i})^{2}}{({x}_{i + 1} - {x}_{i})^{2}} \le 1$$
+
+Reorganizing:
+
+$$ y_{i + 1} y_i \le \frac{y_{i + 1}^2 + y_i^2}{2} \iff \overline{p} \in C $$
+
+Thus, the circle $ C $ containing the point $\overline{p}$ doesn't depend on $ s $ nor on the horizontal parametrization of $ W \ quad \blacksquare $
