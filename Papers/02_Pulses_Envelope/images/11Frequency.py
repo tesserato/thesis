@@ -64,8 +64,8 @@ def get_radius_function(X, Y):
 
 def get_frontier(X, Y):
   '''extracts the envelope via snowball method'''
-  s = (np.average(X[1:]-X[:-1]) / 2) / np.average(Y)
-  Y = Y * s
+  scaling = (np.average(X[1:]-X[:-1]) / 2) / np.average(Y)
+  Y = Y * scaling
 
   r_of_x = get_radius_function(X, Y)
   idx1 = 0
@@ -90,14 +90,14 @@ def get_frontier(X, Y):
   # frontierX.append(X[-1])
   # frontierY.append(Y[-1])
   frontierX = np.array(frontierX)
-  frontierY = np.array(frontierY) / s
+  frontierY = np.array(frontierY) / scaling
   return frontierX, frontierY
 
 
 '''==============='''
 ''' Read wav file '''
 '''==============='''
-name = "tom"
+name = "alto"
 parent_path = str(Path(os.path.abspath('./')).parents[1])
 path = f"{parent_path}/Python/Samples/{name}.wav"
 print(path)
@@ -108,8 +108,17 @@ W = W - np.average(W)
 amplitude = np.max(np.abs(W))
 W = W / amplitude
 n = W.size
-print(f"n={n}, amplitude={amplitude}")
-X = np.arange(n, dtype=np.float64)
+print(f"n={n}")
+X = np.arange(n)
+
+# '''==============='''
+# ''' Make wav file '''
+# '''==============='''
+# n = 44100
+# X = np.arange(n)
+# fo = 5
+# po = 3
+# W = np.cos(po + 2 * np.pi * fo * X / n)
 
 
 sign = np.sign(W[0])
@@ -143,21 +152,36 @@ posX, posY, negX, negY = np.array(posX), np.array(posY), np.array(negX), np.arra
 pos_frontierX, pos_frontierY = get_frontier(posX, posY)
 neg_frontierX, neg_frontierY = get_frontier(negX, negY)
 
-pos_scale = 1000000
-neg_scale = 1.0e-159
-scale = 1
+FT = np.fft.rfft(W) * 2 / n
+PW = np.abs(FT)
+
+f = np.argmax(PW)
+p = np.angle(FT[f])
+
+f_pf = (pos_frontierX.size - 1) * n / (pos_frontierX[-1] - pos_frontierX[0])
+p_pf = np.average((2 * np.pi - 2 * f_pf * pos_frontierX * np.pi / n) % (2 * np.pi))
+
+f_nf = (neg_frontierX.size - 1) * n / (neg_frontierX[-1] - neg_frontierX[0])
+p_nf = np.average((np.pi - 2 * f_nf * neg_frontierX * np.pi / n) % (2 * np.pi))
+
+print(f"FT: f={f}, p={round(p, 2)} PF: f={f_pf}, p={p_pf} NF: f={f_nf}, p={p_nf}")
+
+exit()
+
+
+
 
 '''============================================================================'''
-'''                                    PLOT                                    '''
+'''                                    PLOT FT                                    '''
 '''============================================================================'''
 fig = make_subplots(
-    rows=1, cols=2, shared_yaxes=True#, horizontal_spacing=0.01
-    # subplot_titles=("Frequency Domain", "Time Domain")
+    rows=2, cols=1,
+    subplot_titles=("Frequency Domain", "Time Domain")
     )
 
 fig.layout.template ="plotly_white"
 fig.update_layout(
-  legend=dict(orientation='h', yanchor='top', xanchor='left', x=0.05, y=1.1),
+  legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=5, r=5, b=5, t=5),
   font=dict(
   family="Latin Modern Roman",
@@ -166,56 +190,51 @@ fig.update_layout(
   )
 )
 
-fig.update_xaxes(row=1, col=2, title_text="$\\text{Max} \\ x$", showline=False, showgrid=False, zeroline=False)
-fig.update_yaxes(row=1, col=2, title_text="Amplitude", showline=False, showgrid=False, zerolinewidth=1, zerolinecolor="silver")
+fig.update_xaxes(row=2, col=1, title_text="Frequency", showline=False, showgrid=False, zeroline=False, range=[0, 5000])
+fig.update_yaxes(row=2, col=1, title_text="Power", showline=False, showgrid=False, zerolinewidth=1, zerolinecolor='silver', range=[0, 0.005])
 
-fig.add_trace(
-  go.Scatter(
-    name="Signal", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=X * pos_scale,
-    y=W,
-    mode="lines",
-    line=dict(color="silver"),
-    showlegend=True,
-  ),
-  row=1, col=2
-)
-
-fig.add_trace(
-  go.Scatter(
-    name="Frontiers", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=pos_frontierX * pos_scale,
-    y=pos_frontierY,
-    mode="lines",
-    line=dict(color="Black"),
-    showlegend=True,
-  ),
-  row=1, col=2
-)
-
-fig.add_trace(
-  go.Scatter(
-    name="Frontier", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=neg_frontierX * pos_scale,
-    y=neg_frontierY,
-    mode="lines",
-    line=dict(color="Black"),
-    showlegend=False,
-  ),
-  row=1, col=2
-)
-
-
-fig.update_xaxes(row=1, col=1, title_text="$\\text{Min} \\ x$", showline=False, showgrid=False, zeroline=False)
-fig.update_yaxes(row=1, col=1, title_text="Amplitude", showline=False, showgrid=False, zerolinewidth=1, zerolinecolor="silver")
 
 fig.add_trace(
   go.Scatter(
     name="Original Signal", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=X * neg_scale,
+    x=X,
+    y=FT,
+    mode="none",
+    fill="tozeroy",
+    fillcolor="black",
+  ),
+  row=2, col=1
+)
+
+fig.add_trace(
+  go.Scatter(
+    name="Normalized Signal", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=X,
+    y=normalized_FT,
+    mode="none",
+    fill="tozeroy",
+    fillcolor="rgba(128,128,128,0.9)",
+  ),
+  row=2, col=1
+)
+
+
+
+'''============================================================================'''
+'''                                    PLOT SIGNAL                                   '''
+'''============================================================================'''
+
+fig.update_xaxes(row=1, col=1, title_text="$i$", showline=False, showgrid=False, zeroline=False)
+fig.update_yaxes(row=1, col=1, title_text="Amplitude", showline=False, showgrid=False, zerolinewidth=1)
+
+
+fig.add_trace(
+  go.Scatter(
+    name="Original Signal", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=X,
     y=W,
     mode="lines",
-    line=dict(color="silver"),
+    line=dict(color="black"),
     showlegend=False,
   ),
   row=1, col=1
@@ -223,32 +242,21 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Frontier", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=pos_frontierX * neg_scale,
-    y=pos_frontierY,
+    name="Normalized Signal", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=X,
+    y=normalized_W,
     mode="lines",
-    line=dict(color="Black"),
+    line=dict(color="rgba(128,128,128,0.9)"),
     showlegend=False,
   ),
   row=1, col=1
 )
 
-fig.add_trace(
-  go.Scatter(
-    name="Frontier", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=neg_frontierX * neg_scale,
-    y=neg_frontierY,
-    mode="lines",
-    line=dict(color="Black"),
-    showlegend=False,
-  ),
-  row=1, col=1
-)
-
-# fig.layout.annotations[0].update(x=0.875)
+fig.layout.annotations[0].update(x=0.875)
+fig.layout.annotations[1].update(x=0.875)
 
 # fig.show(config=dict({'scrollZoom': True}))
 
 save_name = "./" + sys.argv[0].split('/')[-1].replace(".py", ".pdf")
-fig.write_image(save_name, width=800, height=200, scale=1, engine="kaleido")
+fig.write_image(save_name, width=800, height=400, scale=1, engine="kaleido")
 print("saved:", save_name)
