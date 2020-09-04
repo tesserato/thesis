@@ -4,7 +4,7 @@ import numpy as np
 from Helper import save_wav
 
 random.seed(0)
-n = 10000
+n = 44100
 
 X = np.arange(n)
 Y = np.zeros(n)
