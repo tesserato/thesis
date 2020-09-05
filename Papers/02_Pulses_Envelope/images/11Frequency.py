@@ -154,7 +154,6 @@ neg_frontierX, neg_frontierY = get_frontier(negX, negY)
 
 FT = np.fft.rfft(W) * 2 / n
 PW = np.abs(FT)
-
 f = np.argmax(PW)
 p = np.angle(FT[f])
 

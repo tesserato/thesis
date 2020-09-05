@@ -119,7 +119,7 @@ Figure \ref{fig:AnalyticSignal} shows the envelope obtained via the Hilbert tran
 
 In practice, however, is not uncommon for a discrete wave, specially in the case of sound, to present somewhat different positive and negative contours; as our method will forcibly have to be applied separately to both sides, superior and inferior, of the discrete wave, it is only natural to introduce such separation as soon as possible. 
 
-To do so we will define the positive (upper) frontier and negative (lower) frontier as the set of points $ (i, |W[i]|) $ that are, necessarily but not sufficiently, the points of maximum absolute amplitude of their respective pulses. The set of all these points such that $ W[i] > 0 $ will be called the positive, piecewise linear frontier and will be denoted by $ F_+ $; similarly, $ F_- $ will denote the negative frontier of $ W $, defined by the subset of points $ (i, W[i]) $ where $ W[i] < 0 $, as is shown in figure \ref{fig:Frontiers}. To identify such points, we need to address the different units in which the amplitude and horizontal distance of our wave are expressed.
+To do so we will define the positive (upper) frontier and negative (lower) frontier as the set of points $ (i, |W[i]|) $ that are, necessarily but not sufficiently, the points of maximum absolute amplitude of their respective pulses. The set of all these points such that $ W[i] > 0 $ will be called the positive, piecewise linear frontier and will be denoted by $ F^+ $; similarly, $ F^- $ will denote the negative frontier of $ W $, defined by the subset of points $ (i, W[i]) $ where $ W[i] < 0 $, as is shown in figure \ref{fig:Frontiers}. To identify such points, we need to address the different units in which the amplitude and horizontal distance of our wave are expressed.
 
 \begin{figure}[ht!]
   \centering
@@ -201,7 +201,9 @@ Figure \ref{fig:FullFrontiers} illustrates the frontiers obtained to six diverse
 
 We can see that the frontier is satisfactorily detected in harmonic an inharmonic sounds, and presents robustness in relation to the number of samples and the frequencies of the waves.
 
-% Key results in details
+Besides, the algorithm presents a definition of the position of the cycles of a wave, with which on can, for example, derive its fundamental frequency and phase: using one of the two frontiers, we have $ f = (\#F^\pm - 1) n / (F^\pm[-1] - F^\pm[0])$, where $ \#F^\pm $ denotes the cardinality of the frontier, while $ F^\pm[0] $ and $ F^\pm[-1] $ stand for the frontier's first and last item, respectively.
+
+Similarly, each item of each of the frontiers can be used to estimate the local phase at that location. For the positive frontier, it is necessary to note that, for each item, the following equation holds: $ \cos(\phi + 2 \pi f i / n) = 1 $, and thus $ \phi = k 2 \pi - 2 \pi f i / n $, with $ k \in \mathbb{N } $, while for the negative frontier $ \cos(\phi + 2 \pi f i / n) = -1 $ and $ \phi = k 3 \pi - 2 \pi f i / n) $.
 
 \begin{figure}[ht!]
   \centering
@@ -239,8 +241,49 @@ Although important from a theoretical standpoint, this step has a special comput
   \label{fig:yRobustness}
 \end{figure}
 
-% Comparison with results in other works
-Direct comparison with other algorithms is made difficult by the unavailability of digital implementations of such works, many designed to process analog signals \parencite[e.g.,][]{2018AssefModeling}.
+\subsection{Comparison with traditional algorithms}
+
+Direct comparison with many of the more recent algorithms is made difficult by the unavailability of digital implementations of such works, many designed to process analog signals \parencite[e.g.,][]{2018AssefModeling}.
+
+Nevertheless, insight can be gained from a comparison of the results of the method here proposed with some of the most common envelope extraction algorithms, as cane be seen in figure \ref{fig:Comparison}.
+
+\begin{figure}[ht!]
+  \centering
+    \includegraphics[width=0.8\linewidth]{12Comparison.pdf}
+  \caption{Comparison of the algorithm present in this work with the most common methods of digital envelope identification.}
+  \label{fig:Comparison}
+\end{figure}
+
+For a recording of a guitar bend, we contrast the proposed algorithm with four common approaches of varied complexity: simple smoothing of the rectified original wave, lowpass filtering followed by peak identification and subsequent smoothing, and the extraction of the envelope via Hilbert transform, as presented earlier in the paper, with a previous smoothing of the original wave to avoid the artefacts shown in figure \ref{fig:AnalyticSignal}.
+
+All those methods demanded careful parameter tuning: in the case of filtering, a local cut-off frequency of approximately 88 Hz was used, consisting of one additional parameter to be tuned. For all the other traditional approaches, the Savitzky-Golay smoothing algorithm was used, and the window size was the parameter to be defined.
+
+In the case of the proposed algorithm, the smooth temporal envelope was obtained merging both positive and negative frontiers, that were also smoothed with the same procedure described. Figure \ref{fig:FrontiersToEnvelope} illustrates this process.
+
+\begin{figure}[ht!]
+  \centering
+    \includegraphics[width=0.8\linewidth]{13FrontiersToEnvelope.pdf}
+  \caption{Original positive and negative frontiers in dark gray and their mirrored versions. The temporal envelope, in black, is obtained by merging and approximating both frontiers.}
+  \label{fig:FrontiersToEnvelope}
+\end{figure}
+
+Table \ref{table:Comparison} presents some computational results. The times are for custom implementations of those methods in the Python programming language. The least mean squares was calculated halving the envelopes presented in figure \ref{fig:Comparison} and comparing then with the rectified absolute wave, so as to avoid the potential influence of an estimated frequency. We can see that, while the algorithm here presented is the most accurate, it's also the most computationally intensive. The connection between alpha-shapes and Delaunay triangulation can be explored in future works as a mean to improve the efficiency of the algorithm.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{ l c c }
+\hline
+Method & LMS & time(s) \\
+\hline
+Presented Algorithm & 0.0088 & 4.1507 \\ 
+Smoothing           & 0.0123 & 0.1911 \\ 
+Lowpass Filter      & 0.0258 & 0.5601 \\ 
+Hilbert Transform   & 0.0141 & 0.2599 \\ 
+\hline
+\end{tabular}
+\caption{Comparison of the algorithm present in this work with the most common methods of digital envelope identification.}
+\label{table:Comparison}
+\end{table}
 
 \section{Discussion}
 
@@ -249,7 +292,6 @@ This work hopes to fill a gap identified by the authors in the context of sound 
 While relevant in its own accord, the procedure here presented isolates the individual cycles of a wave, pinpointing them in the time domain. Due to that, a rich set of theoretical advancements, of whose an example was given in the preceding section, can be built upon this initial building block.
 
 With the knowledge of the exact position and characteristics of the cycles of a wave, one can investigate its evolution in time, in terms of frequency content for example, free from the potencial interference of a modulating wave; in other words, one can have a very satisfactory view of the instantaneous frequencies and phase of an arbitrary wave and its evolution in time, providing a way to bridge the gap between time domain and frequency domain interpretations.
-
 
 \section{References}
 
