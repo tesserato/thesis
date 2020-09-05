@@ -1,9 +1,6 @@
-import plotly.graph_objects as go
 import numpy as np
 from scipy.interpolate import interp1d
 import numpy.polynomial.polynomial as poly
-import wave
-from scipy.signal import savgol_filter
 
 
 def _get_circle(x0, y0, x1, y1, r):
