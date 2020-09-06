@@ -40,7 +40,7 @@ Besides the most direct applications of this work to audio classification and sy
 \section{Introduction}
 Envelope detection is ubiquitous in both analogue and digital signal processing \parencite{2011CaetanoImproved}. Nevertheless, the literature in this area is very fragmented \parencite{2017LyonsDigital}. Besides, most envelope detection techniques are designed to account for very specific settings, like pure sinusoids with moderate noise content, a limitation that excludes most physical signals, as is the case of recorded sound, for example; that limitation arises in part due to the lack of a strict mathematical definition of a temporal envelope \parencite{2013Mengempirical}.
 
-In many natural signals, however, the temporal amplitude envelope of a signal plays a prominent role in the characteristics exhibited: according to \textcite{2017QiRelative}, for example, the envelope is at least as important as the fine structure of a soundwave in the context of the intelligibility of mandarin tones. This is also the case for English \parencite{1995ShannonSpeech}, where even envelopes modulating mostly noise were still capable of conveying meaning. 
+In many natural signals, however, the temporal amplitude envelope of a signal plays a prominent role in the characteristics exhibited: according to \textcite{2017QiRelative}, for example, the envelope is at least as important as the fine structure of a sound wave in the context of the intelligibility of mandarin tones. This is also the case for English \parencite{1995ShannonSpeech}, where even envelopes modulating mostly noise were still capable of conveying meaning. 
 
 The envelope helps to impart emotion and identity to the human voice \parencite{2018ZhuContributions}, and envelope preserving characteristics in concert halls are associated with their pleasantness \parencite{2011LokkiEngaging}.
 
@@ -56,7 +56,7 @@ Following this path, we present a general approach to envelope detection, exploi
 
 While the robustness of the proposed approach allows it to be used as a plug-in replacement for many methods encountered in the literature, we feel that it would be particularly useful for sound synthesis.
 
-The envelope is shown to add complexity to the spectral representation of a wave \parencite{2019TarjanoNeuro}, and an accurate description of the envelope, while describing the evolution of the instantaneous amplitude of a signal in time, would also greatly simplify further spectral analysis. Moreover, the algorithm developed in this work naturally divides a signal in its pseudo-cycles, pinpointing them in the time domain, providing the building blocks for the reconstruction of the fine structure of the wave.
+The envelope is shown to add complexity to the spectral representation of a wave \parencite{2019TarjanoNeuro}, and an accurate description of the envelope, while describing the evolution of the instantaneous amplitude of a signal in time, would also greatly simplify further spectral analysis. Moreover, the algorithm developed in this work naturally divides a signal into its pseudo-cycles, pinpointing them in the time domain, providing the building blocks for the reconstruction of the fine structure of the wave.
 
 The rest of this paper is divided as follows: After explaining and defining the various entities to be used subsequently, of which the concept of frontiers is arguably the most important, in the methodology section, we dedicate a section to present a new discrete curvature estimation approach, and how it was used to identify the frontiers of a discrete wave.
 
@@ -71,7 +71,7 @@ In this work it is assumed, without loss of generality, that one is interested i
 
 Naturally, due to the necessary truncations both in time and amplitude, as well as measurement errors introduced by the instruments used to record the signal, it is not possible to exactly recover the original, continuous wave, from its digital counterpart.
 
-The best representation one can hope to get of the original wave is, then, the recording itself. It is sensible, thus, to characterise the envelope of the wave in terms of a subset of the exact samples that comprise its digital representation.
+The best representation one can hope to get of the original wave is, then, the recording itself. It is sensible, thus, to characterize the envelope of the wave in terms of a subset of the exact samples that comprise its digital representation.
 
 To that end, this work will emphasize the concept of frontier, as the points of the digital wave that mark the wave's upper and lower boundaries; from those points an envelope, conforming to the vague definitions of uniqueness and smoothness, can be trivially constructed, as will be shown.
 
@@ -248,7 +248,7 @@ Nevertheless, insight can be gained from a comparison of the results of the meth
   \label{fig:Comparison}
 \end{figure}
 
-For a recording of a guitar sound, in which a bend is performed, we contrast the proposed algorithm with four common approaches of varying complexity: simple smoothing of the rectified original wave, low pass filtering followed by rectification, peak identification and subsequent smoothing, and the extraction of the envelope via Hilbert transform, as presented earlier in the paper, with a previous smoothing of the original wave to avoid the artefacts shown in figure \ref{fig:AnalyticSignal}.
+For a recording of a guitar sound, in which a bend is performed, we contrast the proposed algorithm with four common approaches of varying complexity: simple smoothing of the rectified original wave, low pass filtering followed by rectification, peak identification and subsequent smoothing, and the extraction of the envelope via Hilbert transform, as presented earlier in the paper, with a previous smoothing of the original wave to avoid the artifacts shown in figure \ref{fig:AnalyticSignal}.
 
 All those methods demanded careful choice of parameters: in the case of filtering, a cut-off frequency of approximately 88 Hz was used, consisting of one additional parameter to be tuned. For all the other traditional approaches, the Savitzky-Golay smoothing algorithm was used, and the window size was the parameter to be defined.
 
