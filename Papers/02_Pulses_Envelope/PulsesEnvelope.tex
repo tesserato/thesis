@@ -1,6 +1,7 @@
 \documentclass{article}
 \usepackage{lmodern} % Latin Modern Font
 \usepackage[T1]{fontenc}
+\usepackage{authblk}
 \usepackage{amsfonts} % \mathbb
 \usepackage[margin=0.5in]{geometry}
 \usepackage[utf8]{inputenc}
@@ -14,11 +15,14 @@
 \hypersetup{
   colorlinks=true, 
   allcolors=black,
-  pdfauthor={Carlos Tarjano},
+  pdfauthor={Carlos Henrique Tarjano Santos},
   pdftitle={Robust Digital Envelope Estimation Via Geometric Properties of an Arbitrary Real Signal}
 }
 \title{Robust Digital Envelope Estimation Via Geometric Properties of an Arbitrary Real Signal}
-\author{Carlos Tarjano \and Valdecy Pereira}
+\author[1]{Carlos Henrique Tarjano Santos}
+\author[2]{Valdecy Pereira}
+\affil[1]{(corresponding author, carlostarjano@id.uff.br) Department of Production Engineering, Universidade Federal Fluminense, Rua Passo da Pátria, 156, Campus Praia Vermelha, Bloco D - sala 309, São Domingos, Niterói, RJ, Brasil, CEP: 24.210-240}
+\affil[2]{Department of Production Engineering, Universidade Federal Fluminense, Rua Passo da Pátria, 156, Campus Praia Vermelha, Bloco D - sala 309, São Domingos, Niterói, RJ, Brasil, CEP: 24.210-240}
 
 \begin{document}
 
@@ -34,7 +38,7 @@ We find the algorithm accurate in the identification of the frontiers of a wide 
 Besides the most direct applications of this work to audio classification and synthesis, we foresee impact in compression techniques and machine learning approaches to audio. The discrete curvature definition presented could also be extended to three-dimensional settings, to improve shape detection algorithms based on alpha-shapes.
 \end{abstract}
 
-{\bf Keywords:} DSP, alpha-shapes, envelope detection, discrete curvature
+{\bf Keywords:} DSP, alpha-shapes, envelope detection, discrete curvature estimation
 
 
 \section{Introduction}

@@ -1,0 +1,6 @@
+The temporal amplitude envelope of a signal is essential for its complete characterization, being the primary information-carrying medium in spoken voice and telecommunications.
+Envelope detection techniques have applications in areas like health, sound classification and synthesis, seismology and speech recognition. Nevertheless, a general method to digital envelope detection of signals with rich spectral content doesn't exist, as most methods involve manual intervention, in the form of filter design, smoothing, as well as other specific design choices, based on a priori knowledge about the nature of the specific waves under investigation.
+To address this problem, we propose a framework that uses intrinsic characteristics of a signal to estimate its envelope, completely eliminating the necessity of parameter tuning.
+The approach here described draws inspiration from geometric concepts to isolate the frontiers and thus estimate the temporal envelope of an arbitrary signal. Specifically, a new measure of discrete curvature is used to obtain the average radius of curvature of a discrete wave, serving as a threshold to identify the wave's frontier points. 
+The algorithm also compares favourably with classic envelope detection techniques based on filtering and the Hilbert Transform, with potential applications including audio classification and synthesis.
+
