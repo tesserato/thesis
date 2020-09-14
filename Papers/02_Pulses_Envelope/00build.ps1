@@ -1,7 +1,7 @@
-# $name = "PulsesEnvelope"
-# pdflatex $name
-# biber $name
-# pdflatex $name
-# pdflatex $name
+$name = "PulsesEnvelope"
+pdflatex $name
+biber $name
+pdflatex $name
+pdflatex $name
 
-pandoc PulsesEnvelope.tex --bibliography=bibli.bib -o PulsesEnvelope.docx
+# pandoc PulsesEnvelope.tex --bibliography=bibli.bib -o PulsesEnvelope.docx
