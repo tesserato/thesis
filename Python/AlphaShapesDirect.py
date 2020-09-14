@@ -1,10 +1,11 @@
 import plotly.graph_objects as go
 import numpy as np
-from scipy.interpolate import interp1d
-import numpy.polynomial.polynomial as poly
+# from scipy.interpolate import interp1d
+# import numpy.polynomial.polynomial as poly
 import wave
-from scipy.signal import savgol_filter
+# from scipy.signal import savgol_filter
 from Wheel import frontiers
+import time
 
 def read_wav(path): 
   """returns signal & fps"""
@@ -33,17 +34,18 @@ n = W.size
 print(n)
 X = np.arange(n)
 
-
-
-
+start = start = time.time()
 pos_frontierX, pos_frontierY, neg_frontierX, neg_frontierY = frontiers(W)
+print(time.time() - start)
 
-frontierX = np.concatenate([pos_frontierX, neg_frontierX])
-frontierY = np.concatenate([pos_frontierY, np.abs(neg_frontierY)])
 
-idxs = np.argsort(frontierX)
-frontierX = frontierX[idxs]
-frontierY = frontierY[idxs]
+
+# frontierX = np.concatenate([pos_frontierX, neg_frontierX])
+# frontierY = np.concatenate([pos_frontierY, np.abs(neg_frontierY)])
+
+# idxs = np.argsort(frontierX)
+# frontierX = frontierX[idxs]
+# frontierY = frontierY[idxs]
 
 
 
@@ -102,7 +104,7 @@ fig.add_trace(
         color="silver",
         # showscale=False
     ),
-    visible = "legendonly"
+    # visible = "legendonly"
   )
 )
 
@@ -150,7 +152,7 @@ fig.add_trace(
         color="red",
         # showscale=False
     ),
-    visible = "legendonly"
+    # visible = "legendonly"
   )
 )
 
@@ -166,25 +168,25 @@ fig.add_trace(
         color="red",
         # showscale=False
     ),
-    visible = "legendonly"
+    # visible = "legendonly"
   )
 )
 
-fig.add_trace(
-  go.Scatter(
-    name="Frontier", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=frontierX,
-    y=frontierY,
-    # fill="toself",
-    mode="markers+lines",
-    line=dict(
-        width=1,
-        color="blue",
-        # showscale=False
-    ),
-    visible = "legendonly"
-  )
-)
+# fig.add_trace(
+#   go.Scatter(
+#     name="Frontier", # <|<|<|<|<|<|<|<|<|<|<|<|
+#     x=frontierX,
+#     y=frontierY,
+#     # fill="toself",
+#     mode="markers+lines",
+#     line=dict(
+#         width=1,
+#         color="blue",
+#         # showscale=False
+#     ),
+#     visible = "legendonly"
+#   )
+# )
 
 # fig.add_trace(
 #   go.Scatter(
