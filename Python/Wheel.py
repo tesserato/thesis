@@ -51,7 +51,7 @@ def _get_radius_function(X, Y):
 
 
 def _get_radius_average(X, Y):
-  m0 = np.average(Y[1:] - Y[:-1]) / np.average(X[1:] - X[:-1])
+  m0 = np.sum(Y[1:] - Y[:-1]) / np.sum(X[1:] - X[:-1])
   # curvatures_X = []
   # curvatures_Y = []
   k_sum = 0
@@ -77,6 +77,7 @@ def _get_radius_average(X, Y):
   # r_of_x = interp1d(curvatures_X, 1 / np.abs(smooth_curvatures_Y), fill_value="extrapolate")# a
 
   r = 1 / (k_sum / (len(X) - 1))    #b
+  print(r)
   def r_of_x(x):                  #b
     return r                      #b
 
@@ -116,7 +117,7 @@ def _get_pulses(W):
 
 def _get_frontier(X, Y):
   '''extracts the frontier via snowball method'''
-  scaling = (np.average(X[1:]-X[:-1]) / 2) / np.average(Y)
+  scaling = (np.sum(X[1:]-X[:-1]) / 2) / np.sum(Y)
   Y = Y * scaling
 
   r_of_x = _get_radius_average(X, Y)
