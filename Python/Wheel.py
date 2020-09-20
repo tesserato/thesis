@@ -6,20 +6,19 @@ import numpy.polynomial.polynomial as poly
 def _get_circle(x0, y0, x1, y1, r):
   '''returns center of circle that passes through two points'''
   
-  radsq = r * r
   q = np.sqrt((x1 - x0)**2 + (y1 - y0)**2)
 
-  # assert q <= 2 * r, f"shit"
+  c = np.sqrt(r * r - (q / 2)**2)
 
   x3 = (x0 + x1) / 2
-  y3 = (y0 + y1) / 2
+  y3 = (y0 + y1) / 2 
 
   if y0 + y1 >= 0:
-    xc = x3 + np.sqrt(radsq - (q / 2)**2) * ((y0 - y1) / q)
-    yc = y3 + np.sqrt(radsq - (q / 2)**2) * ((x1 - x0) / q)
+    xc = x3 + c * (y0 - y1) / q
+    yc = y3 + c * (x1 - x0) / q
   else:
-    xc = x3 - np.sqrt(radsq - (q / 2)**2) * ((y0 - y1) / q)
-    yc = y3 - np.sqrt(radsq - (q / 2)**2) * ((x1 - x0) / q)
+    xc = x3 - c * (y0 - y1) / q
+    yc = y3 - c * (x1 - x0) / q
 
   return xc, yc
 
@@ -55,15 +54,15 @@ def _get_radius_average(X, Y):
   # curvatures_X = []
   # curvatures_Y = []
   k_sum = 0
-  # mm = np.sqrt(m0**2 + 1)                            # 1
+  mm = np.sqrt(m0**2 + 1)                            # 1
   for i in range(len(X) - 1):
-    # x = (X[i + 1] - X[i])                            # 1
-    # y = (Y[i + 1] - Y[i])                            # 1
-    # k = -(m0 * x - y) / (x * mm * np.sqrt(x*x + y*y))# 1
+    x = (X[i + 1] - X[i])                            # 1
+    y = (Y[i + 1] - Y[i])                            # 1
+    k = -(m0 * x - y) / (x * mm * np.sqrt(x*x + y*y))# 1
 
-    m1 = (Y[i + 1] - Y[i]) / (X[i + 1] - X[i])     # 2
-    theta = np.arctan( (m1 - m0) / (1 + m1 * m0) ) # 2
-    k = np.sin(theta) / (X[i + 1] - X[i])          # 2
+    # m1 = (Y[i + 1] - Y[i]) / (X[i + 1] - X[i])     # 2
+    # theta = np.arctan( (m1 - m0) / (1 + m1 * m0) ) # 2
+    # k = np.sin(theta) / (X[i + 1] - X[i])          # 2
 
     # curvatures_X.append((X[i + 1] + X[i]) / 2)
     # curvatures_Y.append(k)
@@ -77,9 +76,9 @@ def _get_radius_average(X, Y):
   # r_of_x = interp1d(curvatures_X, 1 / np.abs(smooth_curvatures_Y), fill_value="extrapolate")# a
 
   r = 1 / (k_sum / (len(X) - 1))    #b
-  print(r)
-  def r_of_x(x):                  #b
-    return r                      #b
+  print("m0: ", m0, "k: ", k_sum)
+  def r_of_x(x):                    #b
+    return r                        #b
 
   return r_of_x
 
@@ -117,15 +116,16 @@ def _get_pulses(W):
 
 def _get_frontier(X, Y):
   '''extracts the frontier via snowball method'''
-  scaling = (np.sum(X[1:]-X[:-1]) / 2) / np.sum(Y)
+  scaling = (np.sum(X[1:] - X[:-1]) / 2) / np.sum(Y)
   Y = Y * scaling
-
+  
   r_of_x = _get_radius_average(X, Y)
   idx1 = 0
   idx2 = 1
   frontierX = [X[0]]
   frontierY = [Y[0]]
   n = len(X)
+  print("n: ",n, " r: ", r_of_x(0)," Y0: ", Y[0])
   while idx2 < n:
     r = r_of_x((X[idx1] + X[idx2]) / 2)
     xc, yc = _get_circle(X[idx1], Y[idx1], X[idx2], Y[idx2], r)
@@ -142,6 +142,7 @@ def _get_frontier(X, Y):
       idx2 += 1
   frontierX = np.array(frontierX)
   frontierY = np.array(frontierY) / scaling
+  print(frontierX.size)
   return frontierX, frontierY
 
 

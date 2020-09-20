@@ -20,23 +20,23 @@ def read_wav(path):
 '''==============='''
 ''' Read wav file '''
 '''==============='''
-fig = go.Figure()
+
 
 name = "piano33"
 W, fps = read_wav(f"Samples/{name}.wav")
 
 # W = W [:10000]
 
-W = W - np.average(W)
-amplitude = np.max(np.abs(W))
-W = W / amplitude
+# W = W - np.average(W)
+# amplitude = np.max(np.abs(W))
+# W = W / amplitude
 n = W.size
-print(n)
+# print(n)
 X = np.arange(n)
 
-start = start = time.time()
+start = time.time()
 pos_frontierX, pos_frontierY, neg_frontierX, neg_frontierY = frontiers(W)
-print(time.time() - start)
+print("time: ", time.time() - start)
 
 
 
@@ -56,7 +56,7 @@ print(time.time() - start)
 '''============================================================================'''
 '''                                    PLOT                                    '''
 '''============================================================================'''
-
+fig = go.Figure()
 fig.layout.template ="plotly_white"
 # fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
 fig.update_layout(
