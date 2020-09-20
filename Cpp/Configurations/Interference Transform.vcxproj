@@ -29,14 +29,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>Intel C++ Compiler 19.1</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseIntelMKL>Parallel</UseIntelMKL>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>Intel C++ Compiler 19.1</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>PGOptimize</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseIntelMKL>Parallel</UseIntelMKL>
@@ -45,7 +45,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>Intel C++ Compiler 19.1</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseIntelMKL>Parallel</UseIntelMKL>
   </PropertyGroup>
@@ -84,7 +84,7 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\Execs</OutDir>
     <IntDir>..\Intermediary</IntDir>
-    <TargetName>$(Platform)_$(Configuration) $(ProjectName) </TargetName>
+    <TargetName>$(Platform)_$(Configuration)_Frontiers</TargetName>
     <ExecutablePath>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Execs;$(ExecutablePath)</ExecutablePath>
     <LibraryPath>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -92,7 +92,7 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\Execs</OutDir>
     <IntDir>..\Intermediary</IntDir>
-    <TargetName>$(Platform)_$(Configuration)_IT</TargetName>
+    <TargetName>$(Platform)_$(Configuration)_Frontiers</TargetName>
     <ExecutablePath>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Execs;$(ExecutablePath)</ExecutablePath>
     <LibraryPath>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -100,7 +100,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\Execs</OutDir>
     <IntDir>..\Intermediary</IntDir>
-    <TargetName>$(Platform)_$(Configuration) $(ProjectName) </TargetName>
+    <TargetName>$(Platform)_$(Configuration)_Frontiers</TargetName>
     <ExecutablePath>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Execs;$(ExecutablePath)</ExecutablePath>
     <LibraryPath>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Libs;$(LibraryPath)</LibraryPath>
     <RunCodeAnalysis>true</RunCodeAnalysis>
@@ -109,7 +109,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\Execs</OutDir>
     <IntDir>..\Intermediary</IntDir>
-    <TargetName>$(Platform)_$(Configuration)_IT</TargetName>
+    <TargetName>$(Platform)_$(Configuration)_Frontiers</TargetName>
     <ExecutablePath>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Execs;$(ExecutablePath)</ExecutablePath>
     <LibraryPath>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Libs;$(LibraryPath)</LibraryPath>
     <RunCodeAnalysis>true</RunCodeAnalysis>
@@ -121,14 +121,14 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2020.0.166\windows\mkl\include;C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\x64\Release;C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2020.0.166\windows\mkl\include;C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Libs</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libsndfile-1.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Execs;C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Libs</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libsndfile-1.lib;DLL.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -138,14 +138,14 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2020.0.166\windows\mkl\include;C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\x64\Release;C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2020.0.166\windows\mkl\include;C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Libs</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libsndfile-1.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Execs;C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Libs</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libsndfile-1.lib;DLL.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -157,7 +157,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2020.0.166\windows\mkl\include;C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\x64\Release;C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2020.0.166\windows\mkl\include;C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -172,8 +172,9 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Libs</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libsndfile-1.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Execs;C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Libs</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libsndfile-1.lib;DLL.lib</AdditionalDependencies>
+      <TargetMachine>MachineX64</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -184,8 +185,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>Default</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2020.0.166\windows\mkl\include;C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\x64\Release;C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2020.0.166\windows\mkl\include;C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -200,8 +201,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Libs</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libsndfile-1.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Execs;C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Cpp\Libs</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libsndfile-1.lib;DLL.lib</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
