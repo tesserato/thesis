@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 def read_wav(path): 
   """returns signal & fps"""
   wav = wave.open(path , 'r')
-  signal = np.frombuffer(wav.readframes(-1) , np.int16).astype(np.float32)
+  signal = np.frombuffer(wav.readframes(-1) , np.int16).astype(np.double)
   fps = wav.getframerate()
   return signal, fps
 
@@ -24,39 +24,63 @@ def get_frontiers(W):
 
   # print("P : n in = ", W.size)
 
-  lib.compute_raw_envelope(W.ctypes.data_as(ctypes.POINTER(ctypes.c_float)), ctypes.c_uint(W.size))
+  lib.compute_raw_envelope(W.ctypes.data_as(ctypes.POINTER(ctypes.c_float)), ctypes.c_size_t(W.size))
 
   pos_n = lib.get_pos_size()
   print("P : pos n = ", pos_n)
   neg_n = lib.get_neg_size()
   print("P : neg n = ", neg_n)
 
-  lib.get_pos_X.restype = np.ctypeslib.ndpointer(dtype=ctypes.c_int, shape=(pos_n,))
-  lib.get_neg_X.restype = np.ctypeslib.ndpointer(dtype=ctypes.c_int, shape=(neg_n,))
+  lib.get_pos_X.restype = np.ctypeslib.ndpointer(dtype=ctypes.c_size_t, shape=(pos_n,))
+  lib.get_neg_X.restype = np.ctypeslib.ndpointer(dtype=ctypes.c_size_t, shape=(neg_n,))
 
   pos_X = lib.get_pos_X()
   neg_X = lib.get_neg_X()
 
   return pos_X, neg_X
 
+def get_raw_envelope(W):
+  lib = ctypes.CDLL(".\DLL.dll")
+
+  # print("P : n in = ", W.size)
+
+  lib.compute_raw_envelope(W.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), ctypes.c_uint(W.size))
+
+  pos_n = lib.get_pos_size()
+  # print("P : pos n = ", pos_n)
+  neg_n = lib.get_neg_size()
+  # print("P : neg n = ", neg_n)
+
+  lib.get_X.restype = np.ctypeslib.ndpointer(dtype=ctypes.c_size_t, shape=(pos_n + neg_n,)) 
+
+  X = lib.get_X()
+
+  return X
 
 # lib.frontier_from_wav("piano33.wav".encode("utf-8"))
-W, _ = read_wav("piano33.wav")
+W, _ = read_wav("brass.wav")
 
-pos_X, neg_X = get_frontiers(W)
+Xpos, Xneg = get_frontiers(W)
 
+# print(XX)
 
-
-# 224 milliseconds
 # 180 milliseconds
 # 188 milliseconds
-# 196 milliseconds
 # 155 milliseconds
 # 139 milliseconds
 # 122 milliseconds
-# 
-# 
-# 
+
+# 198 milliseconds
+# 110 milliseconds
+# 101 milliseconds
+# 92 milliseconds
+# 228 milliseconds
+
+# 156 milliseconds
+# 81 milliseconds
+# 94 milliseconds
+# 84 milliseconds
+# 96 milliseconds
 
 '''============================================================================'''
 '''                                    PLOT                                    '''
@@ -101,8 +125,8 @@ fig.add_trace(
 fig.add_trace(
   go.Scatter(
     name="+Frontier", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=pos_X,
-    y=W[pos_X],
+    x=Xpos,
+    y=W[Xpos],
     # fill="toself",
     mode="lines",
     line=dict(
@@ -117,8 +141,8 @@ fig.add_trace(
 fig.add_trace(
   go.Scatter(
     name="-Frontier", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=neg_X,
-    y=W[neg_X],
+    x=Xneg,
+    y=W[Xneg],
     # fill="toself",
     mode="lines",
     line=dict(
