@@ -1,6 +1,11 @@
 \documentclass[12pt]{article}
-\usepackage[utf8]{inputenc}
-\usepackage[backend=biber]{biblatex}
+
+% \usepackage[utf8]{inputenc}
+% \usepackage[T1]{fontenc}
+% \usepackage{authblk}
+
+% \usepackage[backend=biber]{biblatex}
+\usepackage{biblatex}
 
 \usepackage[a4paper, top=3cm, left=3cm, bottom=2cm, right=2cm]{geometry}
 \usepackage{indentfirst}
@@ -33,11 +38,13 @@
   pdftitle={Robust Digital Envelope Estimation Via Geometric Properties of an Arbitrary Real Signal}
 }
 
+\usepackage{glossaries}
+\makeglossaries
 
-\bibliography{00_BIBLI.bib}
+\bibliography{00_BIBLI}
   
 \title{Sound Synthesis}
 \author{Carlos Tarjano}
 
-% \usepackage[T1]{fontenc}
-% \usepackage{authblk}
+% \newglossaryentry{VST}{name=VST, description={Virtual Studio Technology}}
+
