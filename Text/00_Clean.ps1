@@ -1,0 +1,1 @@
+Remove-Item *.bcf, *.xml, *.aux, *.fls, *.log*.bcf, *.fdb_latexmk, *.pdf

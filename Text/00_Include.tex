@@ -1,7 +1,43 @@
 \documentclass[12pt]{article}
-\usepackage[a4paper, top=3cm, left=3cm, bottom=2cm, right=2cm]{geometry}
 \usepackage[utf8]{inputenc}
-% \usepackage{fontspec}
-% \setmainfont{Arial}
+\usepackage[backend=biber]{biblatex}
+
+\usepackage[a4paper, top=3cm, left=3cm, bottom=2cm, right=2cm]{geometry}
+\usepackage{indentfirst}
+\setlength{\parindent}{1.25cm}
+
+\usepackage[no-math]{fontspec}
+\defaultfontfeatures{Ligatures=TeX}
+\setmainfont{Tex Gyre Termes}
+
+\usepackage[nodisplayskipstretch]{setspace}
+\setstretch{1.427465}
+
+\usepackage[explicit]{titlesec}
+\titleformat{\section}{\normalfont\bfseries}{\thesection}{1em}{\MakeUppercase{#1}}
+\titleformat{\subsection}{\normalfont}{\thesubsection}{1em}{\MakeUppercase{#1}}
+\titleformat{\subsubsection}{\normalfont\bfseries}{\thesection}{1em}
+
+\usepackage{amsmath}  % enables declaremathoperator
+\DeclareMathOperator{\sign}{sign}
+
+\usepackage{amsfonts} % \mathbb
+\usepackage{graphicx} % manipulate imported images
+
+\usepackage{hyperref}
+\usepackage{hypcap}
+\hypersetup{
+  colorlinks=true, 
+  allcolors=black,
+  pdfauthor={Carlos Henrique Tarjano Santos},
+  pdftitle={Robust Digital Envelope Estimation Via Geometric Properties of an Arbitrary Real Signal}
+}
+
+
+\bibliography{00_BIBLI.bib}
+  
 \title{Sound Synthesis}
 \author{Carlos Tarjano}
+
+% \usepackage[T1]{fontenc}
+% \usepackage{authblk}
