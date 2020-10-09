@@ -4,8 +4,8 @@
 % \usepackage[T1]{fontenc}
 % \usepackage{authblk}
 
-% \usepackage[backend=biber]{biblatex}
-\usepackage{biblatex}
+\usepackage[backend=biber]{biblatex}
+%\usepackage{biblatex}
 
 \usepackage[a4paper, top=3cm, left=3cm, bottom=2cm, right=2cm]{geometry}
 \usepackage{indentfirst}
@@ -19,15 +19,30 @@
 \setstretch{1.427465}
 
 \usepackage[explicit]{titlesec}
-\titleformat{\section}{\normalfont\bfseries}{\thesection}{1em}{\MakeUppercase{#1}}
-\titleformat{\subsection}{\normalfont}{\thesubsection}{1em}{\MakeUppercase{#1}}
-\titleformat{\subsubsection}{\normalfont\bfseries}{\thesection}{1em}
+\titleformat{\section}[hang]{\normalfont\bfseries}{\thesection}{1em}{\MakeUppercase{#1}}
+\titleformat{\subsection}[hang]{\normalfont}{\thesubsection}{1em}{\MakeUppercase{#1}}
+\titleformat{\subsubsection}[hang]{\normalfont\bfseries}{\thesubsubsection}{1em}{#1}%{\MakeLowercase{#1}}
+
+\usepackage{titletoc}
+\titlecontents{section}[1em]{\vspace{12pt}}{\bfseries\normalsize\contentslabel[\thecontentslabel]{3em}\uppercase}{\hspace*{-2em}\uppercase}{\titlerule*[.75em]{.}\contentspage}
+\titlecontents{subsection}[1em]{\vspace{12pt}}{\normalfont\normalsize\contentslabel[\thecontentslabel]{3em}\uppercase}{\hspace*{-2em}\uppercase}{\titlerule*[.75em]{.}\contentspage}
+\titlecontents{subsubsection}[1em]{\vspace{12pt}}{\bfseries\normalsize\contentslabel[\thecontentslabel]{3em}}{\hspace*{-2em}}{\titlerule*[.75em]{.}\contentspage}
+
 
 \usepackage{amsmath}  % enables declaremathoperator
 \DeclareMathOperator{\sign}{sign}
 
 \usepackage{amsfonts} % \mathbb
 \usepackage{graphicx} % manipulate imported images
+
+
+\usepackage{fancyhdr} % \pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+\usepackage[toc,section=section]{glossaries}
+\makeglossaries
 
 \usepackage{hyperref}
 \usepackage{hypcap}
@@ -37,9 +52,6 @@
   pdfauthor={Carlos Henrique Tarjano Santos},
   pdftitle={Robust Digital Envelope Estimation Via Geometric Properties of an Arbitrary Real Signal}
 }
-
-\usepackage{glossaries}
-\makeglossaries
 
 \bibliography{00_BIBLI}
   
