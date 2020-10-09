@@ -25,3 +25,12 @@ Cpp/Execs/FT.csv
 *.sav
 Papers/02_Pulses_Envelope/words.md
 *.pdf
+*.bbl
+*.blg
+*.glg
+*.glo
+*.gls
+*.glsdefs
+*.ist
+*.out
+*.toc
