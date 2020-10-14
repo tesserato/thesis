@@ -6,6 +6,8 @@ tlmgr update --all
 ## Make Symlink link target
 mklink /D "C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Text\imgs\envelope" "C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Papers\01_Pulses_Envelope"
 
+mklink "C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Papers\02_Sound_Representation\bibli.bib" "C:\Users\tesse\Desktop\Files\Dropbox\0_Thesis\Text\00_BIBLI.bib"
+
 from adm cmd prompt
 
 # Directives
