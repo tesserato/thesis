@@ -113,7 +113,7 @@ def constrained_least_squares_arbitrary_intervals(X, Y, I, k=3):
 
   # U = np.zeros((n, k * q))
 
-  U = []
+  U = [] # Q
 
   for i in range(len(I) - 1):
     l0, l1 = I[i], I[i + 1]
