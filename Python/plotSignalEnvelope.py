@@ -10,7 +10,7 @@ import signal_envelope as se
 '''==============='''
 
 
-name = "tom"
+name = "alto"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 n = W.size

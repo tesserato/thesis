@@ -29,7 +29,7 @@ l = m // s
 Q = np.zeros((m, k * s))
 V = np.zeros((2 * (s-1), k * s))
 
-'''populating U'''
+'''populating Q'''
 for i1 in range(s):
   for i2 in range(l * i1, l * (i1 + 1)):
     for i3 in range(k):

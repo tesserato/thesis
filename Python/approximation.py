@@ -1,7 +1,8 @@
 import plotly.graph_objects as go
 import numpy as np
 import signal_envelope as se
-
+from scipy.linalg import block_diag
+import numpy.polynomial.polynomial as poly
 
 
 
@@ -10,7 +11,7 @@ import signal_envelope as se
 '''==============='''
 
 
-name = "alto"
+name = "brass"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 n = W.size
@@ -52,7 +53,67 @@ for i in range(1, Xneg.size):
 negpseudoCyclesX = np.array(negpseudoCyclesX)
 negpseudoCyclesY = np.array(negpseudoCyclesY)
 
+pospseudoCyclesY_avg = np.average(pospseudoCyclesY, 0)
+negpseudoCyclesY_avg = np.average(negpseudoCyclesY, 0)
+idx = np.argmax(negpseudoCyclesY_avg)
+negpseudoCyclesY_avg = np.roll(negpseudoCyclesY_avg, -idx)
 
+pseudoCyclesY_avg = (pospseudoCyclesY_avg + negpseudoCyclesY_avg) / 2
+
+'''============================================================================'''
+'''                                    APROX                                   '''
+'''============================================================================'''
+
+m = pseudoCyclesY_avg.size
+X = np.arange(m, dtype=np.float64)
+k = 7
+Q = np.zeros((m, k + 1))
+
+for i in range(m):
+  for j in range(k + 1):
+    Q[i, j] = X[i]**j
+
+Q = block_diag(Q, Q)
+
+D = np.eye(k + 1)
+
+D = np.hstack((D, -D))
+
+E = np.zeros((2, 2 * (k + 1)))
+for j in range(k + 1):
+  E[0, j] = X[0]**j
+  E[0, k + j + 1] = -X[m - 1]**j
+
+for j in range(1, k + 1):
+  E[1, j] = j * X[0] ** (j - 1)
+  E[1, k + j + 1] = -j * X[m - 1] ** (j - 1)
+
+V = np.vstack((D, E))
+
+np.savetxt("V.csv", V, delimiter=",")
+
+Y = np.hstack((pseudoCyclesY_avg, pseudoCyclesY_avg)).T
+
+print(Q.shape, Y.shape)
+
+QTQinv = np.linalg.inv(Q.T @ Q)
+tau = np.linalg.inv(V @ QTQinv @ V.T)
+QTY = Q.T @ Y
+# par1 = V @ QTQinv @ QTY
+A = QTQinv @ (QTY - V.T @ tau @ V @ QTQinv @ QTY)
+A = np.reshape(A, (2, -1))
+
+print(A)
+
+Yc = poly.polyval(X, A[0, :])
+
+ncycles = int(np.round((Xpos.size + Xneg.size) / 2))
+
+Wr = np.tile(Yc, ncycles) * 9000
+
+se.save_wav(Wr)
+
+# exit()
 
 '''============================================================================'''
 '''                                    PLOT                                    '''
@@ -76,41 +137,42 @@ fig.update_layout(
 
 fig.add_trace(
   go.Scatter(
-    name="+Pseudo-Cycles", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=[item for sublist in pospseudoCyclesX for item in sublist.tolist() + [None]],
-    y=[item for sublist in pospseudoCyclesY for item in sublist.tolist() + [None]],
-    # fill="toself",
-    mode="lines",
-    line=dict(
-        width=1,
-        color="rgba(38, 12, 12, 0.2)",
-        # showscale=False
-    ),
-    visible = "legendonly"
-  )
-)
-
-fig.add_trace(
-  go.Scatter(
-    name="-Pseudo-Cycles", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=[item for sublist in negpseudoCyclesX for item in sublist.tolist() + [None]],
-    y=[item for sublist in negpseudoCyclesY for item in sublist.tolist() + [None]],
-    # fill="toself",
-    mode="lines",
-    line=dict(
-        width=1,
-        color="rgba(38, 12, 12, 0.2)",
-        # showscale=False
-    ),
-    visible = "legendonly"
-  )
-)
-
-fig.add_trace(
-  go.Scatter(
-    name="+PC Avg", # <|<|<|<|<|<|<|<|<|<|<|<|
+    name="PC Avg", # <|<|<|<|<|<|<|<|<|<|<|<|
     # x=[item for sublist in pseudoCyclesX for item in sublist.tolist() + [None]],
-    y=np.average(pospseudoCyclesY, 0),
+    y=pseudoCyclesY_avg,
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=4,
+        color="black",
+        # showscale=False
+    ),
+    # visible = "legendonly"
+  )
+)
+
+fig.add_trace(
+  go.Scatter(
+    name="PC Avg mirror", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=X+m-1,
+    y=pseudoCyclesY_avg,
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=2,
+        color="black",
+        # dash="dash"
+        # showscale=False
+    ),
+    # visible = "legendonly"
+  )
+)
+
+fig.add_trace(
+  go.Scatter(
+    name="Parametric", # <|<|<|<|<|<|<|<|<|<|<|<|
+    # x=[item for sublist in pseudoCyclesX for item in sublist.tolist() + [None]],
+    y=Yc,
     # fill="toself",
     mode="lines",
     line=dict(
@@ -122,41 +184,20 @@ fig.add_trace(
   )
 )
 
-
-negpseudoCyclesY_avg = np.average(negpseudoCyclesY, 0)
-idx = np.argmax(negpseudoCyclesY_avg)
-negpseudoCyclesY_avg = np.roll(negpseudoCyclesY_avg, -idx)
-
 fig.add_trace(
   go.Scatter(
-    name="-PC Avg", # <|<|<|<|<|<|<|<|<|<|<|<|
-    # x=[item for sublist in pseudoCyclesX for item in sublist.tolist() + [None]],
-    y=negpseudoCyclesY_avg,
+    name="Parametric mirror", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=X+m-1,
+    y=Yc,
     # fill="toself",
     mode="lines",
     line=dict(
-        width=4,
+        width=2,
         color="red",
+        # dash="dash"
         # showscale=False
     ),
     # visible = "legendonly"
-  )
-)
-
-Xcos = np.linspace(np.pi, - np.pi, maxL)
-fig.add_trace(
-  go.Scatter(
-    name="Sinusoid", # <|<|<|<|<|<|<|<|<|<|<|<|
-    # x=Xcos,
-    y=np.cos(np.linspace(np.pi, 3 * np.pi, maxL)) * np.average(np.abs(negpseudoCyclesY)),
-    # fill="toself",
-    mode="lines",
-    line=dict(
-        width=4,
-        color="blue",
-        # showscale=False
-    ),
-    visible = "legendonly"
   )
 )
 

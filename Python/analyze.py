@@ -1,9 +1,7 @@
 import plotly.graph_objects as go
 import numpy as np
 import signal_envelope as se
-
-
-
+from plotly.subplots import make_subplots
 
 '''==============='''
 ''' Read wav file '''
@@ -26,23 +24,19 @@ negL = []
 for i in range(1, Xneg.size):
   negL.append(Xneg[i] - Xneg[i - 1])
 
-L = np.array(posL + negL)
-avgL = np.average(L)
-stdL = np.std(L)
-
-
+np.histogram(Xneg, np.arange(Xneg.size))
 
 
 '''============================================================================'''
 '''                                    PLOT                                    '''
 '''============================================================================'''
-fig = go.Figure()
+fig = make_subplots(rows=1, cols=2, shared_yaxes=True)
 fig.layout.template ="plotly_white"
 # fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
 fig.update_layout(
   # title = name,
-  xaxis_title="x",
-  yaxis_title="Amplitude",
+  xaxis_title="Length",
+  yaxis_title="Number of Ocurrences",
 
   # yaxis = dict(        # <|<|<|<|<|<|<|<|<|<|<|<|
   #   scaleanchor = "x", # <|<|<|<|<|<|<|<|<|<|<|<|
@@ -54,89 +48,50 @@ fig.update_layout(
   font=dict(
   family="Computer Modern",
   color="black",
-  size=18
+  size=12
   )
 )
 
 fig.add_trace(
-  go.Scatter(
-    name="+Frontier", # <|<|<|<|<|<|<|<|<|<|<|<|
-    # x=Xpos,
-    y=posL,
-    # fill="toself",
-    mode="markers",
-    marker=dict(
-        size=3,
-        color="black",
-        showscale=False
-    ),
-    # visible = "legendonly"
-  )
+  go.Histogram(
+    name=f"Lengths of Positive Pseudo-Pulses (std={np.round(np.std(posL), 2)})",
+    x=posL,
+    marker_color = "black",
+    xbins=dict( # bins used for histogram
+      # start=-4.0,
+      # end=3.0,
+      size=1
+    )
+  ),row=1,col=1
 )
 
 fig.add_trace(
-  go.Scatter(
-    name="-Frontier", # <|<|<|<|<|<|<|<|<|<|<|<|
-    # x=Xpos,
-    y=negL,
-    # fill="toself",
-    mode="markers",
-    marker=dict(
-        size=3,
-        color="red",
-        showscale=False
-    ),
-    # visible = "legendonly"
-  )
+  go.Histogram(
+    name=f"Lengths of Negative Pseudo-Pulses (std={np.round(np.std(negL), 2)})",
+    x=negL,
+    marker_color = "gray",
+    xbins=dict( # bins used for histogram
+      # start=-4.0,
+      # end=3.0,
+      size=1
+    )
+  ),row=1,col=2
 )
 
-
-fig.add_trace(
-  go.Scatter(
-    name="Average L", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=[0, max(Xpos.size, Xneg.size)],
-    y=[avgL, avgL],
-    # fill="toself",
-    mode="lines",
-    # line=dict(
-    #     # size=3,
-    #     color="black",
-    #     showscale=False
-    # ),
-    # visible = "legendonly"
-  )
-)
-
-fig.add_trace(
-  go.Scatter(
-    name="+std L", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=[0, max(Xpos.size, Xneg.size)],
-    y=[avgL + stdL, avgL + stdL],
-    # fill="toself",
-    mode="lines",
-    # line=dict(
-    #     # size=3,
-    #     color="black",
-    #     showscale=False
-    # ),
-    # visible = "legendonly"
-  )
-)
-
-fig.add_trace(
-  go.Scatter(
-    name="-std L", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=[0, max(Xpos.size, Xneg.size)],
-    y=[avgL - stdL, avgL - stdL],
-    # fill="toself",
-    mode="lines",
-    # line=dict(
-    #     # size=3,
-    #     color="black",
-    #     showscale=False
-    # ),
-    # visible = "legendonly"
-  )
-)
+# fig.add_trace(
+#   go.Scatter(
+#     name="-Frontier", # <|<|<|<|<|<|<|<|<|<|<|<|
+#     # x=Xpos,
+#     y=negL,
+#     # fill="toself",
+#     mode="markers",
+#     marker=dict(
+#         size=3,
+#         color="red",
+#         showscale=False
+#     ),
+#     # visible = "legendonly"
+#   )
+# )
 
 fig.show(config=dict({'scrollZoom': True}))

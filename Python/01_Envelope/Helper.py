@@ -121,7 +121,6 @@ def constrained_least_squares_arbitrary_intervals(X, Y, I, k=3):
     for j in range(l1 - l0):
       for c in range(k + 1):
         Ui[j, c] = X[l0 + j]**c
-
     U.append(Ui)
 
   U = block_diag(*U)
