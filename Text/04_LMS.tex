@@ -1,7 +1,10 @@
 \section{Theory}
 
 \subsection{Least Mean Squares}
-The linear least mean squares, also known as linear regression \parencite{2018StephenBoydIntroduction} is a data fitting technique. % TODO
+
+\newacronym{LMS}{LMS}{Least Mean Squares}
+
+The linear \gls{LMS}, also known as linear regression \parencite{2018StephenBoydIntroduction} is a data fitting technique. % TODO
 
 We present here the theory for real numbers, noting that it can be easily extended for complex numbers \parencite{1995LawsonSolving}, should the necessity arise. That, however, will not be the case in this work.
 
@@ -50,9 +53,13 @@ Since an exact solution is often beyond reach, we can at least choose $ A $ in a
 
 Using calculus, for example, on can arrive at the equation $ \hat{A} = (Q^T Q)^{-1} Q^T Y $, where $ \hat{A} $ is the vector of coefficients that minimizes the squared errors. A detailed derivation is available at \cite{2018StephenBoydIntroduction}.
 
+
+
 \subsection{Constrained Least Mean Squares}
 
-In the constrained version of the least squares problem we are still interested in finding the coefficient vector $ \hat{A} $ that minimizes $ ||Q A - Y||^2_2 $, but respecting a restriction on this vector of the general form of $ V A = B $.
+\newacronym{CLMS}{CLMS}{Constrained Least Mean Squares}
+
+In the constrained version of the \gls{LMS}, known as the \gls{CLMS} problem we are still interested in finding the coefficient vector $ \hat{A} $ that minimizes $ ||Q A - Y||^2_2 $, but respecting a restriction on this vector of the general form of $ V A = B $.
 
 We can then define the Lagrangian and set its derivatives to zero to obtain, as described in \textcite{2013SelesnickLeast}, the closed form solution 
 
