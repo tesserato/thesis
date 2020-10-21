@@ -11,7 +11,7 @@ print (os.path.abspath(os.curdir))
 ''' Read wav file '''
 '''==============='''
 
-name = "alto"
+name = "piano33"
 W, fps = se.read_wav(f"./Python/Samples/{name}.wav")
 W = W - np.average(W)
 n = W.size
@@ -74,52 +74,22 @@ fig.update_layout(
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=5, r=5, b=5, t=5),
   font=dict(
-  family="Latin Modern Roman",
-  color="black",
-  size=10
+    family="Latin Modern Roman",
+    color="black",
+    size=10
   )
 )
 
 fig.update_xaxes(showline=False, showgrid=False, zeroline=False)
 fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=1, zerolinecolor='silver')
 
-# fig.add_trace(
-#   go.Scatter(
-#     name="+Pseudo-Cycles", # <|<|<|<|<|<|<|<|<|<|<|<|
-#     x=[item for sublist in pospseudoCyclesX for item in sublist.tolist() + [None]],
-#     y=[item for sublist in pospseudoCyclesY for item in sublist.tolist() + [None]],
-#     # fill="toself",
-#     mode="lines",
-#     line=dict(
-#         width=1,
-#         color="rgba(38, 12, 12, 0.2)",
-#         # showscale=False
-#     ),
-#     visible = "legendonly"
-#   )
-# )
 
-# fig.add_trace(
-#   go.Scatter(
-#     name="-Pseudo-Cycles", # <|<|<|<|<|<|<|<|<|<|<|<|
-#     x=[item for sublist in negpseudoCyclesX for item in sublist.tolist() + [None]],
-#     y=[item for sublist in negpseudoCyclesY for item in sublist.tolist() + [None]],
-#     # fill="toself",
-#     mode="lines",
-#     line=dict(
-#         width=1,
-#         color="rgba(38, 12, 12, 0.2)",
-#         # showscale=False
-#     ),
-#     visible = "legendonly"
-#   )
-# )
-
+pospseudoCyclesY_avg = np.average(pospseudoCyclesY, 0)
 fig.add_trace(
   go.Scatter(
     name="Average normalized pseudo-cycle (positive frontier)", # <|<|<|<|<|<|<|<|<|<|<|<|
     # x=[item for sublist in pseudoCyclesX for item in sublist.tolist() + [None]],
-    y=np.average(pospseudoCyclesY, 0),
+    y=pospseudoCyclesY_avg,
     # fill="toself",
     mode="lines",
     line=dict(
@@ -130,7 +100,6 @@ fig.add_trace(
     # visible = "legendonly"
   )
 )
-
 
 negpseudoCyclesY_avg = np.average(negpseudoCyclesY, 0)
 idx = np.argmax(negpseudoCyclesY_avg)
@@ -153,22 +122,44 @@ fig.add_trace(
   )
 )
 
-# Xcos = np.linspace(np.pi, - np.pi, maxL)
-# fig.add_trace(
-#   go.Scatter(
-#     name="Sinusoid", # <|<|<|<|<|<|<|<|<|<|<|<|
-#     # x=Xcos,
-#     y=np.cos(np.linspace(np.pi, 3 * np.pi, maxL)) * np.average(np.abs(negpseudoCyclesY)),
-#     # fill="toself",
-#     mode="lines",
-#     line=dict(
-#         width=4,
-#         color="blue",
-#         # showscale=False
-#     ),
-#     visible = "legendonly"
-#   )
-# )
 
-# fig.show(config=dict({'scrollZoom': True}))
+M = np.max(pospseudoCyclesY_avg)
+fig.add_trace(
+  go.Scatter(
+    name="Average normalized pseudo-cycle (negative frontier)", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=[0, negpseudoCyclesY_avg.size - 1],
+    y=[M, M],
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=1,
+        color="gray",
+        # dash='dash'
+        # showscale=False
+    ),
+    showlegend=False
+    # visible = "legendonly"
+  )
+)
+
+M = np.max(negpseudoCyclesY_avg)
+fig.add_trace(
+  go.Scatter(
+    name="Average normalized pseudo-cycle (negative frontier)", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=[0, negpseudoCyclesY_avg.size - 1],
+    y=[M, M],
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=1,
+        color="black",
+        dash='dash'
+        # showscale=False
+    ),
+    showlegend=False
+    # visible = "legendonly"
+  )
+)
+
+fig.show(config=dict({'scrollZoom': True}))
 fig.write_image(save_path, width=680, height=300, scale=1, engine="kaleido", format="svg")
