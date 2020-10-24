@@ -11,7 +11,7 @@ import numpy.polynomial.polynomial as poly
 '''==============='''
 
 
-name = "piano33"
+name = "alto"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 n = W.size
@@ -30,6 +30,7 @@ for i in range(1, Xneg.size):
 if np.std(posL) < np.std(negL):
   print("using positive frontier")
   maxL = np.max(np.array(posL))
+  avgL = int(round(np.average(np.array(posL))))
   pseudoCyclesX = []
   pseudoCyclesY = []
   for i in range(1, Xpos.size):
@@ -45,6 +46,7 @@ if np.std(posL) < np.std(negL):
 else:
   print("using negative frontier")
   maxL = np.max(np.array(negL))
+  avgL = int(round(np.average(np.array(negL))))
   pseudoCyclesX = []
   pseudoCyclesY = []
   for i in range(1, Xpos.size):
@@ -66,10 +68,9 @@ pseudoCyclesY_avg = np.average(pseudoCyclesY, 0)
 '''============================================================================'''
 '''                                    APROX                                   '''
 '''============================================================================'''
-
-m = pseudoCyclesY_avg.size
-# X = np.arange(m, dtype=np.float64)
-X = np.linspace(0, 1, m)
+assert pseudoCyclesY_avg.size == maxL
+m = int(maxL)
+X = np.linspace(0, 1, m, dtype=np.float64)
 k = 7
 Q = np.zeros((m, k + 1))
 
@@ -109,7 +110,11 @@ A = np.reshape(A, (2, -1))
 
 print(A)
 
-Yc = poly.polyval(X, A[0, :])
+
+
+
+Xc = np.linspace(0, 1, avgL, dtype=np.float64)
+Yc = poly.polyval(Xc, A[0, :])
 
 ncycles = int(np.round((Xpos.size + Xneg.size) / 2))
 
@@ -175,7 +180,7 @@ fig.add_trace(
 fig.add_trace(
   go.Scatter(
     name="Parametric", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=X,
+    x=Xc,
     y=Yc,
     # fill="toself",
     mode="lines",
@@ -191,7 +196,7 @@ fig.add_trace(
 fig.add_trace(
   go.Scatter(
     name="Parametric mirror", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=X + 1,
+    x=Xc + 1,
     y=Yc,
     # fill="toself",
     mode="lines",
