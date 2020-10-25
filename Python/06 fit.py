@@ -66,10 +66,10 @@ def coefs_to_array_arbitrary_intervals(A, X, I, n):
   #   x += 1
   return Y
 
+
 '''==============='''
 ''' Read wav file '''
 '''==============='''
-
 
 name = "piano33"
 W, fps = se.read_wav(f"Samples/{name}.wav")
@@ -124,7 +124,6 @@ else:
   pseudoCyclesY = np.array(pseudoCyclesY)
 
 print(f"Max L = {maxL}")
-
 
 pseudoCyclesY_avg = np.average(pseudoCyclesY, 0)
 
@@ -271,7 +270,7 @@ fig.add_trace(
   go.Scatter(
     name="Approx", # <|<|<|<|<|<|<|<|<|<|<|<|
     x=Xparam,
-    y=Wparam,
+    y=Wparam * amp,
     # fill="toself",
     mode="lines",
     line=dict(

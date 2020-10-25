@@ -1,6 +1,7 @@
 import plotly.graph_objects as go
 import numpy as np
 import signal_envelope as se
+import hp
 
 
 
@@ -10,13 +11,45 @@ import signal_envelope as se
 '''==============='''
 
 
-name = "alto"
+name = "brass"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
+amp = np.max(np.abs(W))
 n = W.size
 X = np.arange(n)
 
 Xpos, Xneg = se.get_frontiers(W)
+
+Xf = np.sort(np.hstack([Xpos, Xneg]))
+
+'''======='''
+''' Split '''
+'''======='''
+
+Ix = hp.split_raw_frontier(Xf, W)
+A = hp.constrained_least_squares_arbitrary_intervals(Xf, np.abs(W), Ix, 2)
+E = hp.coefs_to_array_arbitrary_intervals(A, Xf, Ix, n)
+
+pa, used_positive_frontier = hp.pseudocycles_average(Xpos, Xneg, W)
+A = hp.approximate_pseudocycles_average(pa)
+if used_positive_frontier:
+  Wp = hp.parametric_W(Xpos, A, n)
+else:
+  Wp = hp.parametric_W(Xneg, A, n)
+
+We = Wp * E
+
+se.save_wav(We)
+
+Xintervals = []
+Yintervals = []
+for x in Xf[Ix]:
+  Xintervals.append(x)
+  Xintervals.append(x)
+  Xintervals.append(None)
+  Yintervals.append(-amp)
+  Yintervals.append(amp)
+  Yintervals.append(None)
 
 
 '''============================================================================'''
@@ -71,7 +104,7 @@ fig.add_trace(
         color="red",
         # showscale=False
     ),
-    # visible = "legendonly"
+    visible = "legendonly"
   )
 )
 
@@ -85,6 +118,59 @@ fig.add_trace(
     line=dict(
         # width=1,
         color="red",
+        # showscale=False
+    ),
+    visible = "legendonly"
+  )
+)
+
+fig.add_trace(
+  go.Scatter(
+    name="Raw Frontier", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=Xf,
+    y=np.abs(W[Xf]),
+    # fill="toself",
+    mode="lines+markers",
+    line=dict(
+      width=1,
+      color="gray",
+      # showscale=False
+    ),
+    marker=dict(
+      size=2,
+    ),
+    visible = "legendonly"
+  )
+)
+
+fig.add_trace(
+  go.Scatter(
+    name="Breaks", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=Xintervals,
+    y=Yintervals,
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=1,
+        color="gray",
+        # dash="dash"
+        # showscale=False
+    ),
+    # visible = "legendonly"
+  )
+)
+
+fig.add_trace(
+  go.Scatter(
+    name="Envelope", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=X,
+    y=We,
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=1,
+        color="red",
+        # dash="dash"
         # showscale=False
     ),
     # visible = "legendonly"
