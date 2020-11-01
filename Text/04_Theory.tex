@@ -1,0 +1,90 @@
+\section{Theory}
+
+\subsection{Waves}
+
+It can be insightful to analyse the behaviour of the crytical points and the zeroes of an arbitrary, periodic wave over time.
+We will assume, for the sake of simplicity, that each cycle of said wave has a unique maximum and minimum, and crosses the horizontal axis one single time. Those assumption dont compromise the generality of the analysis, as in the case of multiple maxima, minima and/or zeroes, one of thosee can be choosen randomly to represent the global one, as long as consistency between cycles is maintained.
+
+To keep our roots in the physical case, we`ll also assume that a wave with a zero phase has an instantaneous amplitude of zero at time zero, as is the case of the sine wave, for example.
+
+For a continuous wave, if we were to plot the time at which any of those values ocurred as a function of their ordinality, the result would be parallel straight lines, their slope somehow related to the frequency of the underlying wave. We will illustrated the point in the case of discrete waves, as this case will be of more immediate use in this work.
+
+\subsubsection{Continuous and discrete waves}
+
+First, it is necessary to stablish a correspondence between a continuous and a discrete wave, as the latter will be the object of most of this work. To do that we will define a simple continuous sinusoidal wave of the form $ S(t) = a \cos \left( \phi + 2 \pi \mathcal{F} t \right) $, where $ a \in \mathbb{R}^+ $ is the amplitude; $ \phi \in \mathbb{R}^+, 0 \le \phi < 2 \pi $ is the phase; $ \mathcal{F} \in \mathbb{R}^+ $ is the absolute frequency of the wave, in Hz and $ t \in \mathbb{R} $ is time, in seconds.
+
+The cosine function is used for a twofold reason: it is historical background, and its use helps to underline the periodic nature of the wave in consideration. It is important to keep in mind, however, that this discussion applyes any arbitrary function of the form $ f(x) = f(x + P) \forall x \in D(f) $, where $ D $ is the domain of the function $ f $.
+% TODO This will be further illustrated in the discrete part below.
+
+If we were to sample $ S(t) $ at regular intervals, that is, to measure the value of the function at a constant rate of $ h $ \gls{FPS}, neglecting errors of measurement, we would have a discrete representation of the continuous wave of the form $ W[i] = a \cos \left( \phi + 2 \pi f \frac{i}{n} \right) $ where, alongside the quantities introduced before, we would have $ i \in \mathbb{N} $ as the frame number; $ n \in \mathbb{N} $ as the number of discrete samples and $ f \in \mathbb{R}^+ $ being the relative frequency of our discrete wave in cycles per $ n $ samples.
+
+The relative, local frequency $ f $ of the discrete representation is related to the absolute frequency $ \mathcal{F} $ via the equation $ f = \frac{n}{\text{fps}} \mathcal{F} $ while the absolute time, in the continuous case can be obtained from the frame number $ i $ of the discrete signal via $ i = t \ \text{fps} $.
+
+\subsubsection{Points of interest of periodic waves}
+
+
+
+\subsection{Least Mean Squares}
+
+
+
+The linear \gls{LMS}, also known as linear regression \parencite{2018StephenBoydIntroduction} is a data fitting technique. % TODO
+
+We present here the theory for real numbers, noting that it can be easily extended for complex numbers \parencite{1995LawsonSolving}, should the necessity arise. That, however, will not be the case in this work.
+
+Given two vectors $ X $ and $ Y $, such that:
+$$ X = [x_0, x_1, \cdots ,x_{m-1}]^T, \ x_i \ \in \ \mathbb{R} \ \forall \ i, \ 0 \le i < m \in \mathbb{N} $$
+$$ Y = [y_0, y_1, \cdots ,y_{m-1}]^T, \ y_i \ \in \ \mathbb{R} \ \forall \ i, \ 0 \le i < m \in \mathbb{N} $$
+We ideally want to find the vector of coefficients $ A = [a_0, a_1, \cdots ,a_k]^T, \ a_j \ \in \ \mathbb{R} \ \forall \ j, \ 0 \le j \le k \in \mathbb{N} $ that satisfies the equality $ x^0_i a_0 + x^1_i a_1 + \cdots + x^{k-1}_i a_{k-1} + x^k_i a_k = y_i \quad \forall \quad i \in \{0, \cdots , m-1\} $.
+
+Put in that way, what we have is a system of linear equations that can be rewritten in matrix form as seen in equation \ref{eq:lms}.
+
+\begin{equation}
+  \label{eq:lms}
+\stackrel{Q_{m \times (k+1)}}
+{
+\begin{bmatrix}
+1 & x_0 & \cdots & x_0^k \\
+1 & x_1 & \cdots & x_1^k \\
+\vdots & \vdots & \ddots & \vdots  \\
+1 & x_{m-1} & \cdots & x_{m-1} \\
+\end{bmatrix}
+}
+\stackrel{A_{(k+1) \times 1}}
+{
+\begin{bmatrix}
+a_0 \\
+a_1 \\
+\vdots  \\
+a_k \\
+\end{bmatrix}
+}
+=
+\stackrel{Y_{m \times 1}}
+{
+\begin{bmatrix}
+y_0 \\
+y_1 \\
+\vdots  \\
+y_{m-1} \\
+\end{bmatrix}
+}
+\end{equation}
+
+More compactly, we have that $ Q A = Y $. This system will generally be over-determined, only having an exact solution in the case where $ Y $ is a linear combination of the columns in $ Q $ \parencite{2018StephenBoydIntroduction}.
+
+Since an exact solution is often beyond reach, we can at least choose $ A $ in a way that makes $ Q A $ and $ Y $ close. A way to do that is to minimize the absolute errors (or their square) between those two quantities; $ \underset{A}{\min} ||Q A - Y||^2_2 $
+
+Using calculus, for example, on can arrive at the equation $ \hat{A} = (Q^T Q)^{-1} Q^T Y $, where $ \hat{A} $ is the vector of coefficients that minimizes the squared errors. A detailed derivation is available at \cite{2018StephenBoydIntroduction}.
+
+
+
+\subsection{Constrained Least Mean Squares}
+
+\newacronym{CLMS}{CLMS}{Constrained Least Mean Squares}
+
+In the constrained version of the \gls{LMS}, known as the \gls{CLMS} problem we are still interested in finding the coefficient vector $ \hat{A} $ that minimizes $ ||Q A - Y||^2_2 $, but respecting a restriction on this vector of the general form of $ V A = B $.
+
+We can then define the Lagrangian and set its derivatives to zero to obtain, as described in \textcite{2013SelesnickLeast}, the closed form solution 
+
+$$ \hat{A} = \left(Q^{T} Q\right)^{-1} \left(Q^{T} Y - V^{T} \left(V \left(Q^{T} Q\right)^{-1} V^{T}\right)^{-1} V \left(Q^{T} Q\right)^{-1} Q^{T} Y - B \right) $$

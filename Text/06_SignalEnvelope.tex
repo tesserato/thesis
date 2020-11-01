@@ -20,7 +20,7 @@ For an arbitrary continuous function, then, a pulse would correspond to the regi
 
   \begin{figure}[ht!]
     \centering
-      \includegraphics[width=0.8\linewidth]{./imgs/envelope/01Pulses.pdf}
+      \includegraphics{./imgs/01Pulses.pdf}
     \caption{Example of a discrete wave. The black stems represent the individual samples of the signal. The grey areas encompass the simplified convex hulls of the pulses. The dashed lines mark the frontiers between pseudo-cycles.}
     \label{fig:Pulses}
   \end{figure}
@@ -33,7 +33,7 @@ Figure \ref{fig:AnalyticSignal} shows the envelope obtained via the analytic sig
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=0.8\linewidth]{./imgs/envelope/02AnalyticSignal.pdf}
+    \includegraphics{./imgs/02AnalyticSignal.pdf}
   \caption{Envelope of a pure sinusoid modulated by a polynomial of degree 3, as obtained by the Hilbert Transform. In the first half, the sinusoid is free of noise, while in the second half white gaussian noise with a standard deviation of $ 1/10 $ of the maximum amplitude of the wave was added to the base signal.}
   \label{fig:AnalyticSignal}
 \end{figure}
@@ -46,14 +46,14 @@ The set of all these points such that $ W[i] > 0 $ will be called the positive, 
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=0.8\linewidth]{./imgs/envelope/03Frontiers.pdf}
+    \includegraphics{./imgs/03Frontiers.pdf}
   \caption{Positive and negative frontiers, envelope and pseudo-cycles for a fragment of piano sound. While we have only one (positive) envelope, here mirrored in the inferior space, we have two frontiers, the superior and inferior, that are obtained independently.}
   \label{fig:Frontiers}
 \end{figure}
 
 To identify such points, we need first to address the different units in which the amplitude and horizontal distance of our wave are expressed. To make abscissa and ordinate units consistent for the computation of the frontiers, and proceed with a geometric treatment of the subject, we consider the set of positive and negative pulses separately. 
 
-For each set, we multiply all pulses vertical coordinates by the average length of the pulses in the set, after having divided by the average of the pulses' amplitudes, putting both axes in the same unit $i$, related to time by the equation $i = t \ \mathit{fps}$.
+For each set, we multiply all pulses vertical coordinates by the average length of the pulses in the set, after having divided by the average of the pulses' amplitudes, putting both axes in the same unit $i$, related to time by the equation $i = t \ \text{FPS}$.
 
 Formally, supposing we have $ m $ pulses of the same sign, we scale each pulse's vertical coordinate $ P[j]^\pm_y $ by $ s^\pm $, where:
 
@@ -84,7 +84,7 @@ Concerning the last method, two approaches to fit a polynomial to a generic wave
 The geometric, symmetrical nature of the problem excludes the more computationally economic least mean squares approach, however, leaving us with the total least squares, for which no general closed-form solutions are available \parencite{2007MarkovskyOverview}; this leads us to turn our attention to direct approaches of curvature estimation.
 
 
-\subsection{Discrete Curvature Estimation - The Equivalent Circle Approach}
+\subsection{Discrete Curvature Estimation - Equivalent Circle Approach}
 
 As previously noted, no default discrete curvature definition exists; \textcite{2014CarrollSurvey}, for example, derive three such different definitions based on the approximation of a circle by an inscribed, centred and circumscribed polygon. In the context of 3d meshes, \textcite{2016VasaMultivariate} evaluate a range of existing estimators from a multivariate point of view.
 
@@ -94,7 +94,7 @@ The idea is to find the equivalent circle whose tangent presents the same change
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=0.2\linewidth]{./imgs/envelope/04DiscreteCurvature.pdf}
+    \includegraphics{./imgs/04DiscreteCurvature.pdf}
   \caption{The tangent unit vector of the circle changes from the horizontal direction in $ \hat{u}_0 $ to an inclination of $ \theta $ in $ \hat{u}_1 $. $ \theta $ is also the angle between the average direction $ \vec{\overline{v}}_l $ and the vector $ \vec{v}_l $ that represents the edge of interest, shown in grey.}
   \label{fig:DiscreteCurvature}
 \end{figure}
@@ -111,17 +111,17 @@ After this procedure, illustrated in figure \ref{fig:Curvatures}, two sets of po
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=0.8\linewidth]{./imgs/envelope/05Curvatures.pdf}
+    \includegraphics{./imgs/05Curvatures.pdf}
   \caption{The equivalent circles obtained via the procedure described for the positive frontier. $\theta$, the angle between $ \vec{\overline{v}}^+$ and each of the $\vec{v}_l^+$ is used, as is the horizontal component of each $\vec{v}_l^+$ to obtain the radii of the circles.}
   \label{fig:Curvatures}
 \end{figure}
 
-Given the robustness of the method, for an average wave of a few seconds at an ordinary rate of 44100 $ \mathit{fps} $ the average of the radius values is sufficient to assure the accurate identification of the frontier. However, a curve fitting method can be used in the case of longer or ill-behaved waves. 
+Given the robustness of the method, for an average wave of a few seconds at an ordinary rate of 44100 \gls{FPS} the average of the radius values is sufficient to assure the accurate identification of the frontier. However, a curve fitting method can be used in the case of longer or ill-behaved waves. 
 An example of the use of the average equivalent circle can be seen in figure \ref{fig:AvgCircle}.
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=0.8\linewidth]{./imgs/envelope/06AvgCircle.pdf}
+    \includegraphics{./imgs/06AvgCircle.pdf}
   \caption{The positive frontier as obtained by the use of the circle representing the average curvature of the discrete wave illustrated.}
   \label{fig:AvgCircle}
 \end{figure}
@@ -132,8 +132,8 @@ Figure \ref{fig:FullFrontiers} illustrates the frontiers of six diverse discrete
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=0.8\linewidth]{./imgs/envelope/07FullFrontiers.pdf}
-  \caption{Positive and negative frontiers of six digital waves, as extracted by the algorithm here presented. For each wave, the region highlighted in black is shown in detail besides the whole wave. For each wave the horizontal axis is the sample number $i$, while the vertical axis is the normalized amplitude. All 6 waves were recorded at 44100 $ \mathit{fps} $.}
+    \includegraphics{./imgs/07FullFrontiers.pdf}
+  \caption{Positive and negative frontiers of six digital waves, as extracted by the algorithm here presented. For each wave, the region highlighted in black is shown in detail besides the whole wave. For each wave the horizontal axis is the sample number $i$, while the vertical axis is the normalized amplitude. All 6 waves were recorded at 44100 \gls{FPS}.}
   \label{fig:FullFrontiers}
 \end{figure}
 
@@ -143,7 +143,7 @@ The impact of the normalization of a wave using the frontiers obtained can be se
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=0.8\linewidth]{./imgs/envelope/08Fourier.pdf}
+    \includegraphics{./imgs/08Fourier.pdf}
   \caption{Original and normalized views of a recording of key 33 (F3, 175 Hz) from a grand piano both in time and frequency domains.}
   \label{fig:Fourier}
 \end{figure}
@@ -156,14 +156,14 @@ Although important from a theoretical standpoint, this step has an especial comp
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=0.8\linewidth]{./imgs/envelope/10xRobustness.pdf}
+    \includegraphics{./imgs/10xRobustness.pdf}
   \caption{Minimum and maximum scales of the abscissa before computational stability issues arose, for a recording of a drum kit tom.  $ \text{B} = 10^6 $.}
   \label{fig:xRobustness}
 \end{figure}
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=0.8\linewidth]{./imgs/envelope/09yRobustness.pdf}
+    \includegraphics{./imgs/09yRobustness.pdf}
   \caption{Minimum and maximum values of the amplitude before computational stability issues arose, for a recording of a drum kit tom.}
   \label{fig:yRobustness}
 \end{figure}
@@ -176,7 +176,7 @@ Nevertheless, insight can be gained from a comparison of the results of the meth
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=0.8\linewidth]{./imgs/envelope/12Comparison.pdf}
+    \includegraphics{./imgs/12Comparison.pdf}
   \caption{Comparison of the algorithm present in this work with the most common methods of digital envelope identification.}
   \label{fig:Comparison}
 \end{figure}
@@ -189,7 +189,7 @@ In the case of the proposed algorithm, the smooth temporal envelope was obtained
 
 \begin{figure}[ht!]
   \centering
-    \includegraphics[width=0.8\linewidth]{./imgs/envelope/13FrontiersToEnvelope.pdf}
+    \includegraphics{./imgs/13FrontiersToEnvelope.pdf}
   \caption{Original positive and negative frontiers in dark grey and their mirrored versions. The temporal envelope, in black, is obtained by merging and approximating both frontiers.}
   \label{fig:FrontiersToEnvelope}
 \end{figure}
