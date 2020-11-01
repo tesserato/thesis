@@ -1,8 +1,10 @@
 import numpy as np
 from scipy.linalg import block_diag
 import numpy.polynomial.polynomial as poly
+from collections import Counter
+from math import gcd
 
-def split_raw_frontier(Xf, W):
+def split_raw_frontier(Xf, W, n_intervals = 4):
   Areas = []
   for i in range(1, Xf.size):
     x0 = Xf[i - 1]
@@ -12,9 +14,7 @@ def split_raw_frontier(Xf, W):
     a = (x1 - x0) * (y0 + y1) / 2
     Areas.append(a)
 
-  Areas = np.array(Areas)
-
-  n_intervals = 4
+  Areas = np.array(Areas)  
 
   limit = np.sum(Areas) / n_intervals
 
@@ -77,8 +77,8 @@ def constrained_least_squares_arbitrary_intervals(X, W, I:list, k=3):
       V[2 * i, (i + 1) * (k + 1) + c] = -x**c
       V[2 * i + 1, (i + 1) * (k + 1) + c] = -x**(c-1) * c
 
-  np.savetxt("Q.csv", np.round(Q, 2), delimiter=",")
-  np.savetxt("V.csv", np.round(V, 2), delimiter=",")
+  # np.savetxt("Q.csv", np.round(Q, 2), delimiter=",")
+  # np.savetxt("V.csv", np.round(V, 2), delimiter=",")
 
   '''solving'''
   QTQinv = np.linalg.inv(Q.T @ Q)
@@ -155,7 +155,7 @@ def pseudocycles_average(Xpos, Xneg, W):
   print(f"Max L = {maxL}")
 
   pseudoCyclesY_avg = np.average(pseudoCyclesY, 0)
-  return pseudoCyclesY_avg, used_positive_frontier
+  return pseudoCyclesY_avg, used_positive_frontier, pseudoCyclesY
 
 def approximate_pseudocycles_average(pseudoCyclesY_avg):
   m = pseudoCyclesY_avg.size
@@ -197,11 +197,15 @@ def approximate_pseudocycles_average(pseudoCyclesY_avg):
   A = np.reshape(A, (2, -1))[0, :]
   return A
 
-def parametric_W(Xp, A, n):
+def parametric_W(Xp, A, n, approximate=False):
   Wparam = []
-  Xparam = []
+  # Xparam = []
+  if approximate:
+    XX = np.arange(Xp.size)
+    C = poly.polyfit(XX, Xp, 3)
+    Xp = np.round(poly.polyval(XX, C)).astype(int)
   for x in range(Xp[0]):
-    Xparam.append(x)
+    # Xparam.append(x)
     Wparam.append(0)
   for i in range(1, Xp.size):
     x0 = Xp[i - 1]
@@ -209,11 +213,46 @@ def parametric_W(Xp, A, n):
     Xl = np.linspace(0, 1, int(x1) - int(x0) + 1, dtype=np.float64)
     Yl = poly.polyval(Xl, A)
     for j in range(Yl.size - 1):
-      Xparam.append(x0 + j)
+      # Xparam.append(x0 + j)
       Wparam.append(Yl[j])
   for x in range(Xp[-1], n):
-    Xparam.append(x)
+    # Xparam.append(x)
     Wparam.append(0)
 
   Wparam = np.array(Wparam) #* amp
-  return Wparam
+  return Wparam[0:n]
+
+def linearize_pc(Xp):
+  Xp = Xp.astype(np.int)
+  AB = []
+  for i in range(Xp.size):
+    for j in range(i+1, Xp.size):
+      anum = Xp[j] - Xp[i]
+      aden = j - i
+      agcd = gcd(anum, aden)
+      bnum = i * Xp[j] - j * Xp[i]
+      bden = i - j
+      bgcd = gcd(bnum, bden)
+      AB.append((anum / agcd, aden / agcd, bnum / bgcd, bden / bgcd))
+
+  # countsAB = Counter([(ab[0], ab[1]) for ab in AB])
+
+  countsAB = Counter(AB)
+
+  afrac = countsAB.most_common(1)[0][0]
+
+  # B = []
+  # for ab in AB:
+  #   if afrac == (ab[0], ab[1]):
+  #     B.append(ab[2] / ab[3])
+
+  print(f"a num, a den = {countsAB.most_common(10)[0][0]}, total={len(AB)}")
+
+  a = afrac[0] / afrac[1]
+  b = afrac[2] / afrac[3]
+
+  x0 = int(np.round(- b / a))
+  x1 = int(np.round((Xp[-1]- b) / a))
+
+  X = np.arange(x0, x1)
+  return a * X + b
