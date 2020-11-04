@@ -4,6 +4,7 @@ import signal_envelope as se
 import numpy.polynomial.polynomial as poly
 from collections import Counter
 from math import gcd
+import hp as hp
 
 
 '''==============='''
@@ -11,62 +12,43 @@ from math import gcd
 '''==============='''
 
 
-name = "piano33"
+name = "brass"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
+amp = np.max(np.abs(W))
 n = W.size
 X = np.arange(n)
 
 Xpos, Xneg = se.get_frontiers(W)
 
-Xpos, Xneg = Xpos.astype(np.int), Xneg.astype(np.int)
-
 XX = np.arange(Xpos.size)
-# A = poly.polyfit(XX, Xpos, 4)
-# Xposfit = poly.polyval(XX, A)
+A = poly.polyfit(XX, Xpos, 1)
+b, a = A
 
-AB = []
-for i in range(Xpos.size):
-  for j in range(i+1, Xpos.size):
-    anum = Xpos[j] - Xpos[i]
-    aden = j - i
-    agcd = gcd(anum, aden)
-    bnum = i * Xpos[j] - j * Xpos[i]
-    bden = i - j
-    bgcd = gcd(bnum, bden)
-    AB.append((anum / agcd, aden / agcd, bnum / bgcd, bden / bgcd))
+print("a=", a)
 
+x0 = int(np.round(- b / a))
+x1 = int(np.round((Xpos[-1]- b) / a))
+XX = np.arange(x0, x1)
 
-countsAB = Counter([(ab[0], ab[1]) for ab in AB])
+Xposlms = poly.polyval(XX, [b, a])
+# stdlms = hp.std(Xposlms, Xpos)
 
-# countsAB = Counter(AB)
+# Xposfit, Yposfit = hp.linearize_pc(Xpos)
+# stdfit = hp.std(Yposfit, Xpos)
+# print(stdlms, stdfit)
+FT = np.fft.rfft(W)
+f = np.argmax(np.abs(FT))
+print(n/a, f)
 
-afrac = countsAB.most_common(1)[0][0]
-
-B = []
-for ab in AB:
-  if afrac == (ab[0], ab[1]):
-    B.append(ab[2] / ab[3])
-
-print(f"a num, a den = {countsAB.most_common(10)[0][0]}, total={len(AB)}")
-
-a = afrac[0] / afrac[1]
-b = np.average(np.array(B))
-
-# posL = []
-# for i in range(1, Xpos.size):
-#   posL.append(Xpos[i] - Xpos[i - 1])
-
-# negL = []
-# for i in range(1, Xneg.size):
-#   negL.append(Xneg[i] - Xneg[i - 1])
-
-# np.histogram(Xneg, np.arange(Xneg.size))
+# exit()
 
 
 '''============================================================================'''
-'''                                    PLOT                                    '''
+'''                              PLOT LINES                                    '''
 '''============================================================================'''
+
+
 fig = go.Figure()
 fig.layout.template ="plotly_white"
 # fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
@@ -95,9 +77,9 @@ fig.add_trace(
     # x=Xpos,
     y=Xpos,
     # fill="toself",
-    mode="markers",
-    marker=dict(
-        # width=1,
+    mode="lines",
+    line=dict(
+        width=1,
         color="black",
         # showscale=False
     ),
@@ -105,16 +87,125 @@ fig.add_trace(
   )
 )
 
+# fig.add_trace(
+#   go.Scatter(
+#     name="Xposfit", # <|<|<|<|<|<|<|<|<|<|<|<|
+#     x=Xposfit,
+#     y=Yposfit,
+#     # fill="toself",
+#     mode="lines",
+#     line=dict(
+#         width=1,
+#         color="gray",
+#         # showscale=False
+#     ),
+#     # visible = "legendonly"
+#   )
+# )
+
 fig.add_trace(
   go.Scatter(
-    name="Xposfit", # <|<|<|<|<|<|<|<|<|<|<|<|
+    name="Xposlms", # <|<|<|<|<|<|<|<|<|<|<|<|
     x=XX,
-    y=a * XX + b,
+    y=Xposlms,
     # fill="toself",
     mode="lines",
     line=dict(
         width=1,
-        color="gray",
+        color="blue",
+        # showscale=False
+    ),
+    # visible = "legendonly"
+  )
+)
+
+
+# fig.add_trace(
+#   go.Scatter(
+#     name="Xposlms + std", # <|<|<|<|<|<|<|<|<|<|<|<|
+#     x=XX,
+#     y=Xposlms + 3 * stdlms,
+#     # fill="toself",
+#     mode="lines",
+#     line=dict(
+#         width=1,
+#         color="blue",
+#         dash="dash"
+#         # showscale=False
+#     ),
+#     # visible = "legendonly"
+#   )
+# )
+
+# fig.add_trace(
+#   go.Scatter(
+#     name="Xposlms - std", # <|<|<|<|<|<|<|<|<|<|<|<|
+#     x=XX,
+#     y=Xposlms - 3 * stdlms,
+#     # fill="toself",
+#     mode="lines",
+#     line=dict(
+#         width=1,
+#         color="blue",
+#         dash="dash"
+#         # showscale=False
+#     ),
+#     # visible = "legendonly"
+#   )
+# )
+
+# fig.add_trace(
+#   go.Scatter(
+#     name="Xneg", # <|<|<|<|<|<|<|<|<|<|<|<|
+#     # x=Xpos,
+#     y=Xneg,
+#     # fill="toself",
+#     mode="lines",
+#     line=dict(
+#         width=1,
+#         color="red",
+#         # showscale=False
+#     ),
+#     # visible = "legendonly"
+#   )
+# )
+
+fig.show(config=dict({'scrollZoom': True}))
+
+'''============================================================================'''
+'''                                    PLOT                                    '''
+'''============================================================================'''
+fig = go.Figure()
+fig.layout.template ="plotly_white"
+# fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
+fig.update_layout(
+  # title = name,
+  xaxis_title="Length",
+  yaxis_title="Number of Ocurrences",
+
+  # yaxis = dict(        # <|<|<|<|<|<|<|<|<|<|<|<|
+  #   scaleanchor = "x", # <|<|<|<|<|<|<|<|<|<|<|<|
+  #   scaleratio = 1,    # <|<|<|<|<|<|<|<|<|<|<|<|
+  # ),                   # <|<|<|<|<|<|<|<|<|<|<|<|
+
+  legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
+  margin=dict(l=5, r=5, b=5, t=5),
+  font=dict(
+  family="Computer Modern",
+  color="black",
+  size=12
+  )
+)
+
+fig.add_trace(
+  go.Scatter(
+    name="Signal", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=X,
+    y=W,
+    mode="lines",
+    line=dict(
+        # size=8,
+        color="silver",
         # showscale=False
     ),
     # visible = "legendonly"
@@ -123,9 +214,9 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Xneg", # <|<|<|<|<|<|<|<|<|<|<|<|
-    # x=Xpos,
-    y=Xneg,
+    name="Positive Frontier", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=Xpos,
+    y=W[Xpos],
     # fill="toself",
     mode="markers",
     line=dict(
@@ -133,7 +224,48 @@ fig.add_trace(
         color="red",
         # showscale=False
     ),
-    # visible = "legendonly"
+    visible = "legendonly"
   )
 )
+
+XX = []
+XXd = []
+YY = []
+for x in Xposlms:
+  XX.append(x), XX.append(x), XX.append(None)
+  XXd.append(a / 2 + x), XXd.append(a / 2 + x), XXd.append(None)
+  YY.append(-amp), YY.append(amp), YY.append(None)
+
+fig.add_trace(
+  go.Scatter(
+    name="Positive Frontier lms", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=XX,
+    y=YY,
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        # width=1,
+        color="blue",
+        # showscale=False
+    ),
+    visible = "legendonly"
+  )
+)
+
+fig.add_trace(
+  go.Scatter(
+    name="  Positive Frontier lms", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=XXd,
+    y=YY,
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        # width=1,
+        color="gray",
+        # showscale=False
+    ),
+    visible = "legendonly"
+  )
+)
+
 fig.show(config=dict({'scrollZoom': True}))

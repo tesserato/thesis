@@ -255,4 +255,7 @@ def linearize_pc(Xp):
   x1 = int(np.round((Xp[-1]- b) / a))
 
   X = np.arange(x0, x1)
-  return a * X + b
+  return X, a * X + b
+
+def std(V1, V2):
+  return np.sqrt(np.average((V1 - V2)**2))
