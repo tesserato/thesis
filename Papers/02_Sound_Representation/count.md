@@ -1,67 +1,7 @@
-\documentclass{article}
-\usepackage{lmodern} % Latin Modern Font
-\usepackage[T1]{fontenc}
-\usepackage{amsfonts} % \mathbb
-\usepackage[margin=0.5in]{geometry}
-\usepackage[utf8]{inputenc}
-\usepackage{graphicx}
-% \graphicspath{{images/}}
-\usepackage[backend=biber]{biblatex}
-\usepackage{amsmath}
-\usepackage[makeroom]{cancel}
-
-% \usepackage{auto-pst-pdf}
-
-% \usepackage{hyperref}
-% \usepackage{hypcap}
-% \DeclareMathOperator{\sign}{sign}
-% \hypersetup{
-%   colorlinks=true, 
-%   allcolors=black,
-%   pdfauthor={Carlos Henrique Tarjano Santos},
-%   pdftitle={Robust Digital Envelope Estimation Via Geometric Properties of an Arbitrary Real Signal}
-% }
-
-\bibliography{bibli}
-
-\usepackage{authblk}
-\title{Robust Digital Envelope Estimation Via Geometric Properties of an Arbitrary Real Signal}
-\author[1]{Carlos Henrique Tarjano Santos}
-\author[2]{Valdecy Pereira}
-\affil[1]{(corresponding author, carlostarjano@id.uff.br) Department of Production Engineering, Universidade Federal Fluminense, Rua Passo da Pátria, 156, Campus Praia Vermelha, Bloco D - sala 309, São Domingos, Niterói, RJ, Brasil, CEP: 24.210-240}
-\affil[2]{Department of Production Engineering, Universidade Federal Fluminense, Rua Passo da Pátria, 156, Campus Praia Vermelha, Bloco D - sala 309, São Domingos, Niterói, RJ, Brasil, CEP: 24.210-240}
-
-\begin{document}
-
-\maketitle
-
-\begin{abstract}
-
-\end{abstract}
-
-{\bf Keywords:} DSP, alpha-shapes, envelope detection, discrete curvature estimation
-
-
-\section{Introduction}
-
-
-
-We aim to exploit redundancies in the constitution of a discrete sound wave to formulate an alternative, more compact and thus easier to analyse, representation. Implicit in this affirmation is the somewhat loose assumption that the wave considered is reasonably well behaved, in the sense that redundancies exist to be identified. In contrast with \textcite{2019TarjanoNeuro}, we don't require the signal to be strictly harmonic.
-
-We aim in providing a method that, with minimal manual interference, is able to reduce a digital wave to a more compact and meaningful representation.
-
-
 \section{Methodology}
 Conceptually, one can think of the procedure here presented as a way to represent discrete, pitched, signal with a set of 3 tuples. Those tuples are composed, to describe them loosely, of a polynomial description of the envelope of the signal, that dictates the outer shape of the wave, or the volume of the sound as a function of time; another polynomial description, but this time for the (pseudo)-cycles of the wave, meant to represent the shape of each pseudo cycle of the signal, and a description of the beginning of each said pseudo cycle, and thus the end of the preceding one.
 
 This aids in putting in perspective the broad strokes of the algorithm.
-
-
-\subsection{Pseudo Cycles}
-
-This work proposes the pseudo cycle as the building block of a discrete wave, assuming its parametric shape to be constant throughout the space of the digital signal; in order words, the adjective pseudo is used because the two other descriptions of the wave, namely, the envelope and the length of the pseudo cycles act into the pseudo cycles shape itself, changing it in function of the time.
-
-This is a simplification, as many factors are known to influence the shape of the wave, as is the case of the decaying high frequencies in a rigid string, for example. % TODO Those factors will be eventually accounted for
 
 Using the algorithm presented in \textcite{2020TarjanoRobust} one can identify the frontiers, both positive and negative, of a digital signal: Those are, ideally, respectively composed of the maxima and minima of each pseudo-cycle of a discrete signal. 
 
@@ -78,44 +18,14 @@ and the extracted envelopes; the signal is an example of the voice of an alto si
   \label{fig:signalenvelope}
 \end{figure}
 
-It can be seen that both frontiers provide approximately the same information about the location of each pseudo-cycle, with an approximate $ \pi $ phase difference between them. As the original algorithm proposed in \textcite{2020TarjanoRobust} is meant for envelope detection, maxima or minima that lies close to the already established frontiers are sometimes neglected, without significant impact in the envelope extracted.
-
-For our purposes, however, it is beneficial to accurately identify as many local maxima and minima, and hence pseudo cycles as possible. Consider, for example, the periodic discrete signal shown in the figure \ref{fig:periodicwave} below, consisting of the repetition of a cycle constructed from a simple sinusoid with gaussian noise added, where the maxima and the minima were highlighted.
+It can be seen that both frontiers provide approximately the same information about the location of each pseudo-cycle, with a $ \pi $ phase difference.
 
 \begin{figure}[ht!]
   \centering
-     \includegraphics{07periodicwave.pdf}
-  \caption{Three Cycles, divided by the vertical lines, of a discrete periodic wave, with the maxima and minima highlighted}
-  \label{fig:periodicwave}
-\end{figure}
-
-The first thing we can observe from \ref{fig:periodicwave} is that there are three types of well defined points of interest in the cycle of an arbitrary periodic discrete wave of the form $ f(x) = f(x + P) \forall x \in D(f) $, where $ D $ is the domain of the function $ f $: The extreme points, that is, the maxima and minima, and the zeroes.
-
-It is easy to see that if we choose to plot the frame of ocurrence of those points as a function of their cardinality, breaking ties arbitrarily and consistently, we will invariably have a straight line of the form $ y = a x + b $, in the case of strictily periodic waves, with the slope related to the dominant frequency, and the intercept related to the concept of phase.
-
-Also, we can argue that using the maxima, instead of the zeroes, brings some simplifications to the process, as the maxima are generally less abundant, and more directly well defined, both in the horizontal and vertical axes. The vertical difference of one of such points and the immediately adjacent one is the period $ T $ of the periodic wave.
-
-Two things about this straight line become, then, immeadiately apparent: the first is that unit in the vertical axis is $ i $, that is, the indices of the frames of the discrete wave, and the second is that $ x \in \mathbb{N} $. Also, we have that the slope of the line equation is $ a = \frac{y_{k+1} - y_{k}}{x_{k+1} - x_{k}} = T $.
-
-We can then rewrite the line equation as $ y_k = T x_k + b $
-
-% $ b = \frac{x_{k+1} y_{k} - x_{k} y_{k+1}}{x_{k+1} - x_{k}} $
-
-If we define the local frequency $ f $ of a discrete, periodic wave as the ratio between the number cycles of said wave and the number $ n $ of frames of that wave, we can, recalling that the period of a wave is the inverse of its frequency, obtain the dominant frequency of the wave by using the equation $ f = \frac{n}{T} = \frac{n}{a} $. Alternatively, the relation $ f = (\#F^\pm - 1) n / (F^\pm[-1] - F^\pm[0])$, where $ \#F^\pm $ denotes the cardinality of the frontier, while $ F^\pm[0] $ and $ F^\pm[-1] $ stand for the frontier's first and last item, respectively, could also be used.
-
-Similarly, it is simpler to obtain information about the phase of a periodic wave from the extremes. Keeping in mind that a phase shift of $ 2 \pi $ would shift the wave by one whole period and also that a wave with zero phase would have its first maximum at $ i = 0 $, we need only to multiply the ratio between the frame where the first maximum ocurred and the period by 
-$ 2 \pi $, as in the formula $ \phi = \frac{2 \pi F^+[0]}{T}$
-
-About the result above it is important to keep in mind that congruency with the results of the Fourier Transform is not guarateed, as the shape of an arbitrary wave and, consequently, the relative position of its maximum can depart considerably from the position of an ordinary sinusoid.
-
-By this token, it is more convenient to define the phase obtained from the negative frontier in terms of the one obtained with the use of the positive one; To achieve that, it is sufficient to infer the relative position of the maximum in relation to the minimum, and use that in the phase formula presented above.
-
-
-
-
-\begin{figure}[ht!]
-  \centering
+    %  \includegraphics[width=0.9\linewidth]{01signalenvelope}
      \includegraphics{02pcsraw-alto.pdf}
+    % \def\svgwidth{\linewidth}
+    %\input{01signalenvelope.pdf_tex}
   \caption{Raw pseudo-cycles superimposed as defined by the positive and negative frontiers, for the alto singer signal.}
   \label{fig:pcrawalto}
 \end{figure}
@@ -276,26 +186,3 @@ The initial $k+1$ lines of $V$ assure that the first half of the coefficients of
   \caption{Two adjacent pseudo-cycles. The detail view illustrates that $C^0$ and $C^1$ smoothness are maintained in the parametric representation when two reconstructions are stacked horizontally.}
   \label{fig:05approximation-alto}
 \end{figure}
-
-
-
-% \begin{table}[ht!]
-% \centering
-% \begin{tabular}{ l c c }
-% \hline
-% Method & LMS & time(s) \\
-% \hline
-% Presented Algorithm & 0.0088 & 4.1507 \\ 
-% Smoothing           & 0.0123 & 0.1911 \\ 
-% Low pass Filter      & 0.0258 & 0.5601 \\ 
-% Hilbert Transform   & 0.0141 & 0.2599 \\ 
-% \hline
-% \end{tabular}
-% \caption{Comparison of the algorithm present in this work with the most common methods of digital envelope identification.}
-% \label{table:Comparison}
-% \end{table}
-
-
-\printbibliography
-
-\end{document}
