@@ -2,13 +2,9 @@ import plotly.graph_objects as go
 import numpy as np
 import signal_envelope as se
 
-
-
-
 '''==============='''
 ''' Read wav file '''
 '''==============='''
-
 
 name = "alto"
 W, fps = se.read_wav(f"Samples/{name}.wav")

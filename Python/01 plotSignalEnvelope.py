@@ -3,13 +3,9 @@ import numpy as np
 import signal_envelope as se
 import hp
 
-
-
-
 '''==============='''
 ''' Read wav file '''
 '''==============='''
-
 
 name = "piano33"
 W, fps = se.read_wav(f"Samples/{name}.wav")
@@ -21,8 +17,6 @@ X = np.arange(n)
 Xpos, Xneg = se.get_frontiers(W)
 
 Xf = np.sort(np.hstack([Xpos, Xneg]))
-
-
 
 Ix = hp.split_raw_frontier(Xf, W, 2)
 A = hp.constrained_least_squares_arbitrary_intervals(Xf, np.abs(W), Ix, 2)

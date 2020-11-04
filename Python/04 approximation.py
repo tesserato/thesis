@@ -4,12 +4,9 @@ import signal_envelope as se
 from scipy.linalg import block_diag
 import numpy.polynomial.polynomial as poly
 
-
-
 '''==============='''
 ''' Read wav file '''
 '''==============='''
-
 
 name = "brass"
 W, fps = se.read_wav(f"Samples/{name}.wav")

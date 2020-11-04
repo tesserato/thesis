@@ -259,3 +259,23 @@ def linearize_pc(Xp):
 
 def std(V1, V2):
   return np.sqrt(np.average((V1 - V2)**2))
+
+def refine_frontier(Xp):
+  "find additional frontier points, and return an array with then, if found"
+  L = Xp[1:] - Xp[:-1]
+  avgL = np.average(L)
+  stdL = np.std(L)
+  Xnew = []
+  for i in range(1, Xp.size):
+    x0 = int(Xp[i - 1])
+    x1 = int(Xp[i])
+    if x1 - x0 > avgL + 2 * stdL:
+      Xzeroes = []
+      currsign = np.sign(W[x0])
+      for i in range(x0 + 1, x1):
+        if currsign != np.sign(W[i]):
+          Xzeroes.append(i)
+          currsign = np.sign(W[i])
+      if len(Xzeroes) > 1:
+        Xnew.append(Xzeroes[0] + np.argmax(W[Xzeroes[0] : Xzeroes[-1]]))
+  return np.array(Xnew, dtype=np.int)
