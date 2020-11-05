@@ -59,56 +59,68 @@ This aids in putting in perspective the broad strokes of the algorithm.
 
 \subsection{Pseudo Cycles}
 
-This work proposes the pseudo cycle as the building block of a discrete wave, assuming its parametric shape to be constant throughout the space of the digital signal; in order words, the adjective pseudo is used because the two other descriptions of the wave, namely, the envelope and the length of the pseudo cycles act into the pseudo cycles shape itself, changing it in function of the time.
+This work proposes the pseudo cycle as the building block of a discrete wave, assuming its parametric shape to be constant throughout the space of the digital signal; in order words, the adjective pseudo is used because the two other descriptions of the wave, namely, the envelope and the length of the pseudo cycles act into the pseudo cycles shape itself, modifying it in function of the time.
 
-This is a simplification, as many factors are known to influence the shape of the wave, as is the case of the decaying high frequencies in a rigid string, for example. % TODO Those factors will be eventually accounted for
+This is a simplification, as many factors are known to influence the shape pseudo cycles of an arbitrary wave throughout time, as is the case of the decaying high frequencies in a rigid string, for example. % TODO Those factors will be eventually accounted for
 
-Using the algorithm presented in \textcite{2020TarjanoRobust} one can identify the frontiers, both positive and negative, of a digital signal: Those are, ideally, respectively composed of the maxima and minima of each pseudo-cycle of a discrete signal. 
+Using the envelope detection algorithm presented in \textcite{2020TarjanoRobust} one can identify the frontiers, both positive and negative, of a digital signal: Those are, ideally, respectively composed of the maxima and minima of each pseudo-cycle of a discrete signal. 
 
 If we disconsider inaccuracies we could use either one of the frontiers to infer the exact position, wavelength and amplitude of each pseudo-cycle and to, provided that the shape of the wave is also known, reconstruct the original wave with those pieces of information. Consider, for example, the digital signal presented in figure \ref{fig:signalenvelope}
-and the extracted envelopes; the signal is an example of the voice of an alto singer, with its frontiers in black.
+and the extracted frontiers; the signal is an example of the voice of an alto singer, with its frontiers in black.
 
 \begin{figure}[ht!]
   \centering
-    %  \includegraphics[width=0.9\linewidth]{01signalenvelope}
-     \includegraphics{01signalenvelope.pdf}
-    % \def\svgwidth{\linewidth}
-    %\input{01signalenvelope.pdf_tex}
+     \includegraphics{images/01signalenvelope.pdf}
   \caption{A discrete wave of the singing voice of an alto singer. The black lines are the frontiers; in the detail view, it can be seen that each region between two diamonds comprises a pseudo-cycle, as defined by the points belonging to the upper frontier. Similarly, two adjacent squares delimitate a pseudo-cycle, from the standpoint of the lower frontier.}
   \label{fig:signalenvelope}
 \end{figure}
 
-It can be seen that both frontiers provide approximately the same information about the location of each pseudo-cycle, with an approximate $ \pi $ phase difference between them. As the original algorithm proposed in \textcite{2020TarjanoRobust} is meant for envelope detection, maxima or minima that lies close to the already established frontiers are sometimes neglected, without significant impact in the envelope extracted.
+It can be seen that both frontiers provide approximately the same information about the location of each pseudo-cycle, albeit with a phase difference between them. As the original algorithm proposed in \textcite{2020TarjanoRobust} is meant for envelope detection, maxima or minima that lies close to the already established frontiers are sometimes neglected, without significant impact in the envelope extracted.
 
-For our purposes, however, it is beneficial to accurately identify as many local maxima and minima, and hence pseudo cycles as possible. Consider, for example, the periodic discrete signal shown in the figure \ref{fig:periodicwave} below, consisting of the repetition of a cycle constructed from a simple sinusoid with gaussian noise added, where the maxima and the minima were highlighted.
+This can be seen in the discrete representation of the sound of the key 33 of a grand piano in figure \ref{fig:frontiergaps}, as the black squares and diamonds: intuitively, one can see that some local maxima and minima are missing, compromising the identification of all pseudo cycles. For our purposes, however, it is beneficial to accurately identify as many local maxima and minima, and hence pseudo cycles, as possible, as the impact on the shape of a pseudo cycle is significant.
+
+We are going to assume that all the local extremes identified by the envelope detection algorithm are indeed correct; albeit not being strictily accurate, this approximation is very reasonable and simplifies further steps immensely, as we now need only to idenfity pseudo cycles with periods $ T $, that is, the difference between two adjacent maxima or minima, that are significantly bigger than the average observed in the discrete wave, and identify their local maximum or minimum, respectively.
+
+The result of this procedure can be seen ad the gray squares and diamonds in figure \ref{fig:frontiergaps}.
 
 \begin{figure}[ht!]
   \centering
-     \includegraphics{07periodicwave.pdf}
-  \caption{Three Cycles, divided by the vertical lines, of a discrete periodic wave, with the maxima and minima highlighted}
-  \label{fig:periodicwave}
+     \includegraphics{images/02frontiergaps.pdf}
+  \caption{Close-up view of a discrete signal representing the sound of the key 33 of a grand piano and its original positive and negative frontiers, in black, as well as the additional extrema identified during the refining process.}
+  \label{fig:frontiergaps}
 \end{figure}
 
-The first thing we can observe from \ref{fig:periodicwave} is that there are three types of well defined points of interest in the cycle of an arbitrary periodic discrete wave of the form $ f(x) = f(x + P) \forall x \in D(f) $, where $ D $ is the domain of the function $ f $: The extreme points, that is, the maxima and minima, and the zeroes.
 
-It is easy to see that if we choose to plot the frame of ocurrence of those points as a function of their cardinality, breaking ties arbitrarily and consistently, we will invariably have a straight line of the form $ y = a x + b $, in the case of strictily periodic waves, with the slope related to the dominant frequency, and the intercept related to the concept of phase.
 
-Also, we can argue that using the maxima, instead of the zeroes, brings some simplifications to the process, as the maxima are generally less abundant, and more directly well defined, both in the horizontal and vertical axes. The vertical difference of one of such points and the immediately adjacent one is the period $ T $ of the periodic wave.
+% Consider, for example, the periodic discrete signal shown in the figure \ref{fig:periodicwave} below, consisting of the repetition of a cycle constructed from a simple sinusoid with gaussian noise added, where the maxima and the minima were highlighted.
 
-Two things about this straight line become, then, immeadiately apparent: the first is that unit in the vertical axis is $ i $, that is, the indices of the frames of the discrete wave, and the second is that $ x \in \mathbb{N} $. Also, we have that the slope of the line equation is $ a = \frac{y_{k+1} - y_{k}}{x_{k+1} - x_{k}} = T $.
+% \begin{figure}[ht!]
+%   \centering
+%      \includegraphics{07periodicwave.pdf}
+%   \caption{Three Cycles, divided by the vertical lines, of a discrete periodic wave, with the maxima and minima highlighted}
+%   \label{fig:periodicwave}
+% \end{figure}
 
-We can then rewrite the line equation as $ y_k = T x_k + b $
+% The first thing we can observe from \ref{fig:periodicwave} is that there are three types of well defined points of interest in the cycle of an arbitrary periodic discrete wave of the form $ f(x) = f(x + P) \forall x \in D(f) $, where $ D $ is the domain of the function $ f $: The extreme points, that is, the maxima and minima, and the zeroes.
 
-% $ b = \frac{x_{k+1} y_{k} - x_{k} y_{k+1}}{x_{k+1} - x_{k}} $
+% It is easy to see that if we choose to plot the frame of ocurrence of those points as a function of their cardinality, breaking ties arbitrarily and consistently, we will invariably have a straight line of the form $ y = a x + b $, in the case of strictily periodic waves, with the slope related to the dominant frequency, and the intercept related to the concept of phase.
 
-If we define the local frequency $ f $ of a discrete, periodic wave as the ratio between the number cycles of said wave and the number $ n $ of frames of that wave, we can, recalling that the period of a wave is the inverse of its frequency, obtain the dominant frequency of the wave by using the equation $ f = \frac{n}{T} = \frac{n}{a} $. Alternatively, the relation $ f = (\#F^\pm - 1) n / (F^\pm[-1] - F^\pm[0])$, where $ \#F^\pm $ denotes the cardinality of the frontier, while $ F^\pm[0] $ and $ F^\pm[-1] $ stand for the frontier's first and last item, respectively, could also be used.
+% Also, we can argue that using the maxima, instead of the zeroes, brings some simplifications to the process, as the maxima are generally less abundant, and more directly well defined, both in the horizontal and vertical axes. The vertical difference of one of such points and the immediately adjacent one is the period $ T $ of the periodic wave.
 
-Similarly, it is simpler to obtain information about the phase of a periodic wave from the extremes. Keeping in mind that a phase shift of $ 2 \pi $ would shift the wave by one whole period and also that a wave with zero phase would have its first maximum at $ i = 0 $, we need only to multiply the ratio between the frame where the first maximum ocurred and the period by 
-$ 2 \pi $, as in the formula $ \phi = \frac{2 \pi F^+[0]}{T}$
+% Two things about this straight line become, then, immeadiately apparent: the first is that unit in the vertical axis is $ i $, that is, the indices of the frames of the discrete wave, and the second is that $ x \in \mathbb{N} $. Also, we have that the slope of the line equation is $ a = \frac{y_{k+1} - y_{k}}{x_{k+1} - x_{k}} = T $.
 
-About the result above it is important to keep in mind that congruency with the results of the Fourier Transform is not guarateed, as the shape of an arbitrary wave and, consequently, the relative position of its maximum can depart considerably from the position of an ordinary sinusoid.
+% We can then rewrite the line equation as $ y_k = T x_k + b $
 
-By this token, it is more convenient to define the phase obtained from the negative frontier in terms of the one obtained with the use of the positive one; To achieve that, it is sufficient to infer the relative position of the maximum in relation to the minimum, and use that in the phase formula presented above.
+% % $ b = \frac{x_{k+1} y_{k} - x_{k} y_{k+1}}{x_{k+1} - x_{k}} $
+
+% If we define the local frequency $ f $ of a discrete, periodic wave as the ratio between the number cycles of said wave and the number $ n $ of frames of that wave, we can, recalling that the period of a wave is the inverse of its frequency, obtain the dominant frequency of the wave by using the equation $ f = \frac{n}{T} = \frac{n}{a} $. Alternatively, the relation $ f = (\#F^\pm - 1) n / (F^\pm[-1] - F^\pm[0])$, where $ \#F^\pm $ denotes the cardinality of the frontier, while $ F^\pm[0] $ and $ F^\pm[-1] $ stand for the frontier's first and last item, respectively, could also be used.
+
+% Similarly, it is simpler to obtain information about the phase of a periodic wave from the extremes. Keeping in mind that a phase shift of $ 2 \pi $ would shift the wave by one whole period and also that a wave with zero phase would have its first maximum at $ i = 0 $, we need only to multiply the ratio between the frame where the first maximum ocurred and the period by 
+% $ 2 \pi $, as in the formula $ \phi = \frac{2 \pi F^+[0]}{T}$
+
+% About the result above it is important to keep in mind that congruency with the results of the Fourier Transform is not guarateed, as the shape of an arbitrary wave and, consequently, the relative position of its maximum can depart considerably from the position of an ordinary sinusoid.
+
+% By this token, it is more convenient to define the phase obtained from the negative frontier in terms of the one obtained with the use of the positive one; To achieve that, it is sufficient to infer the relative position of the maximum in relation to the minimum, and use that in the phase formula presented above.
 
 
 
