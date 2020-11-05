@@ -1,17 +1,21 @@
 import plotly.graph_objects as go
 import numpy as np
 import signal_envelope as se
-# import hp
+import hp
 
 '''==============='''
 ''' Read wav file '''
 '''==============='''
 
-name = "alto"
+name = "tom"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 n = W.size
 X = np.arange(n)
+
+'''==============='''
+'''     Normal    '''
+'''==============='''
 
 Xpos, Xneg = se.get_frontiers(W)
 
@@ -23,6 +27,8 @@ for i in range(1, Xneg.size):
 maxL = np.max(np.array(maxL))
 print(f"Max L = {maxL}")
 
+Xpc = np.arange(maxL)
+
 pospseudoCyclesX = []
 pospseudoCyclesY = []
 for i in range(1, Xpos.size):
@@ -32,7 +38,7 @@ for i in range(1, Xpos.size):
   ft = np.fft.rfft(W[x0 : x1])
   npulse = np.fft.irfft(ft, maxL)
   pospseudoCyclesY.append(npulse / np.max(np.abs(npulse)))
-  pospseudoCyclesX.append(np.arange(maxL))
+  pospseudoCyclesX.append(Xpc)
 pospseudoCyclesX = np.array(pospseudoCyclesX)
 pospseudoCyclesY = np.array(pospseudoCyclesY)
 
@@ -45,10 +51,56 @@ for i in range(1, Xneg.size):
   ft = np.fft.rfft(W[x0 : x1])
   npulse = np.fft.irfft(ft, maxL)
   negpseudoCyclesY.append(npulse / np.max(np.abs(npulse)))
-  negpseudoCyclesX.append(np.arange(maxL))
+  negpseudoCyclesX.append(Xpc)
 negpseudoCyclesX = np.array(negpseudoCyclesX)
 negpseudoCyclesY = np.array(negpseudoCyclesY)
 
+
+'''==============='''
+'''    Refined    '''
+'''==============='''
+
+Xposadicional = hp.refine_frontier(Xpos, W)
+Xpos = np.sort(np.hstack([Xpos, Xposadicional])).astype(np.int)
+
+Xnegadicional = hp.refine_frontier(Xneg, W)
+Xneg = np.sort(np.hstack([Xneg, Xnegadicional])).astype(np.int)
+
+print("sizes:",Xpos.size, Xneg.size)
+
+# maxL = []
+# for i in range(1, Xpos.size):
+#   maxL.append(Xpos[i] - Xpos[i - 1])
+# for i in range(1, Xneg.size):
+#   maxL.append(Xneg[i] - Xneg[i - 1])
+# maxL = np.max(np.array(maxL))
+# print(f"Max L = {maxL}")
+
+refpospseudoCyclesX = []
+refpospseudoCyclesY = []
+for i in range(1, Xpos.size):
+  x0 = Xpos[i - 1]
+  x1 = Xpos[i]
+  # a = np.max(np.abs(W[x0 : x1]))
+  ft = np.fft.rfft(W[x0 : x1])
+  npulse = np.fft.irfft(ft, maxL)
+  refpospseudoCyclesY.append(npulse / np.max(np.abs(npulse)))
+  refpospseudoCyclesX.append(Xpc)
+refpospseudoCyclesX = np.array(refpospseudoCyclesX)
+refpospseudoCyclesY = np.array(refpospseudoCyclesY)
+
+refnegpseudoCyclesX = []
+refnegpseudoCyclesY = []
+for i in range(1, Xneg.size):
+  x0 = Xneg[i - 1]
+  x1 = Xneg[i]
+  # a = np.max(np.abs(W[x0 : x1]))
+  ft = np.fft.rfft(W[x0 : x1])
+  npulse = np.fft.irfft(ft, maxL)
+  refnegpseudoCyclesY.append(npulse / np.max(np.abs(npulse)))
+  refnegpseudoCyclesX.append(Xpc)
+refnegpseudoCyclesX = np.array(refnegpseudoCyclesX)
+refnegpseudoCyclesY = np.array(refnegpseudoCyclesY)
 
 
 '''============================================================================'''
@@ -115,7 +167,7 @@ fig.add_trace(
         color="red",
         # showscale=False
     ),
-    # visible = "legendonly"
+    visible = "legendonly"
   )
 )
 
@@ -135,16 +187,51 @@ fig.add_trace(
         color="red",
         # showscale=False
     ),
-    # visible = "legendonly"
+    visible = "legendonly"
   )
 )
 
-Xcos = np.linspace(np.pi, - np.pi, maxL)
+'''==============='''
+'''    Refined    '''
+'''==============='''
+
 fig.add_trace(
   go.Scattergl(
-    name="Sinusoid", # <|<|<|<|<|<|<|<|<|<|<|<|
-    # x=Xcos,
-    y=np.cos(np.linspace(np.pi, 3 * np.pi, maxL)) * np.average(np.abs(negpseudoCyclesY)),
+    name="+Ref Pseudo-Cycles", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=[item for sublist in refpospseudoCyclesX for item in sublist.tolist() + [None]],
+    y=[item for sublist in refpospseudoCyclesY for item in sublist.tolist() + [None]],
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=1,
+        color="rgba(38, 12, 12, 0.2)",
+        # showscale=False
+    ),
+    visible = "legendonly"
+  )
+)
+
+fig.add_trace(
+  go.Scattergl(
+    name="-Ref Pseudo-Cycles", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=[item for sublist in refnegpseudoCyclesX for item in sublist.tolist() + [None]],
+    y=[item for sublist in refnegpseudoCyclesY for item in sublist.tolist() + [None]],
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=1,
+        color="rgba(38, 12, 12, 0.2)",
+        # showscale=False
+    ),
+    visible = "legendonly"
+  )
+)
+
+fig.add_trace(
+  go.Scattergl(
+    name="+Ref PC Avg", # <|<|<|<|<|<|<|<|<|<|<|<|
+    # x=[item for sublist in pseudoCyclesX for item in sublist.tolist() + [None]],
+    y=np.average(refpospseudoCyclesY, 0),
     # fill="toself",
     mode="lines",
     line=dict(
@@ -155,5 +242,26 @@ fig.add_trace(
     visible = "legendonly"
   )
 )
+
+refnegpseudoCyclesY_avg = np.average(refnegpseudoCyclesY, 0)
+idx = np.argmax(refnegpseudoCyclesY_avg)
+refnegpseudoCyclesY_avg = np.roll(refnegpseudoCyclesY_avg, -idx)
+
+fig.add_trace(
+  go.Scattergl(
+    name="-Ref PC Avg", # <|<|<|<|<|<|<|<|<|<|<|<|
+    # x=[item for sublist in pseudoCyclesX for item in sublist.tolist() + [None]],
+    y=refnegpseudoCyclesY_avg,
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=4,
+        color="blue",
+        # showscale=False
+    ),
+    visible = "legendonly"
+  )
+)
+
 
 fig.show(config=dict({'scrollZoom': True}))

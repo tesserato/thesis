@@ -136,7 +136,7 @@ fig.add_trace(
     # x=XX,
     y=posL,
     # fill="toself",
-    mode="lines+markers",
+    mode="markers",
     line=dict(
         width=1,
         color="black",
