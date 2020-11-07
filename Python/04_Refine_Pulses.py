@@ -3,11 +3,25 @@ import numpy as np
 import signal_envelope as se
 import hp
 
+def normalize_pcs(Xpcs, W, maxT):
+  weights = []
+  pseudoCyclesY = []
+  for i in range(1, Xpcs.size):
+    x0 = Xpcs[i - 1]
+    x1 = Xpcs[i]
+    weights.append(np.sum(np.abs(W[x0 : x1])))
+    ft = np.fft.rfft(W[x0 : x1])
+    npulse = np.fft.irfft(ft, maxT)
+    pseudoCyclesY.append(npulse / np.max(np.abs(npulse)))
+    # pospseudoCyclesX.append(Xpc)
+  # pospseudoCyclesX = np.array(pospseudoCyclesX)
+  return np.array(pseudoCyclesY), weights
+
 '''==============='''
 ''' Read wav file '''
 '''==============='''
 
-name = "tom"
+name = "alto"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 n = W.size
@@ -27,81 +41,35 @@ for i in range(1, Xneg.size):
 maxL = np.max(np.array(maxL))
 print(f"Max L = {maxL}")
 
-Xpc = np.arange(maxL)
+Xpc = [i for i in range(maxL)]
 
-pospseudoCyclesX = []
-pospseudoCyclesY = []
-for i in range(1, Xpos.size):
-  x0 = Xpos[i - 1]
-  x1 = Xpos[i]
-  # a = np.max(np.abs(W[x0 : x1]))
-  ft = np.fft.rfft(W[x0 : x1])
-  npulse = np.fft.irfft(ft, maxL)
-  pospseudoCyclesY.append(npulse / np.max(np.abs(npulse)))
-  pospseudoCyclesX.append(Xpc)
-pospseudoCyclesX = np.array(pospseudoCyclesX)
-pospseudoCyclesY = np.array(pospseudoCyclesY)
+pospseudoCyclesY, posW = normalize_pcs(Xpos, W, maxL)
+averagepospseudoCyclesY = np.average(pospseudoCyclesY, 0, posW)
 
-negpseudoCyclesX = []
-negpseudoCyclesY = []
-for i in range(1, Xneg.size):
-  x0 = Xneg[i - 1]
-  x1 = Xneg[i]
-  # a = np.max(np.abs(W[x0 : x1]))
-  ft = np.fft.rfft(W[x0 : x1])
-  npulse = np.fft.irfft(ft, maxL)
-  negpseudoCyclesY.append(npulse / np.max(np.abs(npulse)))
-  negpseudoCyclesX.append(Xpc)
-negpseudoCyclesX = np.array(negpseudoCyclesX)
-negpseudoCyclesY = np.array(negpseudoCyclesY)
+negpseudoCyclesY, negW = normalize_pcs(Xneg, W, maxL)
+averagenegpseudoCyclesY = np.average(negpseudoCyclesY, 0, negW)
+
+idx = np.argmax(averagenegpseudoCyclesY)
+averagenegpseudoCyclesY = np.roll(averagenegpseudoCyclesY, -idx)
 
 
 '''==============='''
 '''    Refined    '''
 '''==============='''
+Xpos = hp.refine_frontier_iter(Xpos, W)
 
-Xposadicional = hp.refine_frontier(Xpos, W)
-Xpos = np.sort(np.hstack([Xpos, Xposadicional])).astype(np.int)
+Xneg = hp.refine_frontier_iter(Xneg, W)
 
-Xnegadicional = hp.refine_frontier(Xneg, W)
-Xneg = np.sort(np.hstack([Xneg, Xnegadicional])).astype(np.int)
+print("Sizes:", Xpos.size, Xneg.size)
 
-print("sizes:",Xpos.size, Xneg.size)
+refpospseudoCyclesY, posW = normalize_pcs(Xpos, W, maxL)
+averagerefpospseudoCyclesY = np.average(refpospseudoCyclesY, 0, posW)
 
-# maxL = []
-# for i in range(1, Xpos.size):
-#   maxL.append(Xpos[i] - Xpos[i - 1])
-# for i in range(1, Xneg.size):
-#   maxL.append(Xneg[i] - Xneg[i - 1])
-# maxL = np.max(np.array(maxL))
-# print(f"Max L = {maxL}")
+refnegpseudoCyclesY, negW = normalize_pcs(Xneg, W, maxL)
+averagerefnegpseudoCyclesY = np.average(refnegpseudoCyclesY, 0, negW)
 
-refpospseudoCyclesX = []
-refpospseudoCyclesY = []
-for i in range(1, Xpos.size):
-  x0 = Xpos[i - 1]
-  x1 = Xpos[i]
-  # a = np.max(np.abs(W[x0 : x1]))
-  ft = np.fft.rfft(W[x0 : x1])
-  npulse = np.fft.irfft(ft, maxL)
-  refpospseudoCyclesY.append(npulse / np.max(np.abs(npulse)))
-  refpospseudoCyclesX.append(Xpc)
-refpospseudoCyclesX = np.array(refpospseudoCyclesX)
-refpospseudoCyclesY = np.array(refpospseudoCyclesY)
-
-refnegpseudoCyclesX = []
-refnegpseudoCyclesY = []
-for i in range(1, Xneg.size):
-  x0 = Xneg[i - 1]
-  x1 = Xneg[i]
-  # a = np.max(np.abs(W[x0 : x1]))
-  ft = np.fft.rfft(W[x0 : x1])
-  npulse = np.fft.irfft(ft, maxL)
-  refnegpseudoCyclesY.append(npulse / np.max(np.abs(npulse)))
-  refnegpseudoCyclesX.append(Xpc)
-refnegpseudoCyclesX = np.array(refnegpseudoCyclesX)
-refnegpseudoCyclesY = np.array(refnegpseudoCyclesY)
-
+idx = np.argmax(averagerefnegpseudoCyclesY)
+averagerefnegpseudoCyclesY = np.roll(averagerefnegpseudoCyclesY, -idx)
 
 '''============================================================================'''
 '''                                    PLOT                                    '''
@@ -126,7 +94,7 @@ fig.update_layout(
 fig.add_trace(
   go.Scattergl(
     name="+Pseudo-Cycles", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=[item for sublist in pospseudoCyclesX for item in sublist.tolist() + [None]],
+    x=[item for sublist in pospseudoCyclesY for item in Xpc + [None]],
     y=[item for sublist in pospseudoCyclesY for item in sublist.tolist() + [None]],
     # fill="toself",
     mode="lines",
@@ -142,7 +110,7 @@ fig.add_trace(
 fig.add_trace(
   go.Scattergl(
     name="-Pseudo-Cycles", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=[item for sublist in negpseudoCyclesX for item in sublist.tolist() + [None]],
+    x=[item for sublist in pospseudoCyclesY for item in Xpc + [None]],
     y=[item for sublist in negpseudoCyclesY for item in sublist.tolist() + [None]],
     # fill="toself",
     mode="lines",
@@ -159,7 +127,7 @@ fig.add_trace(
   go.Scattergl(
     name="+PC Avg", # <|<|<|<|<|<|<|<|<|<|<|<|
     # x=[item for sublist in pseudoCyclesX for item in sublist.tolist() + [None]],
-    y=np.average(pospseudoCyclesY, 0),
+    y=averagepospseudoCyclesY,
     # fill="toself",
     mode="lines",
     line=dict(
@@ -171,15 +139,13 @@ fig.add_trace(
   )
 )
 
-negpseudoCyclesY_avg = np.average(negpseudoCyclesY, 0)
-idx = np.argmax(negpseudoCyclesY_avg)
-negpseudoCyclesY_avg = np.roll(negpseudoCyclesY_avg, -idx)
+# negpseudoCyclesY_avg = np.average(negpseudoCyclesY, 0)
 
 fig.add_trace(
   go.Scattergl(
     name="-PC Avg", # <|<|<|<|<|<|<|<|<|<|<|<|
     # x=[item for sublist in pseudoCyclesX for item in sublist.tolist() + [None]],
-    y=negpseudoCyclesY_avg,
+    y=averagenegpseudoCyclesY,
     # fill="toself",
     mode="lines",
     line=dict(
@@ -198,7 +164,7 @@ fig.add_trace(
 fig.add_trace(
   go.Scattergl(
     name="+Ref Pseudo-Cycles", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=[item for sublist in refpospseudoCyclesX for item in sublist.tolist() + [None]],
+    x=[item for sublist in refpospseudoCyclesY for item in Xpc + [None]],
     y=[item for sublist in refpospseudoCyclesY for item in sublist.tolist() + [None]],
     # fill="toself",
     mode="lines",
@@ -214,7 +180,7 @@ fig.add_trace(
 fig.add_trace(
   go.Scattergl(
     name="-Ref Pseudo-Cycles", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=[item for sublist in refnegpseudoCyclesX for item in sublist.tolist() + [None]],
+    x=[item for sublist in refnegpseudoCyclesY for item in Xpc + [None]],
     y=[item for sublist in refnegpseudoCyclesY for item in sublist.tolist() + [None]],
     # fill="toself",
     mode="lines",
@@ -231,7 +197,7 @@ fig.add_trace(
   go.Scattergl(
     name="+Ref PC Avg", # <|<|<|<|<|<|<|<|<|<|<|<|
     # x=[item for sublist in pseudoCyclesX for item in sublist.tolist() + [None]],
-    y=np.average(refpospseudoCyclesY, 0),
+    y=averagerefpospseudoCyclesY,
     # fill="toself",
     mode="lines",
     line=dict(
@@ -243,15 +209,13 @@ fig.add_trace(
   )
 )
 
-refnegpseudoCyclesY_avg = np.average(refnegpseudoCyclesY, 0)
-idx = np.argmax(refnegpseudoCyclesY_avg)
-refnegpseudoCyclesY_avg = np.roll(refnegpseudoCyclesY_avg, -idx)
+# refnegpseudoCyclesY_avg = np.average(refnegpseudoCyclesY, 0)
 
 fig.add_trace(
   go.Scattergl(
     name="-Ref PC Avg", # <|<|<|<|<|<|<|<|<|<|<|<|
     # x=[item for sublist in pseudoCyclesX for item in sublist.tolist() + [None]],
-    y=refnegpseudoCyclesY_avg,
+    y=averagerefnegpseudoCyclesY,
     # fill="toself",
     mode="lines",
     line=dict(

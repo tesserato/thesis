@@ -3,6 +3,8 @@ from scipy.linalg import block_diag
 import numpy.polynomial.polynomial as poly
 from collections import Counter
 from math import gcd
+from statistics import mode
+
 
 def split_raw_frontier(Xf, W, n_intervals = 4):
   Areas = []
@@ -260,20 +262,103 @@ def linearize_pc(Xp):
 def std(V1, V2):
   return np.sqrt(np.average((V1 - V2)**2))
 
-def refine_frontier(Xp, W):
+# def refine_frontier(Xp, W):
+#   "find additional frontier points, and return an array with then, if found"
+#   if W[Xp[0]] >= 0:
+#     e = np.argmax
+#   else:
+#     e = np.argmin
+#   L = Xp[1:] - Xp[:-1]
+#   avgL = np.average(L)
+#   stdL = np.std(L)
+#   Xnew = []
+#   for i in range(1, Xp.size):
+#     x0 = int(Xp[i - 1])
+#     x1 = int(Xp[i])
+#     if x1 - x0 > avgL + 2 * stdL:
+#       Xzeroes = []
+#       currsign = np.sign(W[x0])
+#       for i in range(x0 + 1, x1):
+#         if currsign != np.sign(W[i]):
+#           Xzeroes.append(i)
+#           currsign = np.sign(W[i])
+#       if len(Xzeroes) > 1:
+#         Xnew.append(Xzeroes[0] + e(W[Xzeroes[0] : Xzeroes[-1]]))
+#   return np.array(Xnew, dtype=np.int)
+
+
+# def refine_frontier(Xp, W):
+#   "find additional frontier points, and return an array with then, if found"
+#   if W[Xp[0]] >= 0:
+#     e = np.argmax
+#   else:
+#     e = np.argmin
+#   L = Xp[1:] - Xp[:-1]
+#   avgL = np.average(L)
+#   stdL = np.std(L)
+#   print("std=", stdL)
+#   Pulses = []
+#   Pulses_to_split = []
+#   for i in range(1, Xp.size):
+#     x0 = int(Xp[i - 1])
+#     x1 = int(Xp[i])
+#     if x1 - x0 >= avgL + 2 * stdL:
+#       Pulses_to_split.append((x0, x1))
+#     # else:
+#     #   Pulses_to_split.append((x0, x1))
+
+#   while len(Pulses_to_split) > 0:
+#     Pulses_to_test = []
+#     for x0, x1 in Pulses_to_split:
+#       Xzeroes = []
+#       currsign = np.sign(W[x0])
+#       for i in range(x0 + 1, x1):
+#         if currsign != np.sign(W[i]):
+#           Xzeroes.append(i)
+#           currsign = np.sign(W[i])
+#       if len(Xzeroes) > 1:
+#         x = Xzeroes[0] + e(W[Xzeroes[0] : Xzeroes[-1]])
+#         Pulses_to_test.append((x0, x))
+#         Pulses_to_test.append((x, x1))
+#       # else:
+#       #   Pulses.append((x0, x1))
+#     Pulses_to_split = []
+#     for x0, x1 in Pulses_to_test:
+#       if x1 - x0 < avgL + 2 * stdL:
+#         Pulses.append((x0, x1))
+#       else:
+#         Pulses_to_split.append((x0, x1))
+
+#   if len(Pulses) > 0:
+#     return np.unique(np.array([p[0] for p in Pulses] + [Pulses[-1][1]], dtype=np.int))
+#   else:
+#     print("No refinement found")
+#     return None
+
+
+
+
+def _refine_frontier(Xp, W, avgL, stdL, n_stds = 3):
   "find additional frontier points, and return an array with then, if found"
   if W[Xp[0]] >= 0:
     e = np.argmax
   else:
     e = np.argmin
-  L = Xp[1:] - Xp[:-1]
-  avgL = np.average(L)
-  stdL = np.std(L)
-  Xnew = []
+
+  print("std=", stdL)
+  Pulses = []
+  Pulses_to_split = []
   for i in range(1, Xp.size):
     x0 = int(Xp[i - 1])
     x1 = int(Xp[i])
-    if x1 - x0 > avgL + 2 * stdL:
+    if x1 - x0 >= avgL + n_stds * stdL:
+      Pulses_to_split.append((x0, x1))
+    # else:
+    #   Pulses_to_split.append((x0, x1))
+
+  while len(Pulses_to_split) > 0:
+    Pulses_to_test = []
+    for x0, x1 in Pulses_to_split:
       Xzeroes = []
       currsign = np.sign(W[x0])
       for i in range(x0 + 1, x1):
@@ -281,5 +366,63 @@ def refine_frontier(Xp, W):
           Xzeroes.append(i)
           currsign = np.sign(W[i])
       if len(Xzeroes) > 1:
-        Xnew.append(Xzeroes[0] + e(W[Xzeroes[0] : Xzeroes[-1]]))
-  return np.array(Xnew, dtype=np.int)
+        x = Xzeroes[0] + e(W[Xzeroes[0] : Xzeroes[-1]])
+        Pulses_to_test.append((x0, x))
+        Pulses_to_test.append((x, x1))
+      # else:
+      #   Pulses.append((x0, x1))
+    Pulses_to_split = []
+    for x0, x1 in Pulses_to_test:
+      if x1 - x0 >= avgL + n_stds * stdL:
+        Pulses_to_split.append((x0, x1))
+      else:
+        Pulses.append((x0, x1))
+
+  if len(Pulses) > 0:
+    return np.unique(np.array([p[0] for p in Pulses] + [p[1] for p in Pulses], dtype=np.int))
+  else:
+    print("No refinement found")
+    return None
+
+
+# def refine_frontier_iter(Xp, W):
+#   L = Xp[1:] - Xp[:-1]
+#   avgL = np.average(L)
+#   stdL = np.std(L)
+#   Xp_new = _refine_frontier(Xp, W, avgL, stdL)
+
+#   while not Xp_new is None:
+#     Xp_c = np.unique(np.hstack([Xp, Xp_new])).astype(np.int)
+#     L = Xp_c[1:] - Xp_c[:-1]
+#     stdL_c = np.std(L)
+#     if stdL_c <= stdL:
+#       avgL = np.average(L)
+#       stdL = stdL_c
+#       Xp = Xp_c
+#       Xp_new = _refine_frontier(Xp, W, avgL, stdL)
+#     else:
+#       print(f"std0={stdL}, std1={stdL_c}")
+#       break
+#   return Xp
+
+def refine_frontier_iter(Xp, W): # mode
+  Xp = Xp.astype(np.int)
+  L = Xp[1:] - Xp[:-1]
+  avgL = mode(L)
+  stdL = np.average(np.abs(L - avgL))
+  Xp_new = _refine_frontier(Xp, W, avgL, stdL, 2)
+
+  while not Xp_new is None:
+    Xp_c = np.unique(np.hstack([Xp, Xp_new])).astype(np.int)
+    L = Xp_c[1:] - Xp_c[:-1]
+    avgL = mode(L)
+    stdL_c = np.average(np.abs(L - avgL))
+    if stdL_c <= stdL:
+      # avgL = np.average(L)
+      stdL = stdL_c
+      Xp = Xp_c
+      Xp_new = _refine_frontier(Xp, W, avgL, stdL, 2)
+    else:
+      print(f"std0={stdL}, std1={stdL_c}")
+      break
+  return Xp

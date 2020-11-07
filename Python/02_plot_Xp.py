@@ -1,12 +1,12 @@
 import plotly.graph_objects as go
 import numpy as np
 import signal_envelope as se
-import numpy.polynomial.polynomial as poly
-from collections import Counter
-from math import gcd
+# import numpy.polynomial.polynomial as poly
+# from collections import Counter
+# from math import gcd
 import hp as hp
-from scipy.signal import savgol_filter
-from plotly.subplots import make_subplots
+# from scipy.signal import savgol_filter
+# from plotly.subplots import make_subplots
 
 
 '''==============='''
@@ -14,20 +14,25 @@ from plotly.subplots import make_subplots
 '''==============='''
 
 
-name = "piano33"
+name = "alto"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 amp = np.max(np.abs(W))
 n = W.size
 X = np.arange(n)
 
-Xpos, Xneg = se.get_frontiers(W)
+Xpos_orig, Xneg_orig = se.get_frontiers(W)
 
-Xposadicional = hp.refine_frontier(Xpos, W)
-Xposref = np.sort(np.hstack([Xpos, Xposadicional])).astype(np.int)
+Xpos = hp.refine_frontier_iter(Xpos_orig, W)
+# while not Xposnew is None:
+#   Xpos = np.unique(np.hstack([Xpos, Xposnew])).astype(np.int)
+#   Xposnew = hp.refine_frontier(Xpos, W)
 
-Xnegadicional = hp.refine_frontier(Xneg, W)
-Xnegref = np.sort(np.hstack([Xneg, Xnegadicional])).astype(np.int)
+Xneg = hp.refine_frontier_iter(Xneg_orig, W)
+# while not Xnegnew is None:
+  # Xneg = np.unique(np.hstack([Xneg, Xnegnew])).astype(np.int)
+  # Xnegnew = hp.refine_frontier(Xneg, W)
+
 
 
 
@@ -62,7 +67,7 @@ fig.add_trace(
   go.Scatter(
     name="Maxima", # <|<|<|<|<|<|<|<|<|<|<|<|
     # x=Xpos,
-    y=Xpos,
+    y=Xpos_orig,
     # fill="toself",
     mode="lines",
     line=dict(
@@ -78,7 +83,7 @@ fig.add_trace(
   go.Scatter(
     name="Minima", # <|<|<|<|<|<|<|<|<|<|<|<|
     # x=Xpos,
-    y=Xneg,
+    y=Xneg_orig,
     # fill="toself",
     mode="lines",
     line=dict(
@@ -94,12 +99,12 @@ fig.add_trace(
   go.Scatter(
     name="Refined Maxima", # <|<|<|<|<|<|<|<|<|<|<|<|
     # x=Xpos,
-    y=Xposref,
+    y=Xpos,
     # fill="toself",
     mode="lines",
     line=dict(
         width=1,
-        color="black",
+        color="gray",
         # showscale=False
     ),
     # visible = "legendonly"
@@ -110,12 +115,12 @@ fig.add_trace(
   go.Scatter(
     name="Refined Minima", # <|<|<|<|<|<|<|<|<|<|<|<|
     # x=Xpos,
-    y=Xnegref,
+    y=Xneg,
     # fill="toself",
     mode="lines",
     line=dict(
         width=1,
-        color="black",
+        color="gray",
         # showscale=False
     ),
     # visible = "legendonly"
