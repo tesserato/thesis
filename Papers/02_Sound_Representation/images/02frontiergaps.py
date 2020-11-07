@@ -32,7 +32,7 @@ def refine_frontier(Xp, W):
 ''' Read wav file '''
 '''==============='''
 
-name = "piano33"
+name = "tom"
 
 W, fps = se.read_wav(f"C:/Users/tesse/Desktop/Files/Dropbox/0_Thesis/Python/Samples/{name}.wav")
 W = W - np.average(W)
@@ -139,8 +139,7 @@ fig.add_trace(
   )
 )
 
-
 fig.show()
-save_name = "./images/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
-fig.write_image(save_name, width=650, height=300, engine="kaleido", format="svg")
-print("saved:", save_name)
+# save_name = "./images/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
+# fig.write_image(save_name, width=650, height=300, engine="kaleido", format="svg")
+# print("saved:", save_name)
