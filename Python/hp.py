@@ -110,54 +110,88 @@ def coefs_to_array_arbitrary_intervals(A, X, I, n):
   #   x += 1
   return Y
 
+# def pseudocycles_average(Xpos, Xneg, W):
+#   posL = []
+#   for i in range(1, Xpos.size):
+#     posL.append(Xpos[i] - Xpos[i - 1])
+
+#   negL = []
+#   for i in range(1, Xneg.size):
+#     negL.append(Xneg[i] - Xneg[i - 1])
+
+#   if np.std(posL) < np.std(negL):
+#     print("using positive frontier")
+#     used_positive_frontier = True
+#     maxL = np.max(np.array(posL))
+#     # avgL = int(round(np.average(np.array(posL))))
+#     pseudoCyclesX = []
+#     pseudoCyclesY = []
+#     for i in range(1, Xpos.size):
+#       x0 = Xpos[i - 1]
+#       x1 = Xpos[i]
+#       # a = np.max(np.abs(W[x0 : x1]))
+#       ft = np.fft.rfft(W[x0 : x1])
+#       npulse = np.fft.irfft(ft, maxL)
+#       pseudoCyclesY.append(npulse / np.max(np.abs(npulse)))
+#       pseudoCyclesX.append(np.arange(maxL))
+#     pseudoCyclesX = np.array(pseudoCyclesX)
+#     pseudoCyclesY = np.array(pseudoCyclesY)
+#   else:
+#     print("using negative frontier")
+#     maxL = np.max(np.array(negL))
+#     used_positive_frontier = False
+#     # avgL = int(round(np.average(np.array(negL))))
+#     pseudoCyclesX = []
+#     pseudoCyclesY = []
+#     for i in range(1, Xpos.size):
+#       x0 = Xpos[i - 1]
+#       x1 = Xpos[i]
+#       # a = np.max(np.abs(W[x0 : x1]))
+#       ft = np.fft.rfft(W[x0 : x1])
+#       npulse = np.fft.irfft(ft, maxL)
+#       pseudoCyclesY.append(npulse / np.max(np.abs(npulse)))
+#       pseudoCyclesX.append(np.arange(maxL))
+#     pseudoCyclesX = np.array(pseudoCyclesX)
+#     pseudoCyclesY = np.array(pseudoCyclesY)
+
+#   print(f"Max L = {maxL}")
+
+#   pseudoCyclesY_avg = np.average(pseudoCyclesY, 0)
+#   return pseudoCyclesY_avg, used_positive_frontier, pseudoCyclesY
+
 def pseudocycles_average(Xpos, Xneg, W):
-  posL = []
+  posL = Xpos[1:] - Xpos[:-1]
+  negL = Xneg[1:] - Xneg[:-1]
+
+
+  maxposL = np.max(posL)
+  posPCs = []
   for i in range(1, Xpos.size):
-    posL.append(Xpos[i] - Xpos[i - 1])
+    x0 = Xpos[i - 1]
+    x1 = Xpos[i]
+    # a = np.max(np.abs(W[x0 : x1]))
+    ft = np.fft.rfft(W[x0 : x1])
+    npulse = np.fft.irfft(ft, maxposL)
+    posPCs.append(npulse / np.max(np.abs(npulse)))
+  posPCs = np.array(posPCs)
 
-  negL = []
+  maxnegL = np.max(negL)
+  negPCs = []
   for i in range(1, Xneg.size):
-    negL.append(Xneg[i] - Xneg[i - 1])
-
-  if np.std(posL) < np.std(negL):
-    print("using positive frontier")
-    used_positive_frontier = True
-    maxL = np.max(np.array(posL))
-    # avgL = int(round(np.average(np.array(posL))))
-    pseudoCyclesX = []
-    pseudoCyclesY = []
-    for i in range(1, Xpos.size):
-      x0 = Xpos[i - 1]
-      x1 = Xpos[i]
-      # a = np.max(np.abs(W[x0 : x1]))
-      ft = np.fft.rfft(W[x0 : x1])
-      npulse = np.fft.irfft(ft, maxL)
-      pseudoCyclesY.append(npulse / np.max(np.abs(npulse)))
-      pseudoCyclesX.append(np.arange(maxL))
-    pseudoCyclesX = np.array(pseudoCyclesX)
-    pseudoCyclesY = np.array(pseudoCyclesY)
-  else:
-    print("using negative frontier")
-    maxL = np.max(np.array(negL))
-    used_positive_frontier = False
-    # avgL = int(round(np.average(np.array(negL))))
-    pseudoCyclesX = []
-    pseudoCyclesY = []
-    for i in range(1, Xpos.size):
-      x0 = Xpos[i - 1]
-      x1 = Xpos[i]
-      # a = np.max(np.abs(W[x0 : x1]))
-      ft = np.fft.rfft(W[x0 : x1])
-      npulse = np.fft.irfft(ft, maxL)
-      pseudoCyclesY.append(npulse / np.max(np.abs(npulse)))
-      pseudoCyclesX.append(np.arange(maxL))
-    pseudoCyclesX = np.array(pseudoCyclesX)
-    pseudoCyclesY = np.array(pseudoCyclesY)
+    x0 = Xneg[i - 1]
+    x1 = Xneg[i]
+    # a = np.max(np.abs(W[x0 : x1]))
+    ft = np.fft.rfft(W[x0 : x1])
+    npulse = np.fft.irfft(ft, maxnegL)
+    negPCs.append(npulse / np.max(np.abs(npulse)))
+  negPCs = np.array(negPCs)
 
   print(f"Max L = {maxL}")
 
   pseudoCyclesY_avg = np.average(pseudoCyclesY, 0)
   return pseudoCyclesY_avg, used_positive_frontier, pseudoCyclesY
+
+
 
 def approximate_pseudocycles_average(pseudoCyclesY_avg):
   m = pseudoCyclesY_avg.size
@@ -257,86 +291,10 @@ def linearize_pc(Xp):
   x1 = int(np.round((Xp[-1]- b) / a))
 
   X = np.arange(x0, x1)
-  return X, a * X + b
+  return  (a * X + b).astype(np.int)
 
 def std(V1, V2):
   return np.sqrt(np.average((V1 - V2)**2))
-
-# def refine_frontier(Xp, W):
-#   "find additional frontier points, and return an array with then, if found"
-#   if W[Xp[0]] >= 0:
-#     e = np.argmax
-#   else:
-#     e = np.argmin
-#   L = Xp[1:] - Xp[:-1]
-#   avgL = np.average(L)
-#   stdL = np.std(L)
-#   Xnew = []
-#   for i in range(1, Xp.size):
-#     x0 = int(Xp[i - 1])
-#     x1 = int(Xp[i])
-#     if x1 - x0 > avgL + 2 * stdL:
-#       Xzeroes = []
-#       currsign = np.sign(W[x0])
-#       for i in range(x0 + 1, x1):
-#         if currsign != np.sign(W[i]):
-#           Xzeroes.append(i)
-#           currsign = np.sign(W[i])
-#       if len(Xzeroes) > 1:
-#         Xnew.append(Xzeroes[0] + e(W[Xzeroes[0] : Xzeroes[-1]]))
-#   return np.array(Xnew, dtype=np.int)
-
-
-# def refine_frontier(Xp, W):
-#   "find additional frontier points, and return an array with then, if found"
-#   if W[Xp[0]] >= 0:
-#     e = np.argmax
-#   else:
-#     e = np.argmin
-#   L = Xp[1:] - Xp[:-1]
-#   avgL = np.average(L)
-#   stdL = np.std(L)
-#   print("std=", stdL)
-#   Pulses = []
-#   Pulses_to_split = []
-#   for i in range(1, Xp.size):
-#     x0 = int(Xp[i - 1])
-#     x1 = int(Xp[i])
-#     if x1 - x0 >= avgL + 2 * stdL:
-#       Pulses_to_split.append((x0, x1))
-#     # else:
-#     #   Pulses_to_split.append((x0, x1))
-
-#   while len(Pulses_to_split) > 0:
-#     Pulses_to_test = []
-#     for x0, x1 in Pulses_to_split:
-#       Xzeroes = []
-#       currsign = np.sign(W[x0])
-#       for i in range(x0 + 1, x1):
-#         if currsign != np.sign(W[i]):
-#           Xzeroes.append(i)
-#           currsign = np.sign(W[i])
-#       if len(Xzeroes) > 1:
-#         x = Xzeroes[0] + e(W[Xzeroes[0] : Xzeroes[-1]])
-#         Pulses_to_test.append((x0, x))
-#         Pulses_to_test.append((x, x1))
-#       # else:
-#       #   Pulses.append((x0, x1))
-#     Pulses_to_split = []
-#     for x0, x1 in Pulses_to_test:
-#       if x1 - x0 < avgL + 2 * stdL:
-#         Pulses.append((x0, x1))
-#       else:
-#         Pulses_to_split.append((x0, x1))
-
-#   if len(Pulses) > 0:
-#     return np.unique(np.array([p[0] for p in Pulses] + [Pulses[-1][1]], dtype=np.int))
-#   else:
-#     print("No refinement found")
-#     return None
-
-
-
 
 def _refine_frontier(Xp, W, avgL, stdL, n_stds = 3):
   "find additional frontier points, and return an array with then, if found"

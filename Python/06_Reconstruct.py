@@ -15,19 +15,26 @@ n = W.size
 X = np.arange(n)
 
 Xpos, Xneg = se.get_frontiers(W)
+Xpos = hp.refine_frontier_iter(Xpos, W)
+Xneg = hp.refine_frontier_iter(Xneg, W)
 
-Xf = np.sort(np.hstack([Xpos, Xneg]))
+Xf = np.unique(np.hstack([Xpos, Xneg]))
 
-Ix = hp.split_raw_frontier(Xf, W, 2)
+Ix = hp.split_raw_frontier(Xf, W, 4)
 A = hp.constrained_least_squares_arbitrary_intervals(Xf, np.abs(W), Ix, 2)
 E = hp.coefs_to_array_arbitrary_intervals(A, Xf, Ix, n)
 
 pa, used_positive_frontier, _ = hp.pseudocycles_average(Xpos, Xneg, W)
 A = hp.approximate_pseudocycles_average(pa)
+# if used_positive_frontier:
+#   Wp = hp.parametric_W(hp.linearize_pc(Xpos.astype(np.int)), A, n, False)
+# else:
+#   Wp = hp.parametric_W(hp.linearize_pc(Xneg.astype(np.int)), A, n, False)
+
 if used_positive_frontier:
-  Wp = hp.parametric_W(hp.linearize_pc(Xpos.astype(np.int)), A, n, True)
+  Wp = hp.parametric_W(Xpos, A, n, False)
 else:
-  Wp = hp.parametric_W(hp.linearize_pc(Xneg.astype(np.int)), A, n, True)
+  Wp = hp.parametric_W(Xneg, A, n, False)
 
 We = Wp * E
 

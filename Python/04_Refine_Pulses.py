@@ -12,16 +12,18 @@ def normalize_pcs(Xpcs, W, maxT):
     weights.append(np.sum(np.abs(W[x0 : x1])))
     ft = np.fft.rfft(W[x0 : x1])
     npulse = np.fft.irfft(ft, maxT)
+    # npulse = npulse - np.average(npulse)
     pseudoCyclesY.append(npulse / np.max(np.abs(npulse)))
     # pospseudoCyclesX.append(Xpc)
   # pospseudoCyclesX = np.array(pospseudoCyclesX)
   return np.array(pseudoCyclesY), weights
 
+
 '''==============='''
 ''' Read wav file '''
 '''==============='''
 
-name = "alto"
+name = "piano33"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 n = W.size
@@ -48,7 +50,6 @@ averagepospseudoCyclesY = np.average(pospseudoCyclesY, 0, posW)
 
 negpseudoCyclesY, negW = normalize_pcs(Xneg, W, maxL)
 averagenegpseudoCyclesY = np.average(negpseudoCyclesY, 0, negW)
-
 idx = np.argmax(averagenegpseudoCyclesY)
 averagenegpseudoCyclesY = np.roll(averagenegpseudoCyclesY, -idx)
 
@@ -67,9 +68,16 @@ averagerefpospseudoCyclesY = np.average(refpospseudoCyclesY, 0, posW)
 
 refnegpseudoCyclesY, negW = normalize_pcs(Xneg, W, maxL)
 averagerefnegpseudoCyclesY = np.average(refnegpseudoCyclesY, 0, negW)
-
 idx = np.argmax(averagerefnegpseudoCyclesY)
 averagerefnegpseudoCyclesY = np.roll(averagerefnegpseudoCyclesY, -idx)
+
+
+normaveragerefpospseudoCyclesY = averagerefpospseudoCyclesY - np.average(averagerefpospseudoCyclesY)
+normaveragerefpospseudoCyclesY = normaveragerefpospseudoCyclesY / np.max(np.abs(normaveragerefpospseudoCyclesY))
+
+normaveragerefnegpseudoCyclesY = averagerefnegpseudoCyclesY - np.average(averagerefnegpseudoCyclesY)
+normaveragerefnegpseudoCyclesY = normaveragerefnegpseudoCyclesY / np.max(np.abs(normaveragerefnegpseudoCyclesY))
+
 
 '''============================================================================'''
 '''                                    PLOT                                    '''
@@ -221,6 +229,40 @@ fig.add_trace(
     line=dict(
         width=4,
         color="blue",
+        # showscale=False
+    ),
+    visible = "legendonly"
+  )
+)
+
+fig.add_trace(
+  go.Scattergl(
+    name="+Norm Ref PC Avg", # <|<|<|<|<|<|<|<|<|<|<|<|
+    # x=[item for sublist in pseudoCyclesX for item in sublist.tolist() + [None]],
+    y=normaveragerefpospseudoCyclesY,
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=4,
+        color="green",
+        # showscale=False
+    ),
+    visible = "legendonly"
+  )
+)
+
+# refnegpseudoCyclesY_avg = np.average(refnegpseudoCyclesY, 0)
+
+fig.add_trace(
+  go.Scattergl(
+    name="-Norm Ref PC Avg", # <|<|<|<|<|<|<|<|<|<|<|<|
+    # x=[item for sublist in pseudoCyclesX for item in sublist.tolist() + [None]],
+    y=normaveragerefnegpseudoCyclesY,
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=4,
+        color="green",
         # showscale=False
     ),
     visible = "legendonly"
