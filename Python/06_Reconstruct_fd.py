@@ -7,7 +7,7 @@ import hp
 ''' Read wav file '''
 '''==============='''
 
-name = "piano33"
+name = "alto"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 amp = np.max(np.abs(W))
@@ -30,13 +30,15 @@ A = hp.constrained_least_squares_arbitrary_intervals_wtow(Wp, dWp, W, Xf[Ix].tol
 
 E = hp.coefs_to_array_arbitrary_intervals_wtow(A, Wp, Xf[Ix].tolist(), n)
 
-env = hp.coefs_to_array_arbitrary_intervals(A, X, Xf[Ix].tolist(), n )
-
+env = hp.coefs_to_array_arbitrary_intervals(A, X, Xf[Ix].tolist(), n)
+# Ws = hp.parametric_W(Xpos, Ap, n, True)
 
 We = E
 
 # W = W * EWp
-se.save_wav(We)
+se.save_wav(We, fps=fps)
+error = W - We
+se.save_wav(error, "error.wav", fps=fps)
 
 Xintervals = []
 Yintervals = []
@@ -220,15 +222,15 @@ fig.add_trace(
         # dash="dash"
         # showscale=False
     ),
-    visible = "legendonly"
+    # visible = "legendonly"
   )
 )
 
 fig.add_trace(
   go.Scatter(
     name="Error", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=X,
-    y=W - We,
+    # x=X,
+    y=error,
     # fill="toself",
     mode="lines",
     line=dict(
@@ -242,7 +244,7 @@ fig.add_trace(
 )
 
 fig.show(config=dict({'scrollZoom': True}))
-exit()
+# exit()
 '''============================================================================'''
 '''                                     FT                                     '''
 '''============================================================================'''
@@ -272,7 +274,7 @@ fig.add_trace(
   go.Scatter(
     name="W", # <|<|<|<|<|<|<|<|<|<|<|<|
     # x=X,
-    y=np.abs(np.fft.rfft(W)) / np.max(np.abs(np.fft.rfft(W))),
+    y=np.abs(np.fft.rfft(W)),
     mode="lines",
     line=dict(
         width=1,
@@ -288,7 +290,7 @@ fig.add_trace(
   go.Scatter(
     name="Reconstructed W", # <|<|<|<|<|<|<|<|<|<|<|<|
     # x=X,
-    y=np.abs(np.fft.rfft(We)) / np.max(np.abs(np.fft.rfft(We))),
+    y=np.abs(np.fft.rfft(We)),
     # fill="toself",
     mode="lines",
     line=dict(
@@ -300,4 +302,22 @@ fig.add_trace(
     # visible = "legendonly"
   )
 )
+
+fig.add_trace(
+  go.Scatter(
+    name="error W", # <|<|<|<|<|<|<|<|<|<|<|<|
+    # x=X,
+    y=np.abs(np.fft.rfft(error)),
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=1,
+        color="blue",
+        # dash="dash"
+        # showscale=False
+    ),
+    # visible = "legendonly"
+  )
+)
+
 fig.show(config=dict({'scrollZoom': True}))

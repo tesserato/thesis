@@ -394,21 +394,23 @@ def parametric_W_wtow(Xp, A, n):
 
 def constrained_least_squares_arbitrary_intervals_wtow(X, dX, Y, I:list, k=3):
   '''constrained least squares with intervals as defined by the x coordinates in I and k polynomial'''
-  X = X.astype(np.float64)
-  Y = Y.astype(np.float64)
-  T = np.arange(X.size, dtype=np.float64)
+  X  = X.astype(np.float64)
+  dX = dX.astype(np.float64)
+  Y  = Y.astype(np.float64)
+  T  = np.arange(X.size, dtype=np.float64)
   assert len(X) == len(Y)
+  
   I = [0] + I + [X.size - 1]
   Qlist = []
   for i in range(len(I) - 1):
     l0, l1 = I[i], I[i + 1]
-    Qi = np.zeros((l1 - l0 + 1, k + 1))
+    Qi = np.zeros((l1 - l0 + 1, k + 1), dtype=np.float64)
     for l in range(l1 - l0 + 1):
       for c in range(k + 1):
         Qi[l, c] = X[l0 + l] * T[l0 + l]**c
     Qlist.append(Qi)
 
-  Q = np.zeros((len(X), (len(I) - 1) * (k + 1)))
+  Q = np.zeros((len(X), (len(I) - 1) * (k + 1)), dtype=np.float64)
   l0 = 0
   c0 = 0
   for q in Qlist:
@@ -419,24 +421,30 @@ def constrained_least_squares_arbitrary_intervals_wtow(X, dX, Y, I:list, k=3):
     l0 = l1 - 1
     c0 = c1
 
-  V = np.zeros((2 * (len(I) - 2), (k + 1) + (k + 1) * (len(I) - 2)))
+  V = np.zeros((2 * (len(I) - 2), (k + 1) + (k + 1) * (len(I) - 2)), dtype=np.float64)
   for i in range(len(I) - 2):
+    # r = np.random.rand()
     x = X[I[i + 1]]
     dx = dX[I[i + 1]]
     t = T[I[i + 1]]
-    V[2 * i, i * (k + 1)] = 1
-    V[2 * i, (i + 1) * (k + 1)] = -1
-    V[2 * i, i * (k + 1) + 1] = dx
-    V[2 * i, (i + 1) * (k + 1) + 1] = -dx
-
-    for c in range(1, k + 1):
-      V[2 * i, i * (k + 1) + c] = x * t**c
-      V[2 * i + 1, i * (k + 1) + c] = dx * t**c + x * t**(c-1) * c
-      V[2 * i, (i + 1) * (k + 1) + c] = -x * t**c
-      V[2 * i + 1, (i + 1) * (k + 1) + c] = -(dx * t**c + x * t**(c-1) * c)
+    V[2 * i, i * (k + 1)] = x
+    V[2 * i, (i + 1) * (k + 1)] = -x
+    V[2 * i + 1, i * (k + 1)] = dx
+    V[2 * i + 1, (i + 1) * (k + 1)] = -dx
+    for c in np.arange(1, k + 1):
+      # r1 = np.random.rand()
+      # r2 = np.random.rand()
+      # r3 = np.random.rand()
+      # r4 = np.random.rand()
+      v1 = x * t**c
+      v2 = dx * t**c + c * x * t**(c-1)
+      V[2 * i, i * (k + 1) + c] = v1
+      V[2 * i + 1, i * (k + 1) + c] = v2
+      V[2 * i, (i + 1) * (k + 1) + c] = -v1
+      V[2 * i + 1, (i + 1) * (k + 1) + c] = -v2
 
   # np.savetxt("Q.csv", np.round(Q, 2), delimiter=",")
-  # np.savetxt("V.csv", np.round(V, 2), delimiter=",")
+  np.savetxt("V.csv", np.round(V, 2), delimiter=",")
 
   '''solving'''
   QTQinv = np.linalg.inv(Q.T @ Q)
@@ -445,6 +453,7 @@ def constrained_least_squares_arbitrary_intervals_wtow(X, dX, Y, I:list, k=3):
   A = QTQinv @ (QTY - V.T @ tau @ V @ QTQinv @ QTY)
   return np.reshape(A, (len(I) - 1, -1))
 
+
 def coefs_to_array_arbitrary_intervals_wtow(A, X, I, n):
   '''evaluates x E X from a coefficient matrix A'''
   X = X.astype(np.float64)
@@ -452,7 +461,7 @@ def coefs_to_array_arbitrary_intervals_wtow(A, X, I, n):
   T = np.arange(X.size, dtype=np.float64)
   # k = A.shape[1]
   # print("k=", k)
-  Y = np.zeros(n)
+  Y = np.zeros(n, dtype=np.float64)
   I = [0] + I + [X.size]
   for i in range(len(I) - 1):
     for j in range(I[i], I[i + 1]):
