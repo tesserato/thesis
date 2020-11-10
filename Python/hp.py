@@ -110,88 +110,6 @@ def coefs_to_array_arbitrary_intervals(A, X, I, n):
   #   x += 1
   return Y
 
-# def pseudocycles_average(Xpos, Xneg, W):
-#   posL = []
-#   for i in range(1, Xpos.size):
-#     posL.append(Xpos[i] - Xpos[i - 1])
-
-#   negL = []
-#   for i in range(1, Xneg.size):
-#     negL.append(Xneg[i] - Xneg[i - 1])
-
-#   if np.std(posL) < np.std(negL):
-#     print("using positive frontier")
-#     used_positive_frontier = True
-#     maxL = np.max(np.array(posL))
-#     # avgL = int(round(np.average(np.array(posL))))
-#     pseudoCyclesX = []
-#     pseudoCyclesY = []
-#     for i in range(1, Xpos.size):
-#       x0 = Xpos[i - 1]
-#       x1 = Xpos[i]
-#       # a = np.max(np.abs(W[x0 : x1]))
-#       ft = np.fft.rfft(W[x0 : x1])
-#       npulse = np.fft.irfft(ft, maxL)
-#       pseudoCyclesY.append(npulse / np.max(np.abs(npulse)))
-#       pseudoCyclesX.append(np.arange(maxL))
-#     pseudoCyclesX = np.array(pseudoCyclesX)
-#     pseudoCyclesY = np.array(pseudoCyclesY)
-#   else:
-#     print("using negative frontier")
-#     maxL = np.max(np.array(negL))
-#     used_positive_frontier = False
-#     # avgL = int(round(np.average(np.array(negL))))
-#     pseudoCyclesX = []
-#     pseudoCyclesY = []
-#     for i in range(1, Xpos.size):
-#       x0 = Xpos[i - 1]
-#       x1 = Xpos[i]
-#       # a = np.max(np.abs(W[x0 : x1]))
-#       ft = np.fft.rfft(W[x0 : x1])
-#       npulse = np.fft.irfft(ft, maxL)
-#       pseudoCyclesY.append(npulse / np.max(np.abs(npulse)))
-#       pseudoCyclesX.append(np.arange(maxL))
-#     pseudoCyclesX = np.array(pseudoCyclesX)
-#     pseudoCyclesY = np.array(pseudoCyclesY)
-
-#   print(f"Max L = {maxL}")
-
-#   pseudoCyclesY_avg = np.average(pseudoCyclesY, 0)
-#   return pseudoCyclesY_avg, used_positive_frontier, pseudoCyclesY
-
-# def pseudocycles_average(Xpos, Xneg, W):
-#   posL = Xpos[1:] - Xpos[:-1]
-#   negL = Xneg[1:] - Xneg[:-1]
-
-
-#   maxposL = np.max(posL)
-#   posPCs = []
-#   for i in range(1, Xpos.size):
-#     x0 = Xpos[i - 1]
-#     x1 = Xpos[i]
-#     # a = np.max(np.abs(W[x0 : x1]))
-#     ft = np.fft.rfft(W[x0 : x1])
-#     npulse = np.fft.irfft(ft, maxposL)
-#     posPCs.append(npulse / np.max(np.abs(npulse)))
-#   posPCs = np.array(posPCs)
-
-#   maxnegL = np.max(negL)
-#   negPCs = []
-#   for i in range(1, Xneg.size):
-#     x0 = Xneg[i - 1]
-#     x1 = Xneg[i]
-#     # a = np.max(np.abs(W[x0 : x1]))
-#     ft = np.fft.rfft(W[x0 : x1])
-#     npulse = np.fft.irfft(ft, maxnegL)
-#     negPCs.append(npulse / np.max(np.abs(npulse)))
-#   negPCs = np.array(negPCs)
-
-#   print(f"Max L = {maxL}")
-
-#   pseudoCyclesY_avg = np.average(pseudoCyclesY, 0)
-#   return pseudoCyclesY_avg, used_positive_frontier, pseudoCyclesY
-
-
 def approximate_pseudocycles_average(pseudoCyclesY_avg):
   m = pseudoCyclesY_avg.size
   X01 = np.linspace(0, 1, m, dtype=np.float64)
@@ -340,27 +258,6 @@ def _refine_frontier(Xp, W, avgL, stdL, n_stds = 3):
   else:
     print("No refinement found")
     return None
-
-
-# def refine_frontier_iter(Xp, W):
-#   L = Xp[1:] - Xp[:-1]
-#   avgL = np.average(L)
-#   stdL = np.std(L)
-#   Xp_new = _refine_frontier(Xp, W, avgL, stdL)
-
-#   while not Xp_new is None:
-#     Xp_c = np.unique(np.hstack([Xp, Xp_new])).astype(np.int)
-#     L = Xp_c[1:] - Xp_c[:-1]
-#     stdL_c = np.std(L)
-#     if stdL_c <= stdL:
-#       avgL = np.average(L)
-#       stdL = stdL_c
-#       Xp = Xp_c
-#       Xp_new = _refine_frontier(Xp, W, avgL, stdL)
-#     else:
-#       print(f"std0={stdL}, std1={stdL_c}")
-#       break
-#   return Xp
 
 def refine_frontier_iter(Xp, W): # mode
   Xp = Xp.astype(np.int)
@@ -524,16 +421,19 @@ def constrained_least_squares_arbitrary_intervals_wtow(X, dX, Y, I:list, k=3):
 
   V = np.zeros((2 * (len(I) - 2), (k + 1) + (k + 1) * (len(I) - 2)))
   for i in range(len(I) - 2):
-    V[2 * i, i * (k + 1)] = 1
-    V[2 * i, (i + 1) * (k + 1)] = -1
     x = X[I[i + 1]]
     dx = dX[I[i + 1]]
     t = T[I[i + 1]]
+    V[2 * i, i * (k + 1)] = 1
+    V[2 * i, (i + 1) * (k + 1)] = -1
+    V[2 * i, i * (k + 1) + 1] = dx
+    V[2 * i, (i + 1) * (k + 1) + 1] = -dx
+
     for c in range(1, k + 1):
       V[2 * i, i * (k + 1) + c] = x * t**c
-      V[2 * i + 1, i * (k + 1) + c] = dx * t**(c-1) * c
+      V[2 * i + 1, i * (k + 1) + c] = dx * t**c + x * t**(c-1) * c
       V[2 * i, (i + 1) * (k + 1) + c] = -x * t**c
-      V[2 * i + 1, (i + 1) * (k + 1) + c] = -dx * t**(c-1) * c
+      V[2 * i + 1, (i + 1) * (k + 1) + c] = -(dx * t**c + x * t**(c-1) * c)
 
   # np.savetxt("Q.csv", np.round(Q, 2), delimiter=",")
   # np.savetxt("V.csv", np.round(V, 2), delimiter=",")
@@ -558,6 +458,7 @@ def coefs_to_array_arbitrary_intervals_wtow(A, X, I, n):
     for j in range(I[i], I[i + 1]):
       for c in range(A.shape[1]):
         Y[j] += A[i, c] * X[j] * T[j]**c
+        # print(j, T[j])
 
   # x = len(Y)
   # while x < n: # TODO

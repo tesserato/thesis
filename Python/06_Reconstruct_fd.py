@@ -10,7 +10,7 @@ import hp
 name = "piano33"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
-# W = W / np.max(np.abs(W))
+amp = np.max(np.abs(W))
 
 n = W.size
 X = np.arange(n)
@@ -20,23 +20,17 @@ Xpos = hp.refine_frontier_iter(Xpos, W)
 Xneg = hp.refine_frontier_iter(Xneg, W)
 
 pcaverage = hp.average_pc_waveform(Xpos, Xneg, W)
-A = hp.approximate_pseudocycles_average(pcaverage)
-# if used_positive_frontier:
-#   Wp = hp.parametric_W(hp.linearize_pc(Xpos.astype(np.int)), A, n, False)
-# else:
-#   Wp = hp.parametric_W(hp.linearize_pc(Xneg.astype(np.int)), A, n, False)
-
-# Wp = hp.parametric_W(hp.linearize_pc(Xpos.astype(np.int)), A, n, False)
-Wp, dWp = hp.parametric_W_wtow(Xpos, A, n)
-# Wp = Wp / np.max(np.abs(Wp))
+Ap = hp.approximate_pseudocycles_average(pcaverage)
+Wp, dWp = hp.parametric_W_wtow(Xpos, Ap, n)
 
 Xf = np.unique(np.hstack([Xpos, Xneg]))
-Ix = hp.split_raw_frontier(Xf, W, 4)
-# print("maxes", n, np.max(Xf[Ix]))
+Ix = hp.split_raw_frontier(Xf, W, 10)
 
-A = hp.constrained_least_squares_arbitrary_intervals_wtow(Wp, dWp, W, Xf[Ix].tolist(), 3)
+A = hp.constrained_least_squares_arbitrary_intervals_wtow(Wp, dWp, W, Xf[Ix].tolist(), 2)
 
 E = hp.coefs_to_array_arbitrary_intervals_wtow(A, Wp, Xf[Ix].tolist(), n)
+
+env = hp.coefs_to_array_arbitrary_intervals(A, X, Xf[Ix].tolist(), n )
 
 
 We = E
@@ -50,8 +44,8 @@ for x in Xf[Ix]:
   Xintervals.append(x)
   Xintervals.append(x)
   Xintervals.append(None)
-  Yintervals.append(-1)
-  Yintervals.append(1)
+  Yintervals.append(-amp)
+  Yintervals.append(amp)
   Yintervals.append(None)
 
 
@@ -206,6 +200,23 @@ fig.add_trace(
     line=dict(
         width=1,
         color="green",
+        # dash="dash"
+        # showscale=False
+    ),
+    visible = "legendonly"
+  )
+)
+
+fig.add_trace(
+  go.Scatter(
+    name="env", # <|<|<|<|<|<|<|<|<|<|<|<|
+    # x=X,
+    y=env,
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=1,
+        color="black",
         # dash="dash"
         # showscale=False
     ),
