@@ -159,38 +159,37 @@ def coefs_to_array_arbitrary_intervals(A, X, I, n):
 #   pseudoCyclesY_avg = np.average(pseudoCyclesY, 0)
 #   return pseudoCyclesY_avg, used_positive_frontier, pseudoCyclesY
 
-def pseudocycles_average(Xpos, Xneg, W):
-  posL = Xpos[1:] - Xpos[:-1]
-  negL = Xneg[1:] - Xneg[:-1]
+# def pseudocycles_average(Xpos, Xneg, W):
+#   posL = Xpos[1:] - Xpos[:-1]
+#   negL = Xneg[1:] - Xneg[:-1]
 
 
-  maxposL = np.max(posL)
-  posPCs = []
-  for i in range(1, Xpos.size):
-    x0 = Xpos[i - 1]
-    x1 = Xpos[i]
-    # a = np.max(np.abs(W[x0 : x1]))
-    ft = np.fft.rfft(W[x0 : x1])
-    npulse = np.fft.irfft(ft, maxposL)
-    posPCs.append(npulse / np.max(np.abs(npulse)))
-  posPCs = np.array(posPCs)
+#   maxposL = np.max(posL)
+#   posPCs = []
+#   for i in range(1, Xpos.size):
+#     x0 = Xpos[i - 1]
+#     x1 = Xpos[i]
+#     # a = np.max(np.abs(W[x0 : x1]))
+#     ft = np.fft.rfft(W[x0 : x1])
+#     npulse = np.fft.irfft(ft, maxposL)
+#     posPCs.append(npulse / np.max(np.abs(npulse)))
+#   posPCs = np.array(posPCs)
 
-  maxnegL = np.max(negL)
-  negPCs = []
-  for i in range(1, Xneg.size):
-    x0 = Xneg[i - 1]
-    x1 = Xneg[i]
-    # a = np.max(np.abs(W[x0 : x1]))
-    ft = np.fft.rfft(W[x0 : x1])
-    npulse = np.fft.irfft(ft, maxnegL)
-    negPCs.append(npulse / np.max(np.abs(npulse)))
-  negPCs = np.array(negPCs)
+#   maxnegL = np.max(negL)
+#   negPCs = []
+#   for i in range(1, Xneg.size):
+#     x0 = Xneg[i - 1]
+#     x1 = Xneg[i]
+#     # a = np.max(np.abs(W[x0 : x1]))
+#     ft = np.fft.rfft(W[x0 : x1])
+#     npulse = np.fft.irfft(ft, maxnegL)
+#     negPCs.append(npulse / np.max(np.abs(npulse)))
+#   negPCs = np.array(negPCs)
 
-  print(f"Max L = {maxL}")
+#   print(f"Max L = {maxL}")
 
-  pseudoCyclesY_avg = np.average(pseudoCyclesY, 0)
-  return pseudoCyclesY_avg, used_positive_frontier, pseudoCyclesY
-
+#   pseudoCyclesY_avg = np.average(pseudoCyclesY, 0)
+#   return pseudoCyclesY_avg, used_positive_frontier, pseudoCyclesY
 
 
 def approximate_pseudocycles_average(pseudoCyclesY_avg):
@@ -385,6 +384,48 @@ def refine_frontier_iter(Xp, W): # mode
       break
   return Xp
 
+def average_pc_waveform_return_pcsandfts(Xpos, Xneg, W):
+  T = []
+  for i in range(1, Xpos.size):
+    T.append(Xpos[i] - Xpos[i - 1])
+  for i in range(1, Xneg.size):
+    T.append(Xneg[i] - Xneg[i - 1])
+  T = np.array(T, dtype = np.int)
+  maxT = np.max(T)
+
+  nft = int(maxT//2 + 1)
+  Xlocal = np.linspace(0, 1, maxT)
+
+  FTPOS = []
+  PCPOS = []
+  ftpos = np.zeros(nft, dtype=np.complex)
+  for i in range(1, Xpos.size):
+    x0 = Xpos[i - 1]
+    x1 = Xpos[i]
+    if x1 - x0 >= 4:
+      yx = interpolate.interp1d(np.linspace(0, 1, x1 - x0), W[x0 : x1], "cubic")
+      Ylocal = yx(Xlocal)
+      ftlocal = np.fft.rfft(Ylocal)
+      FTPOS.append(ftlocal)
+      PCPOS.append(Ylocal)
+      ftpos += ftlocal
+
+  FTNEG = []
+  PCNEG = []
+  ftneg = np.zeros(nft, dtype=np.complex)
+  for i in range(1, Xneg.size):
+    x0 = Xneg[i - 1]
+    x1 = Xneg[i]
+    if x1 - x0 >= 4:
+      yx = interpolate.interp1d(np.linspace(0, 1, x1 - x0), W[x0 : x1], "cubic")
+      Ylocal = yx(Xlocal)
+      ftlocal = np.fft.rfft(Ylocal)
+      FTNEG.append(ftlocal)
+      PCNEG.append(Ylocal)
+      ftneg += ftlocal
+
+  return np.array(FTPOS), np.array(PCPOS), np.array(FTNEG), np.array(PCNEG)
+
 def average_pc_waveform(Xpos, Xneg, W):
   T = []
   for i in range(1, Xpos.size):
@@ -414,7 +455,6 @@ def average_pc_waveform(Xpos, Xneg, W):
       yx = interpolate.interp1d(np.linspace(0, 1, x1 - x0), W[x0 : x1], "cubic")
       Ylocal = yx(Xlocal)
       ftneg += np.fft.rfft(Ylocal)
-
   ####### SHIFT #######
   f = np.argmax(np.abs(ftneg))
   p = np.angle(ftneg[f])
@@ -425,6 +465,105 @@ def average_pc_waveform(Xpos, Xneg, W):
   x = 2 * np.pi * np.arange(nft) / maxT
   ftneg = np.exp(-1j * x * d) * ftneg
   #####################
-  Y = np.fft.irfft(ftpos + ftneg, maxT)
+  Y = np.fft.irfft(ftpos + ftneg)
   Y = Y / np.max(np.abs(Y))
-  return Y, ftpos, ftneg
+  return Y
+
+
+def parametric_W_wtow(Xp, A, n):
+  Wparam = []
+  dWparam = []
+  for _ in range(Xp[0]):
+    Wparam.append(0)
+    dWparam.append(0)
+  for i in range(1, Xp.size):
+    x0 = Xp[i - 1]
+    x1 = Xp[i]
+    Xl = np.linspace(0, 1, int(x1) - int(x0) + 1, dtype=np.float64)
+    Yl = poly.polyval(Xl, A)
+    dYdx = np.zeros(int(x1) - int(x0) + 1)
+    for c in range(1, A.size):
+      dYdx += c * A[c] * Xl**(c - 1)
+    for j in range(Yl.size - 1):
+      dWparam.append(dYdx[j])
+      Wparam.append(Yl[j])
+  for x in range(Xp[-1], n):
+    Wparam.append(0)
+    dWparam.append(0)
+
+  Wparam = np.array(Wparam) #* amp
+  dWparam = np.array(dWparam) #* amp
+  return Wparam[0:n], dWparam[0:n]
+
+def constrained_least_squares_arbitrary_intervals_wtow(X, dX, Y, I:list, k=3):
+  '''constrained least squares with intervals as defined by the x coordinates in I and k polynomial'''
+  X = X.astype(np.float64)
+  Y = Y.astype(np.float64)
+  T = np.arange(X.size, dtype=np.float64)
+  assert len(X) == len(Y)
+  I = [0] + I + [X.size - 1]
+  Qlist = []
+  for i in range(len(I) - 1):
+    l0, l1 = I[i], I[i + 1]
+    Qi = np.zeros((l1 - l0 + 1, k + 1))
+    for l in range(l1 - l0 + 1):
+      for c in range(k + 1):
+        Qi[l, c] = X[l0 + l] * T[l0 + l]**c
+    Qlist.append(Qi)
+
+  Q = np.zeros((len(X), (len(I) - 1) * (k + 1)))
+  l0 = 0
+  c0 = 0
+  for q in Qlist:
+    # print(q.shape)
+    l1 = l0 + q.shape[0]
+    c1 = c0 + q.shape[1]
+    Q[l0:l1, c0:c1] = q
+    l0 = l1 - 1
+    c0 = c1
+
+  V = np.zeros((2 * (len(I) - 2), (k + 1) + (k + 1) * (len(I) - 2)))
+  for i in range(len(I) - 2):
+    V[2 * i, i * (k + 1)] = 1
+    V[2 * i, (i + 1) * (k + 1)] = -1
+    x = X[I[i + 1]]
+    dx = dX[I[i + 1]]
+    t = T[I[i + 1]]
+    for c in range(1, k + 1):
+      V[2 * i, i * (k + 1) + c] = x * t**c
+      V[2 * i + 1, i * (k + 1) + c] = dx * t**(c-1) * c
+      V[2 * i, (i + 1) * (k + 1) + c] = -x * t**c
+      V[2 * i + 1, (i + 1) * (k + 1) + c] = -dx * t**(c-1) * c
+
+  # np.savetxt("Q.csv", np.round(Q, 2), delimiter=",")
+  # np.savetxt("V.csv", np.round(V, 2), delimiter=",")
+
+  '''solving'''
+  QTQinv = np.linalg.inv(Q.T @ Q)
+  tau = np.linalg.inv(V @ QTQinv @ V.T)
+  QTY = Q.T @ Y
+  A = QTQinv @ (QTY - V.T @ tau @ V @ QTQinv @ QTY)
+  return np.reshape(A, (len(I) - 1, -1))
+
+def coefs_to_array_arbitrary_intervals_wtow(A, X, I, n):
+  '''evaluates x E X from a coefficient matrix A'''
+  X = X.astype(np.float64)
+  A = A.astype(np.float64)
+  T = np.arange(X.size, dtype=np.float64)
+  # k = A.shape[1]
+  # print("k=", k)
+  Y = np.zeros(n)
+  I = [0] + I + [X.size]
+  for i in range(len(I) - 1):
+    for j in range(I[i], I[i + 1]):
+      for c in range(A.shape[1]):
+        Y[j] += A[i, c] * X[j] * T[j]**c
+
+  # x = len(Y)
+  # while x < n: # TODO
+  #   y = 0
+  #   for i in range(k):
+  #     y += A[q-1, i] * X[x]**i
+  #   Y.append(y)
+  #   x += 1
+  return Y
