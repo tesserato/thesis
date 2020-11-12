@@ -155,7 +155,7 @@ def parametric_W(Xp, A, n, approximate=False):
   # Xparam = []
   if approximate:
     XX = np.arange(Xp.size)
-    C = poly.polyfit(XX, Xp, 3)
+    C = poly.polyfit(XX, Xp, 1)
     Xp = np.round(poly.polyval(XX, C)).astype(int)
   for x in range(Xp[0]):
     # Xparam.append(x)
@@ -203,6 +203,18 @@ def linearize_pc(Xp):
 
   a = afrac[0] / afrac[1]
   b = afrac[2] / afrac[3]
+
+  x0 = int(np.round(- b / a))
+  x1 = int(np.round((Xp[-1]- b) / a))
+
+  X = np.arange(x0, x1)
+  return  (a * X + b).astype(np.int)
+
+def linearize_pc_approx(Xp):
+  # Xp = Xp.astype(np.int)
+  XX = np.arange(Xp.size)
+  b, a = poly.polyfit(XX, Xp, 1)
+  # Xp = np.round(poly.polyval(XX, [a, b])).astype(int)
 
   x0 = int(np.round(- b / a))
   x1 = int(np.round((Xp[-1]- b) / a))
@@ -452,7 +464,6 @@ def constrained_least_squares_arbitrary_intervals_wtow(X, dX, Y, I:list, k=3):
   QTY = Q.T @ Y
   A = QTQinv @ (QTY - V.T @ tau @ V @ QTQinv @ QTY)
   return np.reshape(A, (len(I) - 1, -1))
-
 
 def coefs_to_array_arbitrary_intervals_wtow(A, X, I, n):
   '''evaluates x E X from a coefficient matrix A'''

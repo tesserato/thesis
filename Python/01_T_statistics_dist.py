@@ -1,18 +1,20 @@
 import plotly.graph_objects as go
 import numpy as np
 import signal_envelope as se
-# import numpy.polynomial.polynomial as poly
-# from collections import Counter
-# from math import gcd
+from statistics import mode
 import hp as hp
-# from scipy.signal import savgol_filter
-# from plotly.subplots import make_subplots
-
 
 '''==============='''
 ''' Read wav file '''
 '''==============='''
 
+# def stats(L):
+#   avg = np.average(L)
+#   mde = mode(L)
+#   std_avg = np.average(np.abs(L - avg))
+#   std_mde = np.average(np.abs(L - mde))
+#   print("std:", std_avg, std_mde, np.min(L), mde, np.max(L))
+#   return avg, std_avg, mde, std_mde, np.std(L)
 
 name = "piano33"
 W, fps = se.read_wav(f"Samples/{name}.wav")
@@ -21,25 +23,34 @@ amp = np.max(np.abs(W))
 n = W.size
 X = np.arange(n)
 
-Xpos_orig, Xneg_orig = se.get_frontiers(W)
+Xpos, Xneg = se.get_frontiers(W)
+posT = Xpos[1:] - Xpos[:-1]
+negT = Xneg[1:] - Xneg[:-1]
+T = np.hstack([posT, negT])
 
-Xpos = hp.refine_frontier_iter(Xpos_orig, W)
-Xneg = hp.refine_frontier_iter(Xneg_orig, W)
+Xpos = hp.refine_frontier_iter(Xpos, W)
+Xneg = hp.refine_frontier_iter(Xneg, W)
+posT_ref = Xpos[1:] - Xpos[:-1]
+negT_ref = Xneg[1:] - Xneg[:-1]
+T_ref = np.hstack([posT_ref, negT_ref])
 
+mode_error = T_ref - mode(T_ref)
+modeX, modeY = np.unique(mode_error, return_counts=True)
 
+avg_error = T_ref - np.average(T_ref)
+avgX, avgY = np.unique(avg_error, return_counts=True)
 
 '''============================================================================'''
 '''                              PLOT LINES                                    '''
 '''============================================================================'''
-
 
 fig = fig = go.Figure()
 fig.layout.template ="plotly_white"
 # fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
 fig.update_layout(
   # title = name,
-  xaxis_title="Length",
-  yaxis_title="Number of Ocurrences",
+  xaxis_title="T",
+  yaxis_title="Number of ocurrences",
 
   # yaxis = dict(        # <|<|<|<|<|<|<|<|<|<|<|<|
   #   scaleanchor = "x", # <|<|<|<|<|<|<|<|<|<|<|<|
@@ -57,9 +68,9 @@ fig.update_layout(
 
 fig.add_trace(
   go.Scatter(
-    name="Maxima", # <|<|<|<|<|<|<|<|<|<|<|<|
-    # x=Xpos,
-    y=Xpos_orig,
+    name=f"Mode (average absolute error={np.round(np.average(np.abs(mode_error)), 2)})", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=modeX,
+    y=modeY,
     # fill="toself",
     mode="lines",
     line=dict(
@@ -73,51 +84,18 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Minima", # <|<|<|<|<|<|<|<|<|<|<|<|
-    # x=Xpos,
-    y=Xneg_orig,
+    name=f"Average (average absolute error={np.round(np.average(np.abs(avg_error)), 2)})", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=avgX,
+    y=avgY,
     # fill="toself",
     mode="lines",
     line=dict(
         width=1,
-        color="black",
+        color="red",
         # showscale=False
     ),
     # visible = "legendonly"
   )
 )
-
-fig.add_trace(
-  go.Scatter(
-    name="Refined Maxima", # <|<|<|<|<|<|<|<|<|<|<|<|
-    # x=Xpos,
-    y=Xpos,
-    # fill="toself",
-    mode="lines",
-    line=dict(
-        width=1,
-        color="gray",
-        # showscale=False
-    ),
-    # visible = "legendonly"
-  )
-)
-
-fig.add_trace(
-  go.Scatter(
-    name="Refined Minima", # <|<|<|<|<|<|<|<|<|<|<|<|
-    # x=Xpos,
-    y=Xneg,
-    # fill="toself",
-    mode="lines",
-    line=dict(
-        width=1,
-        color="gray",
-        # showscale=False
-    ),
-    # visible = "legendonly"
-  )
-)
-
 
 fig.show(config=dict({'scrollZoom': True}))
