@@ -27,14 +27,13 @@ def split_raw_frontier(Xf, W, n_intervals = 4):
     while curr_sum < limit:
       i += 1
       curr_sum += Areas[i]
-    # dx = ()
+    dx = ()
     Ix.append(i)
   return Ix
 
 def constrained_least_squares_arbitrary_intervals(X, W, I:list, k=3):
   '''constrained least squares with intervals as defined by the x coordinates in I and k polynomial'''
-  Y = W[X].astype(np.float64)
-  # X = X.astype(np.float64)
+  Y = W[X]
   assert len(X) == len(Y)
   # n = len(X)
   I = [0] + I + [X.size - 1]
@@ -49,7 +48,7 @@ def constrained_least_squares_arbitrary_intervals(X, W, I:list, k=3):
         Qi[l, c] = X[l0 + l]**c
     Qlist.append(Qi)
 
-  Q = np.zeros((len(X), (len(I) - 1) * (k + 1)), dtype=np.float64)
+  Q = np.zeros((len(X), (len(I) - 1) * (k + 1)))
 
   l0 = 0
   c0 = 0
@@ -63,14 +62,14 @@ def constrained_least_squares_arbitrary_intervals(X, W, I:list, k=3):
 
   # Q = block_diag(*Q)
 
-  V = np.zeros((2 * (len(I) - 2), (k + 1) + (k + 1) * (len(I) - 2)), dtype=np.float64)
+  V = np.zeros((2 * (len(I) - 2), (k + 1) + (k + 1) * (len(I) - 2)))
 
   # Xf[x0 + 1] - Xf[x0]) * np.abs(W[Xf[x0 + 1]]) / (np.abs(W[Xf[x0]]) + np.abs(W[Xf[x0 + 1]])
 
   for i in range(len(I) - 2):
     V[2 * i, i * (k + 1)] = 1
     V[2 * i, (i + 1) * (k + 1)] = -1
-    x = X[I[i + 1]] #+ 0.5
+    x = X[I[i + 1]] + 0.5
     # x0 = X[I[i + 1]]
     # x1 = X[I[i + 2]]
     # x = (x1 - x0) * np.abs(W[x1]) / (np.abs(W[x0]) + np.abs(W[x1]))
@@ -88,14 +87,12 @@ def constrained_least_squares_arbitrary_intervals(X, W, I:list, k=3):
   tau = np.linalg.inv(V @ QTQinv @ V.T)
   QTY = Q.T @ Y
   A = QTQinv @ (QTY - V.T @ tau @ V @ QTQinv @ QTY)
-  return np.reshape(A, (len(I) - 1, -1)).astype(np.float64)
+  return np.reshape(A, (len(I) - 1, -1))
 
 def coefs_to_array_arbitrary_intervals(A, X, I, n):
   '''evaluates x E X from a coefficient matrix A'''
-  A = A.astype(np.float64)
   k = A.shape[1]
-  Y = np.zeros(n, dtype=np.float64)
-  X = X.astype(np.float64)
+  Y = np.zeros(n)
   Xs = [0] + [int(round(X[i])) for i in I] + [n]
 
   for i in range(len(Xs) - 1):
@@ -491,77 +488,3 @@ def coefs_to_array_arbitrary_intervals_wtow(A, X, I, n):
   #   Y.append(y)
   #   x += 1
   return Y
-
-
-'''New Functions'''
-def split(V, number_of_intervals = 4):
-  '''Splits V into number_of_intervals intervals with approximately equal areas, returning an array of the indices'''
-  V = np.abs(V)
-  limit = np.sum(V) / number_of_intervals
-  I = []
-  curr_sum = 0
-  for i, v in enumerate(V):
-    curr_sum += v
-    if curr_sum >= limit:
-      I.append(i-1)
-      curr_sum = 0
-  return I
-
-
-def clms_ai_nonlinearX(X, dX, Y, I, k=2):
-  '''constrained least squares with intervals as defined by the x coordinates in I and k polynomial'''
-  X  = X.astype(np.float64)
-  dX = dX.astype(np.float64)
-  Y  = Y.astype(np.float64)
-  T  = np.arange(X.size, dtype=np.float64)
-  assert len(X) == len(Y)
-  
-  I = [0] + I + [X.size - 1]
-  
-  Qlist = []
-  for i in range(len(I) - 1):
-    l0, l1 = I[i], I[i + 1]
-    Qi = np.zeros((l1 - l0 + 1, k + 1), dtype=np.float64)
-    for l in range(l1 - l0 + 1):
-      for c in range(k + 1):
-        Qi[l, c] = X[l0 + l] * T[l0 + l]**c
-    Qlist.append(Qi)
-
-  Q = np.zeros((len(X), (len(I) - 1) * (k + 1)), dtype=np.float64)
-  l0 = 0
-  c0 = 0
-  for q in Qlist:
-    # print(q.shape)
-    l1 = l0 + q.shape[0]
-    c1 = c0 + q.shape[1]
-    Q[l0:l1, c0:c1] = q
-    l0 = l1 - 1
-    c0 = c1
-
-  V = np.zeros((2 * (len(I) - 2), (k + 1) + (k + 1) * (len(I) - 2)), dtype=np.float64)
-  for i in range(len(I) - 2):
-    # r = np.random.rand()
-    x = X[I[i + 1]]
-    dx = dX[I[i + 1]]
-    t = T[I[i + 1]]
-    V[2 * i, i * (k + 1)] = x
-    V[2 * i, (i + 1) * (k + 1)] = -x
-    V[2 * i + 1, i * (k + 1)] = dx
-    V[2 * i + 1, (i + 1) * (k + 1)] = -dx
-    for c in np.arange(1, k + 1):
-      v1 = x * t**c
-      v2 = dx * t**c + c * x * t**(c-1)
-      V[2 * i, i * (k + 1) + c] = v1
-      V[2 * i + 1, i * (k + 1) + c] = v2
-      V[2 * i, (i + 1) * (k + 1) + c] = -v1
-      V[2 * i + 1, (i + 1) * (k + 1) + c] = -v2
-
-  # np.savetxt("Q.csv", np.round(Q, 2), delimiter=",")
-  # np.savetxt("V.csv", np.round(V, 2), delimiter=",")
-
-  '''solving'''
-  QTQinv = np.linalg.inv(Q.T @ Q)
-  tau = np.linalg.inv(V @ QTQinv @ V.T)
-  QTY = Q.T @ Y
-  A = QTQinv @ (QTY - V.T @ tau @ V @ QTQinv @ QTY)
-  return np.reshape(A, (len(I) - 1, -1))
