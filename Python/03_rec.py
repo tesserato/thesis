@@ -53,7 +53,7 @@ def find_zeroes(V):
 ''' Read wav file '''
 '''==============='''
 
-name = "piano33"
+name = "alto"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 amp = np.max(np.abs(W))
@@ -67,7 +67,7 @@ Xneg = hp.refine_frontier_iter(Xneg_orig, W)
 
 '''find estimated Xpcs:'''
 nn = min(Xpos.size, Xneg.size)
-Average_ref_X = np.round((Xpos[:nn] + Xneg[:nn]) / 2).astype(np.int)
+Average_ref_X = np.round((Xpos[:nn] + Xneg[:nn]) / 2)#.astype(np.int)
 
 # Average_ref_X = np.round(savgol_filter(Average_ref_X, 51, 3)).astype(np.int) # <|<|<|<|
 
@@ -81,7 +81,7 @@ Xdev = Xdev - av
 zeroes = find_zeroes(Xdev)
 
 
-A = hp.constrained_least_squares_arbitrary_intervals(np.arange(nn), Xdev, zeroes.tolist(), 3)
+A = hp.constrained_least_squares_arbitrary_intervals(np.arange(nn), Xdev, zeroes.tolist(), 4)
 Xdev_est = hp.coefs_to_array_arbitrary_intervals(A, X, zeroes.tolist(), Average_ref_X_linear.size)
 
 Xpcs = np.round(np.sort(np.abs(Average_ref_X_linear + Xdev_est + av))).astype(np.int)
@@ -109,7 +109,7 @@ Wp = Wp / np.max(np.abs(Wp))
 
 # envelope 2
 xf=np.unique(np.hstack([Xpos, Xneg]))
-intervals = hp.split_raw_frontier(xf, W, n_intervals = 6)
+intervals = hp.split_raw_frontier(xf, W, n_intervals = 12)
 A = hp.constrained_least_squares_arbitrary_intervals(xf, np.abs(W), intervals, 2)
 E = hp.coefs_to_array_arbitrary_intervals(A, X, xf[intervals].tolist(), n)
 

@@ -117,7 +117,7 @@ transp_black = "rgba(38, 12, 12, 0.2)"
 ''' Read wav file '''
 '''==============='''
 
-name = "res"
+name = "tom"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 n = W.size

@@ -82,7 +82,7 @@ def constrained_least_squares_arbitrary_intervals(X, W, I:list, k=3):
 
   # np.savetxt("Q.csv", np.round(Q, 2), delimiter=",")
   # np.savetxt("V.csv", np.round(V, 2), delimiter=",")
-
+  print("cond=", np.linalg.cond(Q.T @ Q))
   '''solving'''
   QTQinv = np.linalg.inv(Q.T @ Q)
   tau = np.linalg.inv(V @ QTQinv @ V.T)
