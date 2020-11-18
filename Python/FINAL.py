@@ -63,12 +63,12 @@ Xpc_est = Xpc_est[Xpc_est > 0]
 # avgpc, orig_pcs, norm_pcs = hp.average_pc_waveform(Xpc.astype(np.int), W)
 avgpc, orig_pcs, norm_pcs = hp.average_pc_waveform(Xpc, W)
 
-
+avgpc = avgpc / np.max(np.abs(avgpc))
 
 I, avgpc_trans = hp.find_breakpoints(avgpc)
 Xavgpc = np.arange(avgpc.size)
-############################################
 
+############################################
 A = hp.approximate_pc_waveform(Xavgpc, avgpc, I, 3, "k")
 avgpc_est = hp.coefs_to_array_arbitrary_intervals(A, Xavgpc, I, avgpc.size)
 std = np.average(np.abs(avgpc - avgpc_est))
@@ -78,7 +78,6 @@ threshold = 1.5
 while added:
   added = False
   # std = np.average(np.abs(avgpc - avgpc_est))
-
   print("std ini=", std, "#############")
   intervals = [0] + I + [avgpc.size]
   for i in range(len(intervals) - 1):
@@ -93,24 +92,36 @@ while added:
   if added:
     A = hp.approximate_pc_waveform(Xavgpc, avgpc, I, 3, "k")
     avgpc_est = hp.coefs_to_array_arbitrary_intervals(A, Xavgpc, I, avgpc.size)
-
 ############################################
+d_avgpc_est = hp.coefs_to_array_arbitrary_intervals_dYdX(A, Xavgpc, I, avgpc.size)
 
-'''==========================='''
-''' Reconstruct Basic Wave: '''
-'''==========================='''
+
+'''========================================'''
+''' Reconstruct Basic Wave and derivative: '''
+'''========================================'''
 
 pcx = interpolate.interp1d(np.linspace(0, 1, avgpc_est.size), avgpc_est, "cubic")
+d_pcx = interpolate.interp1d(np.linspace(0, 1, d_avgpc_est.size), d_avgpc_est, "cubic")
 Wp = np.zeros(n)
+d_Wp = np.zeros(n)
 for i in range(Xpc.size - 1):
   x0 = Xpc[i]
   x1 = Xpc[i + 1]
-  Wp[x0 : x1] = pcx(np.linspace(0, 1, x1 - x0))
-se.save_wav( Wp, "Wp.wav", fps=fps)
+  Wp[x0 : x1] = pcx(np.linspace(0, 1, x1 - x0 + 1))[0:-1]
+  d_Wp[x0 : x1] = d_pcx(np.linspace(0, 1, x1 - x0 + 1))[0:-1]
+
 
 '''==========================='''
 ''' Envelope: '''
 '''==========================='''
+
+Xf = np.unique(np.hstack([Xpos, Xneg]))
+Ie = hp.split_raw_frontier(Xf, W, 5)
+Ie = Xf[Ie].tolist()
+Ae = hp.constrained_least_squares_arbitrary_intervals_X_to_Y(Wp, d_Wp, W, Ie, 2, "k")
+E = hp.coefs_to_array_arbitrary_intervals(Ae, X, Ie, n)
+
+se.save_wav( E * Wp, f"{name}_est.wav", fps=fps)
 
 '''====================================================================================================================='''
 transp_black = "rgba(38, 12, 12, 0.2)"
@@ -128,7 +139,7 @@ def to_plot(Matrix):
 '''==========================='''
 ''' PLOT Signal & frontiers '''
 '''==========================='''
-if False:
+if True:
   fig = go.Figure()
   fig.layout.template ="plotly_white"
   # fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
@@ -169,6 +180,38 @@ if False:
 
   fig.add_trace(
     go.Scattergl(
+      name="Wp * E", # <|<|<|<|<|<|<|<|<|<|<|<|
+      x=X,
+      y=Wp * E,
+      # fill="toself",
+      mode="lines",
+      line=dict(
+          width=1,
+          color="red",
+          # showscale=False
+      ),
+      # visible = "legendonly"
+    )
+  )
+
+  fig.add_trace(
+    go.Scattergl(
+      name="E", # <|<|<|<|<|<|<|<|<|<|<|<|
+      x=X,
+      y=E,
+      # fill="toself",
+      mode="lines",
+      line=dict(
+          width=2,
+          color="blue",
+          # showscale=False
+      ),
+      visible = "legendonly"
+    )
+  )
+
+  fig.add_trace(
+    go.Scattergl(
       name="Max orig", # <|<|<|<|<|<|<|<|<|<|<|<|
       x=Xpos_orig,
       y=W[Xpos_orig],
@@ -179,7 +222,7 @@ if False:
           color="blue",
           # showscale=False
       ),
-      # visible = "legendonly"
+      visible = "legendonly"
     )
   )
 
@@ -195,7 +238,7 @@ if False:
           color="blue",
           # showscale=False
       ),
-      # visible = "legendonly"
+      visible = "legendonly"
     )
   )
 
@@ -211,7 +254,7 @@ if False:
           color="red",
           # showscale=False
       ),
-      # visible = "legendonly"
+      visible = "legendonly"
     )
   )
 
@@ -227,31 +270,31 @@ if False:
           color="red",
           # showscale=False
       ),
-      # visible = "legendonly"
+      visible = "legendonly"
     )
   )
 
-  # XI = []
-  # YI = []
+  XI = []
+  YI = []
   # maxI = np.max(np.abs(avgpc))
-  # for i in I:
-  #   XI. append(i), XI. append(i), XI. append(None)
-  #   YI. append(-maxI), YI. append(maxI), YI. append(None)
-  # fig.add_trace(
-  #   go.Scattergl(
-  #     name="Zeroes", # <|<|<|<|<|<|<|<|<|<|<|<|
-  #     x=XI,
-  #     y=YI,
-  #     # fill="toself",
-  #     mode="lines",
-  #     line=dict(
-  #         width=1,
-  #         color="gray",
-  #         # showscale=False
-  #     ),
-  #     # visible = "legendonly"
-  #   )
-  # )
+  for i in Ie:
+    XI. append(i), XI. append(i), XI. append(None)
+    YI. append(-amp), YI. append(amp), YI. append(None)
+  fig.add_trace(
+    go.Scattergl(
+      name="Zeroes", # <|<|<|<|<|<|<|<|<|<|<|<|
+      x=XI,
+      y=YI,
+      # fill="toself",
+      mode="lines",
+      line=dict(
+          width=1,
+          color="gray",
+          # showscale=False
+      ),
+      # visible = "legendonly"
+    )
+  )
 
   fig.show(config=dict({'scrollZoom': True}))
 
@@ -259,7 +302,7 @@ if False:
 '''==========================='''
 ''' PLOT Average pcs waveform '''
 '''==========================='''
-if True:
+if False:
   fig = go.Figure()
   fig.layout.template ="plotly_white"
   fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
@@ -405,22 +448,39 @@ if True:
     )
   )
 
-  # fig.add_trace(
-  #   go.Scattergl(
-  #     name="line", # <|<|<|<|<|<|<|<|<|<|<|<|
-  #     # x=np.arange(avgpc.size) + avgpc.size - 1,
-  #     y=avgpc_linear,
-  #     # fill="toself",
-  #     mode="lines",
-  #     line=dict(
-  #         width=2,
-  #         color="blue",
-  #         dash="dash"
-  #         # showscale=False
-  #     ),
-  #     # visible = "legendonly"
-  #   )
-  # )
+  fig.add_trace(
+    go.Scattergl(
+      name="d_avgpc_est", # <|<|<|<|<|<|<|<|<|<|<|<|
+      # x=np.arange(avgpc.size) + avgpc.size - 1,
+      y=d_avgpc_est,
+      # fill="toself",
+      mode="lines",
+      line=dict(
+          width=2,
+          color="green",
+          # dash="dash"
+          # showscale=False
+      ),
+      visible = "legendonly"
+    )
+  )
+
+  fig.add_trace(
+    go.Scattergl(
+      name="d_avgpc_est 2", # <|<|<|<|<|<|<|<|<|<|<|<|
+      x=np.arange(avgpc.size) + avgpc.size - 1,
+      y=d_avgpc_est,
+      # fill="toself",
+      mode="lines",
+      line=dict(
+          width=2,
+          color="green",
+          dash="dot"
+          # showscale=False
+      ),
+      visible = "legendonly"
+    )
+  )
 
   fig.add_trace(
     go.Scattergl(

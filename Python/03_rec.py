@@ -95,7 +95,7 @@ pcx = interpolate.interp1d(np.linspace(0, 1, avgpc.size), avgpc, "cubic")
 Wp = np.zeros(n)
 for i in range(Xpcs.size - 1):
   x0 = Xpcs[i]
-  x1 = Xpcs[i + 1]
+  x1 = Xpcs[i + 1] - 1
   Wp[x0 : x1] = pcx(np.linspace(0, 1, x1 - x0))
 
 # envelope 1

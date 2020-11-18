@@ -142,9 +142,16 @@ def coefs_to_array_arbitrary_intervals(A, X, I:list, n):
     for l in np.arange(I[i], I[i + 1]):
       for c in range(A.shape[1]):
         Y[l] += A[i, c] * X[l]**c
-        # print(i, l, c, A[i, c], X[l]**c)
-      # print(l, Y[l])
+  return Y
 
+def coefs_to_array_arbitrary_intervals_dYdX(A, X, I, n):
+  Y = np.zeros(n, dtype=np.float64)
+  # print(A.shape)
+  I = [0] + I + [n]
+  for i in np.arange(A.shape[0]):
+    for l in np.arange(I[i], I[i + 1]):
+      for c in range(1, A.shape[1]):
+        Y[l] += c * A[i, c] * X[l]**(c-1)
   return Y
 
 def average_pc_waveform(Xp, W):
@@ -228,23 +235,24 @@ def approximate_pc_waveform(X, Y, I = [], k=2, solve_method="k"):
 
 def constrained_least_squares_arbitrary_intervals_X_to_Y(X, dX, Y, I:list, k=2, solve_method="k"):
   '''constrained least squares with intervals as defined by the x coordinates in I and k polynomial'''
-  X  = X.astype(np.float64)
-  dX = dX.astype(np.float64)
-  Y  = Y.astype(np.float64)
-  T  = np.arange(X.size, dtype=np.float64)
-  assert len(X) == len(Y)
+  assert len(X) == len(Y)  
+  # X  = X.astype(np.float64)
+  # dX = dX.astype(np.float64)
+  # Y  = Y.astype(np.float64)
+  T  = np.arange(X.size)
+
   
   I = [0] + I + [X.size - 1]
   Qlist = []
   for i in range(len(I) - 1):
     l0, l1 = I[i], I[i + 1]
-    Qi = np.zeros((l1 - l0 + 1, k + 1), dtype=np.float64)
+    Qi = np.zeros((l1 - l0 + 1, k + 1))
     for l in range(l1 - l0 + 1):
       for c in range(k + 1):
         Qi[l, c] = X[l0 + l] * T[l0 + l]**c
     Qlist.append(Qi)
 
-  Q = np.zeros((len(X), (len(I) - 1) * (k + 1)), dtype=np.float64)
+  Q = np.zeros((len(X), (len(I) - 1) * (k + 1)))
   l0 = 0
   c0 = 0
   for q in Qlist:
@@ -255,7 +263,7 @@ def constrained_least_squares_arbitrary_intervals_X_to_Y(X, dX, Y, I:list, k=2, 
     l0 = l1 - 1
     c0 = c1
 
-  V = np.zeros((2 * (len(I) - 2), (k + 1) + (k + 1) * (len(I) - 2)), dtype=np.float64)
+  V = np.zeros((2 * (len(I) - 2), (k + 1) + (k + 1) * (len(I) - 2)))
   for i in range(len(I) - 2):
     # r = np.random.rand()
     x = X[I[i + 1]]
@@ -278,20 +286,55 @@ def constrained_least_squares_arbitrary_intervals_X_to_Y(X, dX, Y, I:list, k=2, 
       V[2 * i + 1, (i + 1) * (k + 1) + c] = -v2
 
   # np.savetxt("Q.csv", np.round(Q, 2), delimiter=",")
-  np.savetxt("V.csv", np.round(V, 2), delimiter=",")
+  # np.savetxt("V.csv", np.round(V, 2), delimiter=",")
 
-  '''solving'''
-  QTQinv = np.linalg.inv(Q.T @ Q)
-  tau = np.linalg.inv(V @ QTQinv @ V.T)
-  QTY = Q.T @ Y
-  A = QTQinv @ (QTY - V.T @ tau @ V @ QTQinv @ QTY)
+  if solve_method=="k":
+    '''solving kkt'''
+    s = len(I) - 1
+    a1 = np.hstack([ 2 * Q.T @ Q , V.T                              ])
+    a2 = np.hstack([ V           , np.zeros((2 * (s-1), 2 * (s-1))) ])
+    x = np.vstack([a1, a2])
+    # print((2 * Q.T @ Y).shape)
+    y = np.hstack([2 * Q.T @ Y, np.zeros(2 * (s-1))]).T
+    A = np.linalg.solve(x, y)[ :s * (k + 1)]
+
+  if solve_method=="d":
+    '''solving direct'''
+    QTQinv = np.linalg.inv(Q.T @ Q)
+    tau = np.linalg.inv(V @ QTQinv @ V.T)
+    QTY = Q.T @ Y
+    A = QTQinv @ (QTY - V.T @ tau @ V @ QTQinv @ QTY)
+
   return np.reshape(A, (len(I) - 1, -1))
 
 
 
 
 
+def split_raw_frontier(Xf, W, n_intervals = 4):
+  Areas = []
+  for i in range(1, Xf.size):
+    x0 = Xf[i - 1]
+    x1 = Xf[i]
+    y0 = np.abs(W[x0])
+    y1 = np.abs(W[x1])
+    a = (x1 - x0) * (y0 + y1) / 2
+    Areas.append(a)
 
+  Areas = np.array(Areas)  
+
+  limit = np.sum(Areas) / n_intervals
+
+  Ix = []
+  i = 0
+  for _ in range(n_intervals - 1):
+    curr_sum = Areas[i]
+    while curr_sum < limit:
+      i += 1
+      curr_sum += Areas[i]
+    dx = ()
+    Ix.append(i)
+  return Ix
 
 
 
