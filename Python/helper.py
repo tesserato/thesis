@@ -204,8 +204,8 @@ def approximate_pc_waveform(X, Y, I = [], k=2, solve_method="k"):
     V[-2, -k - 1 + c] = -(X[-1]**c)
     V[-1, -k - 1 + c] = -(c * X[-1]**(c-1))
 
-  np.savetxt("Q.csv", np.round(Q, 2), delimiter=",")
-  np.savetxt("V.csv", np.round(V, 2), delimiter=",")
+  # np.savetxt("Q.csv", np.round(Q, 2), delimiter=",")
+  # np.savetxt("V.csv", np.round(V, 2), delimiter=",")
   
   if solve_method=="k":
     '''solving kkt'''
@@ -225,6 +225,75 @@ def approximate_pc_waveform(X, Y, I = [], k=2, solve_method="k"):
     A = QTQinv @ (QTY - V.T @ tau @ V @ QTQinv @ QTY)
 
   return np.reshape(A, (len(I) - 1, -1)).astype(np.float64)
+
+def constrained_least_squares_arbitrary_intervals_X_to_Y(X, dX, Y, I:list, k=2, solve_method="k"):
+  '''constrained least squares with intervals as defined by the x coordinates in I and k polynomial'''
+  X  = X.astype(np.float64)
+  dX = dX.astype(np.float64)
+  Y  = Y.astype(np.float64)
+  T  = np.arange(X.size, dtype=np.float64)
+  assert len(X) == len(Y)
+  
+  I = [0] + I + [X.size - 1]
+  Qlist = []
+  for i in range(len(I) - 1):
+    l0, l1 = I[i], I[i + 1]
+    Qi = np.zeros((l1 - l0 + 1, k + 1), dtype=np.float64)
+    for l in range(l1 - l0 + 1):
+      for c in range(k + 1):
+        Qi[l, c] = X[l0 + l] * T[l0 + l]**c
+    Qlist.append(Qi)
+
+  Q = np.zeros((len(X), (len(I) - 1) * (k + 1)), dtype=np.float64)
+  l0 = 0
+  c0 = 0
+  for q in Qlist:
+    # print(q.shape)
+    l1 = l0 + q.shape[0]
+    c1 = c0 + q.shape[1]
+    Q[l0:l1, c0:c1] = q
+    l0 = l1 - 1
+    c0 = c1
+
+  V = np.zeros((2 * (len(I) - 2), (k + 1) + (k + 1) * (len(I) - 2)), dtype=np.float64)
+  for i in range(len(I) - 2):
+    # r = np.random.rand()
+    x = X[I[i + 1]]
+    dx = dX[I[i + 1]]
+    t = T[I[i + 1]]
+    V[2 * i, i * (k + 1)] = x
+    V[2 * i, (i + 1) * (k + 1)] = -x
+    V[2 * i + 1, i * (k + 1)] = dx
+    V[2 * i + 1, (i + 1) * (k + 1)] = -dx
+    for c in np.arange(1, k + 1):
+      # r1 = np.random.rand()
+      # r2 = np.random.rand()
+      # r3 = np.random.rand()
+      # r4 = np.random.rand()
+      v1 = x * t**c
+      v2 = dx * t**c + c * x * t**(c-1)
+      V[2 * i, i * (k + 1) + c] = v1
+      V[2 * i + 1, i * (k + 1) + c] = v2
+      V[2 * i, (i + 1) * (k + 1) + c] = -v1
+      V[2 * i + 1, (i + 1) * (k + 1) + c] = -v2
+
+  # np.savetxt("Q.csv", np.round(Q, 2), delimiter=",")
+  np.savetxt("V.csv", np.round(V, 2), delimiter=",")
+
+  '''solving'''
+  QTQinv = np.linalg.inv(Q.T @ Q)
+  tau = np.linalg.inv(V @ QTQinv @ V.T)
+  QTY = Q.T @ Y
+  A = QTQinv @ (QTY - V.T @ tau @ V @ QTQinv @ QTY)
+  return np.reshape(A, (len(I) - 1, -1))
+
+
+
+
+
+
+
+
 
 def smooth_savgol(V):
   window_len = int(2 * ((V.size / 20) // 2) + 1)
@@ -266,11 +335,19 @@ def find_zeroes_alt(V):
       zeroes.append(i)
   return zeroes
 
+def find_breakpoints(V):
+  '''remove best fitting line from V'''
+  X = np.arange(V.size)
+  A = poly.polyfit(X, V, 1)
+  V = V - poly.polyval(X, A)
+  '''Smooth V'''
+  V = savgol_filter(V, 11, 3)
+  '''find zeroes'''
+  s = np.sign(V[0])
+  zeroes = []
+  for i, v in enumerate(V):
+    if np.sign(v) != s or v == 0:
+      s = np.sign(-1 * s)
+      zeroes.append(i)
+  return zeroes, V
 
-
-  # if np.abs(V[idx_max]) > np.abs(V[idx_min]):
-  #   I.append(idx_max)
-  # else:
-  #   I.append(idx_min)
-
-  return I

@@ -103,14 +103,21 @@ def coefs_to_array_arbitrary_intervals(A, X, I, n):
     for x in range(x0 , x1):
       for c in range(k):
         Y[x] += A[i, c] * x**c
+  return Y
 
-  x = len(Y)
-  # while x < n: # TODO
-  #   y = 0
-  #   for i in range(k):
-  #     y += A[q-1, i] * X[x]**i
-  #   Y.append(y)
-  #   x += 1
+def coefs_to_array_arbitrary_intervals_dYdX(A, X, I, n):
+  '''evaluates x E X from a coefficient matrix A'''
+  A = A.astype(np.float64)
+  k = A.shape[1]
+  Y = np.zeros(n, dtype=np.float64)
+  X = X.astype(np.float64)
+  Xs = [0] + [int(round(X[i])) for i in I] + [n]
+
+  for i in range(len(Xs) - 1):
+    x0, x1 = Xs[i], Xs[i + 1]
+    for x in range(x0 , x1):
+      for c in range(k):
+        Y[x] += A[i, c] * x**c
   return Y
 
 def approximate_pseudocycles_average(pseudoCyclesY_avg):

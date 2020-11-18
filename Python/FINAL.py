@@ -12,7 +12,7 @@ from scipy import interpolate
 ''' Read wav file '''
 '''==============='''
 
-name = "soprano"
+name = "alto"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 amp = np.max(np.abs(W))
@@ -47,7 +47,7 @@ deviation_Xpc = Xpc - Xpc_linear
 average_deviation_Xpc = np.average(deviation_Xpc)
 deviation_Xpc = deviation_Xpc - average_deviation_Xpc
 
-zeroes = hp.find_zeroes_alt(deviation_Xpc)
+zeroes = hp.find_zeroes(deviation_Xpc)
 
 # zeroes = zeroes[:2] + [100, 123] + zeroes[2:]
 
@@ -64,22 +64,53 @@ Xpc_est = Xpc_est[Xpc_est > 0]
 avgpc, orig_pcs, norm_pcs = hp.average_pc_waveform(Xpc, W)
 
 
-I = hp.find_zeroes_alt(avgpc)
-A = hp.approximate_pc_waveform(np.arange(avgpc.size), avgpc, I, 2, "k")
-avgpc_est = hp.coefs_to_array_arbitrary_intervals(A, np.arange(avgpc.size), I, avgpc.size)
+
+I, avgpc_trans = hp.find_breakpoints(avgpc)
+Xavgpc = np.arange(avgpc.size)
+############################################
+
+A = hp.approximate_pc_waveform(Xavgpc, avgpc, I, 3, "k")
+avgpc_est = hp.coefs_to_array_arbitrary_intervals(A, Xavgpc, I, avgpc.size)
+std = np.average(np.abs(avgpc - avgpc_est))
+
+added = True
+threshold = 1.5
+while added:
+  added = False
+  # std = np.average(np.abs(avgpc - avgpc_est))
+
+  print("std ini=", std, "#############")
+  intervals = [0] + I + [avgpc.size]
+  for i in range(len(intervals) - 1):
+    i0 = intervals[i]
+    i1 = intervals[i + 1]
+    stdi = np.average(np.abs(avgpc[i0:i1] - avgpc_est[i0:i1]))
+    print(f"std {i}={stdi}, {stdi > threshold * std}")
+    if stdi > threshold * std:
+      I.append(int(np.round((i0 + i1) / 2)))
+      added = True
+  I.sort()
+  if added:
+    A = hp.approximate_pc_waveform(Xavgpc, avgpc, I, 3, "k")
+    avgpc_est = hp.coefs_to_array_arbitrary_intervals(A, Xavgpc, I, avgpc.size)
+
+############################################
 
 '''==========================='''
-''' Reconstruct Wave: '''
+''' Reconstruct Basic Wave: '''
 '''==========================='''
 
-pcx = interpolate.interp1d(np.linspace(0, 1, avgpc.size), avgpc, "cubic")
+pcx = interpolate.interp1d(np.linspace(0, 1, avgpc_est.size), avgpc_est, "cubic")
 Wp = np.zeros(n)
-for i in range(Xpc_est.size - 1):
-  x0 = Xpc_est[i]
-  x1 = Xpc_est[i + 1]
+for i in range(Xpc.size - 1):
+  x0 = Xpc[i]
+  x1 = Xpc[i + 1]
   Wp[x0 : x1] = pcx(np.linspace(0, 1, x1 - x0))
 se.save_wav( Wp, "Wp.wav", fps=fps)
 
+'''==========================='''
+''' Envelope: '''
+'''==========================='''
 
 '''====================================================================================================================='''
 transp_black = "rgba(38, 12, 12, 0.2)"
@@ -93,7 +124,7 @@ def to_plot(Matrix):
     X.append(None)
     Y.append(None)
   return X, Y
-
+'''====================================================================================================================='''
 '''==========================='''
 ''' PLOT Signal & frontiers '''
 '''==========================='''
@@ -231,7 +262,7 @@ if False:
 if True:
   fig = go.Figure()
   fig.layout.template ="plotly_white"
-  # fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
+  fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
   fig.update_layout(
     # title = name,
     xaxis_title="Length",
@@ -353,7 +384,7 @@ if True:
           # dash="dot"
           # showscale=False
       ),
-      visible = "legendonly"
+      # visible = "legendonly"
     )
   )
 
@@ -368,6 +399,40 @@ if True:
           width=2,
           color="blue",
           dash="dot"
+          # showscale=False
+      ),
+      visible = "legendonly"
+    )
+  )
+
+  # fig.add_trace(
+  #   go.Scattergl(
+  #     name="line", # <|<|<|<|<|<|<|<|<|<|<|<|
+  #     # x=np.arange(avgpc.size) + avgpc.size - 1,
+  #     y=avgpc_linear,
+  #     # fill="toself",
+  #     mode="lines",
+  #     line=dict(
+  #         width=2,
+  #         color="blue",
+  #         dash="dash"
+  #         # showscale=False
+  #     ),
+  #     # visible = "legendonly"
+  #   )
+  # )
+
+  fig.add_trace(
+    go.Scattergl(
+      name="avgpc trans", # <|<|<|<|<|<|<|<|<|<|<|<|
+      # x=np.arange(avgpc.size) + avgpc.size - 1,
+      y=avgpc_trans,
+      # fill="toself",
+      mode="lines+markers",
+      line=dict(
+          width=2,
+          color="blue",
+          dash="dash"
           # showscale=False
       ),
       visible = "legendonly"
