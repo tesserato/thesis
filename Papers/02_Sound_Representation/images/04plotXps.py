@@ -23,7 +23,8 @@ Xpos_orig, Xneg_orig = se.get_frontiers(W)
 Xpos = hp.refine_frontier_iter(Xpos_orig, W)
 Xneg = hp.refine_frontier_iter(Xneg_orig, W)
 
-
+nn = min(Xpos.size, Xneg.size)
+Average_ref_X = np.round((Xpos[:nn] + Xneg[:nn]) / 2)#.astype(np.int)
 
 '''============================================================================'''
 '''                              PLOT LINES                                    '''
@@ -58,7 +59,7 @@ fig.add_trace(
     # fill="toself",
     mode="lines",
     line=dict(
-        width=2,
+        width=1,
         color="black",
         dash="dash"
         # showscale=False
@@ -75,7 +76,7 @@ fig.add_trace(
     # fill="toself",
     mode="lines",
     line=dict(
-        width=2,
+        width=1,
         color="gray",
         dash="dash"
         # showscale=False
@@ -92,7 +93,7 @@ fig.add_trace(
     # fill="toself",
     mode="lines",
     line=dict(
-        width=2,
+        width=1,
         color="black",
         # showscale=False
     ),
@@ -108,7 +109,7 @@ fig.add_trace(
     # fill="toself",
     mode="lines",
     line=dict(
-        width=2,
+        width=1,
         color="gray",
         # dash="dash"
         # showscale=False
@@ -117,7 +118,24 @@ fig.add_trace(
   )
 )
 
-fig.show(config=dict({'scrollZoom': True}))
+fig.add_trace(
+  go.Scatter(
+    name="Average Pseudo Pulses Position", # <|<|<|<|<|<|<|<|<|<|<|<|
+    # x=Xpos,
+    y=Average_ref_X,
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=1,
+        color="silver",
+        # dash="dash"
+        # showscale=False
+    ),
+    # visible = "legendonly"
+  )
+)
+
+# fig.show(config=dict({'scrollZoom': True}))
 save_name = "./images/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
 fig.write_image(save_name, width=650, height=300, engine="kaleido", format="svg")
 print("saved:", save_name)

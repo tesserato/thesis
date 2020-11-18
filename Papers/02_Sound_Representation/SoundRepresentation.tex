@@ -120,7 +120,7 @@ In addition to the smaller mean absolute deviation, the errors when the mode is 
 \end{figure}
 
 
-The result of this procedure can be seen as the additional squares and diamonds in figure \ref{fig:frontiergaps}, representing new maxima and minima, respectively, found by reanalising pulses whose period is superior to 2 mean absolute deviations from the mode of the periods distribution, both for the positive and the negative frontiers.
+The result of this procedure can be seen as the additional squares and diamonds in figure \ref{fig:frontiergaps}, representing new maxima and minima, respectively, found by iteratively reanalising and eventually splitting pulses whose period is superior to 2 mean absolute deviations from the mode of the periods distribution, both for the positive and the negative frontiers.
 
 A new mode is then calculated from the new pulse distribution, as well as the mean absolute deviation; the procedure is repeated until no more new pseudo pulses are found or the mean absolute deviation is increased by the addition of the newfound extrema.
 
@@ -131,15 +131,22 @@ A new mode is then calculated from the new pulse distribution, as well as the me
   \label{fig:frontiergaps}
 \end{figure}
 
-figure \ref{fig:plotXps} illustrates the behaviour of the periods as inferred by both frontiers, before and after the refinement.
+Figure \ref{fig:plotXps} illustrates the behaviour of the extrema as inferred by both frontiers, before and after the refinement. It can be seen, particularly at the end of the wave that each inference is a little biased, both before and after the refinement process. To solve that, we can calculate an intermediate measure of both inferred values, by averaging compatible values of both frontiers.
+
+In this way we have a balanced, unbiased estimative of the position of the pseudo pulses along the time that can be used to calculate the average waveform of the pseudo pulses in the signal of interest.
+
+We won't, in general, have an accurate estimative - unless methods such as the FFT are used - of the relative phase of this signal, since the points marked by the average frontier wont, in general, concide with points of interest of the waveform.
+
+In special cases such as sinusoids, this would be the case, as the average frontier would mark the zeros of each pseudo cycle. Nevertheless, our interest here is in periodicity, since the envetual extracted average waveform will have to be made tileable, rendering ineffective such a discussion. It will be shown below that the average waveform identified as described is indeed very close to tileable, and minimal further processing is required.
 
 \begin{figure}[ht!]
   \centering
      \includegraphics{images/04plotXps.pdf}
-  \caption{Frame of occurrence of the maxima and minima of a discrete signal representing the sound of the key 33 of a grand piano before and after the refinement process.}
+  \caption{Frame of occurrence of the maxima and minima of a discrete signal representing the sound of the key 33 of a grand piano before and after the refinement process, as well as the average of both refined extrema.}
   \label{fig:plotXps}
 \end{figure}
 
+We could use a polinomial approximation, fitting an arbitrary direct polynomial to the values. Given the range of number, that procedure would bring numerical instabillity to our model, however. Instead, we chose to divide the approximation into a straight line and a polynomial approximation of the deviation from this line. In that way we are able to enforce the overall pitch of the wave, while avoiding computational instability.
 
 \subsection{Pseudo Cycles evolution over time}
 
