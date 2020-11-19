@@ -6,13 +6,11 @@ import numpy.polynomial.polynomial as poly
 from scipy.signal import savgol_filter
 from scipy import interpolate
 
-
-
 '''==============='''
 ''' Read wav file '''
 '''==============='''
 
-name = "brass"
+name = "bend"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 amp = np.max(np.abs(W))
@@ -113,9 +111,9 @@ pcx = interpolate.interp1d(np.linspace(0, 1, avgpc_est.size), avgpc_est, "cubic"
 d_pcx = interpolate.interp1d(np.linspace(0, 1, d_avgpc_est.size), d_avgpc_est, "cubic")
 Wp = np.zeros(n)
 d_Wp = np.zeros(n)
-for i in range(Xpc.size - 1):
-  x0 = Xpc[i]
-  x1 = Xpc[i + 1]
+for i in range(Xpc_est.size - 1):
+  x0 = Xpc_est[i]
+  x1 = Xpc_est[i + 1]
   # Wp[x0 : x1] = pcx(np.linspace(0, 1, x1 - x0 + 1))[0:-1]
   # d_Wp[x0 : x1] = d_pcx(np.linspace(0, 1, x1 - x0 + 1))[0:-1]
   Wp[x0 : x1] = pcx(np.linspace(0, 1, x1 - x0, endpoint=False))
@@ -129,7 +127,7 @@ for i in range(Xpc.size - 1):
 Xf = np.unique(np.hstack([Xpos, Xneg]))
 Ie = hp.split_raw_frontier(Xf, W, 5)
 Ie = Xf[Ie].tolist()
-Ae = hp.constrained_least_squares_arbitrary_intervals_X_to_Y(Wp, d_Wp, W, Ie, 3, "k")
+Ae = hp.constrained_least_squares_arbitrary_intervals_X_to_Y(Wp, d_Wp, W, Ie, 2, "k")
 E = hp.coefs_to_array_arbitrary_intervals(Ae, X, Ie, n)
 
 se.save_wav( E * Wp, f"{name}_est.wav", fps=fps)
@@ -643,7 +641,7 @@ if False:
 '''====================='''
 ''' PLOT Xpcs Deviation '''
 '''====================='''
-if False:
+if True:
   fig = go.Figure()
   fig.layout.template ="plotly_white"
   # fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
