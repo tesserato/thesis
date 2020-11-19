@@ -12,14 +12,18 @@ from scipy import interpolate
 ''' Read wav file '''
 '''==============='''
 
-name = "alto"
+name = "brass"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 amp = np.max(np.abs(W))
 # W = W / amp
 n = W.size
 print(f"n={n}")
-X = np.arange(n)
+W = W.astype(np.float64)
+X = np.arange(n, dtype=np.float64)
+# X = np.linspace(0, 1, n, dtype=np.float64)
+
+
 
 '''==========================='''
 ''' Find and refine Frontiers '''
@@ -40,6 +44,8 @@ X_Xpc = np.arange(n_Xpc, dtype=np.float64)
 b, a = poly.polyfit(X_Xpc, Xpc, 1)
 Xpc_linear = a * X_Xpc + b
 
+
+
 '''==========================='''
 ''' Find Xpc deviation '''
 '''==========================='''
@@ -56,6 +62,8 @@ deviation_Xpc_est = hp.coefs_to_array_arbitrary_intervals(A, X_Xpc, zeroes, n_Xp
 
 Xpc_est = np.round(Xpc_linear + average_deviation_Xpc + deviation_Xpc_est).astype(np.int)
 Xpc_est = Xpc_est[Xpc_est > 0]
+
+
 
 '''==========================='''
 ''' Find average pc waveform: '''
@@ -96,6 +104,7 @@ while added:
 d_avgpc_est = hp.coefs_to_array_arbitrary_intervals_dYdX(A, Xavgpc, I, avgpc.size)
 
 
+
 '''========================================'''
 ''' Reconstruct Basic Wave and derivative: '''
 '''========================================'''
@@ -107,8 +116,10 @@ d_Wp = np.zeros(n)
 for i in range(Xpc.size - 1):
   x0 = Xpc[i]
   x1 = Xpc[i + 1]
-  Wp[x0 : x1] = pcx(np.linspace(0, 1, x1 - x0 + 1))[0:-1]
-  d_Wp[x0 : x1] = d_pcx(np.linspace(0, 1, x1 - x0 + 1))[0:-1]
+  # Wp[x0 : x1] = pcx(np.linspace(0, 1, x1 - x0 + 1))[0:-1]
+  # d_Wp[x0 : x1] = d_pcx(np.linspace(0, 1, x1 - x0 + 1))[0:-1]
+  Wp[x0 : x1] = pcx(np.linspace(0, 1, x1 - x0, endpoint=False))
+  d_Wp[x0 : x1] = d_pcx(np.linspace(0, 1, x1 - x0, endpoint=False))
 
 
 '''==========================='''
@@ -118,7 +129,7 @@ for i in range(Xpc.size - 1):
 Xf = np.unique(np.hstack([Xpos, Xneg]))
 Ie = hp.split_raw_frontier(Xf, W, 5)
 Ie = Xf[Ie].tolist()
-Ae = hp.constrained_least_squares_arbitrary_intervals_X_to_Y(Wp, d_Wp, W, Ie, 2, "k")
+Ae = hp.constrained_least_squares_arbitrary_intervals_X_to_Y(Wp, d_Wp, W, Ie, 3, "k")
 E = hp.coefs_to_array_arbitrary_intervals(Ae, X, Ie, n)
 
 se.save_wav( E * Wp, f"{name}_est.wav", fps=fps)

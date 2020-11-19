@@ -135,7 +135,7 @@ def constrained_least_squares_arbitrary_intervals(X, Y, I:list, k=2, solve_metho
 
 def coefs_to_array_arbitrary_intervals(A, X, I:list, n):
   '''evaluates x E X from a coefficient matrix A'''
-  Y = np.zeros(n, dtype=np.float64)
+  Y = np.zeros(n)
   # print(A.shape)
   I = [0] + I + [n]
   for i in np.arange(A.shape[0]):
@@ -145,7 +145,7 @@ def coefs_to_array_arbitrary_intervals(A, X, I:list, n):
   return Y
 
 def coefs_to_array_arbitrary_intervals_dYdX(A, X, I, n):
-  Y = np.zeros(n, dtype=np.float64)
+  Y = np.zeros(n)
   # print(A.shape)
   I = [0] + I + [n]
   for i in np.arange(A.shape[0]):
@@ -239,7 +239,7 @@ def constrained_least_squares_arbitrary_intervals_X_to_Y(X, dX, Y, I:list, k=2, 
   # X  = X.astype(np.float64)
   # dX = dX.astype(np.float64)
   # Y  = Y.astype(np.float64)
-  T  = np.arange(X.size)
+  T  = np.arange(X.size, dtype=np.float64)
 
   
   I = [0] + I + [X.size - 1]
@@ -320,8 +320,7 @@ def split_raw_frontier(Xf, W, n_intervals = 4):
     y1 = np.abs(W[x1])
     a = (x1 - x0) * (y0 + y1) / 2
     Areas.append(a)
-
-  Areas = np.array(Areas)  
+  Areas = np.array(Areas)
 
   limit = np.sum(Areas) / n_intervals
 

@@ -53,7 +53,7 @@ def find_zeroes(V):
 ''' Read wav file '''
 '''==============='''
 
-name = "alto"
+name = "piano33"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 amp = np.max(np.abs(W))
