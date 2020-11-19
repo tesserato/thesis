@@ -155,10 +155,9 @@ def coefs_to_array_arbitrary_intervals_dYdX(A, X, I, n):
   return Y
 
 def average_pc_waveform(Xp, W):
-  amp = np.max(np.abs(W))
-  maxT = np.max(np.abs(Xp[1:] - Xp[:-1]))
-
-  Xlocal = np.linspace(0, 1, maxT)
+  # amp = np.max(np.abs(W))
+  max_T = np.max(np.abs(Xp[1:] - Xp[:-1]))
+  Xlocal = np.linspace(0, 1, max_T)
 
   orig_pcs = []
   norm_pcs = []
@@ -170,9 +169,7 @@ def average_pc_waveform(Xp, W):
       yx = interpolate.interp1d(np.linspace(0, 1, x1 - x0), W[x0 : x1], "cubic")
       Ylocal = yx(Xlocal)
       # Ylocal = Ylocal / np.max(np.abs(Ylocal)) * amp
-      norm_pcs.append(Ylocal)
-
-  
+      norm_pcs.append(Ylocal)  
   return np.average(np.array(norm_pcs), 0), orig_pcs, norm_pcs
 
 def approximate_pc_waveform(X, Y, I = [], k=2, solve_method="k"):
