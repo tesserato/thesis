@@ -125,8 +125,8 @@ for i in range(Xpc.size - 1):
   x1 = Xpc[i + 1]
   # Wp[x0 : x1] = pcx(np.linspace(0, 1, x1 - x0 + 1))[0:-1]
   # d_Wp[x0 : x1] = d_pcx(np.linspace(0, 1, x1 - x0 + 1))[0:-1]
-  Wp[x0 : x1] = pcx(np.linspace(0, 1, x1 - x0, endpoint=False))
-  d_Wp[x0 : x1] = d_pcx(np.linspace(0, 1, x1 - x0, endpoint=False))
+  Wp[x0 : x1] = pcx(np.linspace(0, 1, Wp[x0 : x1].size, endpoint=False))
+  d_Wp[x0 : x1] = d_pcx(np.linspace(0, 1, d_Wp[x0 : x1].size, endpoint=False))
 
 
 '''==========================='''

@@ -166,7 +166,7 @@ def average_pc_waveform(Xp, W):
     x1 = Xp[i] + 1
     orig_pcs.append(W[x0 : x1])
     if x1 - x0 >= 4:
-      yx = interpolate.interp1d(np.linspace(0, 1, x1 - x0), W[x0 : x1], "cubic")
+      yx = interpolate.interp1d(np.linspace(0, 1, W[x0 : x1].size), W[x0 : x1], "cubic")
       Ylocal = yx(Xlocal)
       # Ylocal = Ylocal / np.max(np.abs(Ylocal)) * amp
       norm_pcs.append(Ylocal)  
@@ -397,8 +397,8 @@ def refine_Xpc_alt(Xpc, W):
   stdL = np.average(np.abs(L - avgL))
   avgpc, orig_pcs, norm_pcs = average_pc_waveform(Xpc, W)
   pcx = interpolate.interp1d(np.linspace(0, 1, avgpc.size), avgpc, "cubic")
-  mult = 4
-  padding = int(avgL - mult * stdL)
+  mult = 5
+  padding = max(int(avgL - mult * stdL), int(mult * stdL))
   W = np.pad(W, [padding, padding])
   Xpc_new = []
   sizes = np.arange(int(avgL - mult * stdL), int(avgL + mult * stdL) + 1)
@@ -419,7 +419,7 @@ def refine_Xpc_alt(Xpc, W):
   
   x0 = opt_x0 + opt_size
   opt_size = None
-  while x0 + int(avgL + mult * stdL) < W.size:
+  while x0 + int(avgL + mult * stdL) + 1 < W.size:
     max_conv = 0
     for size in sizes:
       pc = pcx(np.linspace(0, 1, size, endpoint=False))
@@ -430,7 +430,8 @@ def refine_Xpc_alt(Xpc, W):
     x0 += opt_size
     Xpc_new.append(x0)
   Xpc_new = np.array(Xpc_new, np.int) - padding
-  return np.unique(Xpc_new[Xpc_new > 0])
+  Xpc_new = np.unique(Xpc_new[Xpc_new > 0])
+  return Xpc_new[Xpc_new < W.size]
 
 
 
@@ -457,8 +458,6 @@ def split_raw_frontier(Xf, W, n_intervals = 4):
     dx = ()
     Ix.append(i)
   return Ix
-
-
 
 def smooth_savgol(V):
   window_len = int(2 * ((V.size / 20) // 2) + 1)
