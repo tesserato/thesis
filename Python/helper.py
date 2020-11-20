@@ -309,7 +309,7 @@ def _refine_Xpc(Xpc, avgpc, W):
   # maxT = np.max(np.abs(Xpc[1 :] - Xpc[: - 1])).astype(np.int)
   # slack = maxT // 2
 
-  div = 4
+  div = 2
   print(">>>", Xpc.size)
   pcx = interpolate.interp1d(np.linspace(0, 1, avgpc.size), avgpc, "cubic")
   Xpc_ref = np.zeros(Xpc.size, np.int)
@@ -327,14 +327,14 @@ def _refine_Xpc(Xpc, avgpc, W):
     l1 = l0 + length
     values[j] = np.sum(pc * W[l0:l1])
   Xpc_ref[0] = c0 + np.argmax(values)
-
+  g0 = c0 + length # + np.argmax(values)
   '''middle'''
   for i in range(1, Xpc.size - 2):
     x0 = Xpc[i]
     x1 = Xpc[i + 1]
     length = x1 - x0
     pc = pcx(np.linspace(0, 1, length, endpoint=False))
-    c0 = max(0, x0 - length // div)
+    c0 = max(g0, x0 - length // div)
     c1 = min(x1 + length // div, W.size)
     # print(f"c0={c0}, c1={c1}, x0={x0}, x1={x1}")
     
@@ -345,6 +345,7 @@ def _refine_Xpc(Xpc, avgpc, W):
         l1 = l0 + length
         values[j] = np.sum(pc * W[l0:l1])
       Xpc_ref[i] = c0 + np.argmax(values)
+      g0 = c0 + length # + np.argmax(values)
     # else:
     #   Xpc_ref[i] = x0
 
@@ -353,7 +354,7 @@ def _refine_Xpc(Xpc, avgpc, W):
   x1 = Xpc[-1]
   length = x1 - x0
   pc = pcx(np.linspace(0, 1, length, endpoint=False))
-  c0 = max(0, x0 - length // div)
+  c0 = max(g0, x0 - length // div)
   c1 = min(x1 + length // div, W.size)
   if (c1 - c0) - length > 0:
     values = np.zeros((c1 - c0) - length)
@@ -389,6 +390,47 @@ def refine_Xpc_iter(Xpc, W):
     avgL_new = mode(L_new)
     stdL_new = np.average(np.abs(L_new - avgL_new))
   return Xpc, avgpc, orig_pcs, norm_pcs
+
+def refine_Xpc_alt(Xpc, W):
+  L = Xpc[1:] - Xpc[:-1]
+  avgL = mode(L)
+  stdL = np.average(np.abs(L - avgL))
+  avgpc, orig_pcs, norm_pcs = average_pc_waveform(Xpc, W)
+  pcx = interpolate.interp1d(np.linspace(0, 1, avgpc.size), avgpc, "cubic")
+  mult = 4
+  padding = int(avgL - mult * stdL)
+  W = np.pad(W, [padding, padding])
+  Xpc_new = []
+  sizes = np.arange(int(avgL - mult * stdL), int(avgL + mult * stdL) + 1)
+  posit = np.arange(int(avgL + mult * stdL))
+  idxs = np.zeros((sizes.size, posit.size))
+  for size in sizes:
+    # print(f"size = {size}")
+    pc = pcx(np.linspace(0, 1, size, endpoint=False))
+    for x0 in posit:
+      idxs[size - int(avgL - mult * stdL), x0] = np.average(pc * W[x0 : x0 + size])
+      # print(f"x0={x0}, {idxs[size, x0]}")
+  opt_size, opt_x0 = np.unravel_index(idxs.argmax(), idxs.shape)
+  print(f"opt_size idx = {opt_size}, opt_x0 idx = {opt_x0} |||| opt_size = {opt_size + int(avgL - mult * stdL)} of max = {int(avgL + mult * stdL) + 1}")
+  np.savetxt("idxs.csv", idxs, delimiter=",")
+
+  Xpc_new.append(opt_x0)
+  Xpc_new.append(opt_x0 + opt_size)
+  
+  x0 = opt_x0 + opt_size
+  opt_size = None
+  while x0 + int(avgL + mult * stdL) < W.size:
+    max_conv = 0
+    for size in sizes:
+      pc = pcx(np.linspace(0, 1, size, endpoint=False))
+      conv = np.average(pc * W[x0 : x0 + size])
+      if conv > max_conv:
+        opt_size = size
+        max_conv = conv
+    x0 += opt_size
+    Xpc_new.append(x0)
+  Xpc_new = np.array(Xpc_new, np.int) - padding
+  return np.unique(Xpc_new[Xpc_new > 0])
 
 
 

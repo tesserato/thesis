@@ -42,9 +42,11 @@ Xpc_0 = np.unique((Xpc_0[Xpc_0 > 0]))
 
 avgpc_0, orig_pcs_0, norm_pcs_0 = hp.average_pc_waveform(Xpc_0, W)
 
-Xpc, avgpc, orig_pcs, norm_pcs = hp.refine_Xpc_iter(Xpc_0, W)
+Xpc = hp.refine_Xpc_alt(Xpc_0, W)
 
+avgpc, orig_pcs, norm_pcs = hp.average_pc_waveform(Xpc, W)
 
+# exit()
 
 
 
