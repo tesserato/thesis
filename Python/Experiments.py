@@ -10,7 +10,7 @@ from scipy import interpolate
 ''' Read wav file '''
 '''==============='''
 
-name = "soprano"
+name = "tom"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 amp = np.max(np.abs(W))
@@ -26,27 +26,41 @@ X = np.arange(n, dtype=np.float64)
 '''==========================='''
 ''' Find and refine Frontiers '''
 '''==========================='''
-
 Xpos_orig, Xneg_orig = se.get_frontiers(W)
 Xpos = hp.refine_frontier_iter(Xpos_orig, W).astype(np.int)
 Xneg = hp.refine_frontier_iter(Xneg_orig, W).astype(np.int)
 
-n_Xpc = min(Xpos.size, Xneg.size)
-Xpc = np.round((Xpos[:n_Xpc] + Xneg[:n_Xpc]) / 2).astype(np.int)
-Xpc = Xpc[Xpc > 0]
-# Xpc_smooth = np.round(savgol_filter(Xpc, 7, 3)).astype(np.int)
-# Xpc_smooth = np.round(Xpc).astype(np.int)
 
-# X_Xpc = np.linspace(0.0, 1.0, n_Xpc)#, dtype=np.float64)#
-X_Xpc = np.arange(n_Xpc, dtype=np.float64)
-b, a = poly.polyfit(X_Xpc, Xpc, 1)
-Xpc_linear = a * X_Xpc + b
+n_Xpc_0 = min(Xpos.size, Xneg.size)
+Xpc_0 = np.round((Xpos[:n_Xpc_0] + Xneg[:n_Xpc_0]) / 2).astype(np.int)
+Xpc_0 = np.unique((Xpc_0[Xpc_0 > 0]))
 
+
+'''============='''
+''' Refine Xpc: '''
+'''============='''
+
+avgpc_0, orig_pcs_0, norm_pcs_0 = hp.average_pc_waveform(Xpc_0, W)
+
+
+Xpc_before = Xpc_0
+Xpc = hp.refine_Xpc(Xpc_before, avgpc_0, W)
+# while not (Xpc_before == Xpc).all():
+for _ in range(10):
+  print("loop", "(Xpc_before == Xpc).all()")
+  Xpc_before = Xpc
+  avgpc, orig_pcs, norm_pcs = hp.average_pc_waveform(Xpc_before, W)
+  Xpc = hp.refine_Xpc(Xpc_before, avgpc, W)
 
 
 '''==========================='''
 ''' Find Xpc deviation '''
 '''==========================='''
+n_Xpc = Xpc.size
+X_Xpc = np.arange(n_Xpc, dtype=np.float64)
+b, a = poly.polyfit(X_Xpc, Xpc, 1)
+Xpc_linear = a * X_Xpc + b
+
 deviation_Xpc = Xpc - Xpc_linear
 average_deviation_Xpc = np.average(deviation_Xpc)
 deviation_Xpc = deviation_Xpc - average_deviation_Xpc
@@ -62,12 +76,11 @@ Xpc_est = np.round(Xpc_linear + average_deviation_Xpc + deviation_Xpc_est).astyp
 Xpc_est = Xpc_est[Xpc_est > 0]
 
 
-
 '''==========================='''
 ''' Find average pc waveform: '''
 '''==========================='''
 # avgpc, orig_pcs, norm_pcs = hp.average_pc_waveform(Xpc.astype(np.int), W)
-avgpc, orig_pcs, norm_pcs = hp.average_pc_waveform(Xpc, W)
+# avgpc, orig_pcs, norm_pcs = hp.average_pc_waveform(Xpc, W)
 
 
 I, avgpc_trans = hp.find_breakpoints(avgpc)
@@ -99,41 +112,20 @@ while added:
     avgpc_est = hp.coefs_to_array_arbitrary_intervals(A, Xavgpc, I, avgpc.size)
 ############################################
 
-'''============='''
-''' Refine Xpc: '''
-'''============='''
-maxT = np.max(np.abs(Xpc[1 :] - Xpc[: - 1]))
-pcx = interpolate.interp1d(np.linspace(0, 1, avgpc.size), avgpc, "cubic")
-Xpc_ref = np.zeros(Xpc.size)
-for i in range(2, Xpc.size - 1):
-  x0 = Xpc[i]
-  x1 = Xpc[i + 1]
-  pc = pcx(np.linspace(0, 1, x1 - x0, endpoint=False))
-  c0 = x0 - maxT // 2
-  c1 = x1 + maxT // 2
-  values = np.zeros((c1 - c0) - (x1 - x0))
-  for j in range((c1 - c0) - (x1 - x0)):
-    l0 = c0 + j
-    l1 = l0 + x1 - x0
-    values[j] = np.sum(pc * W[l0:l1])
-  Xpc_ref[i] = c0 + np.argmax(values)
-
-Xpc_ref = Xpc_ref[Xpc_ref > 0]
-avgpc_ref, orig_pcs_ref, norm_pcs_ref = hp.average_pc_waveform(Xpc_ref.astype(np.int), W)
 
 '''========================================'''
 ''' Reconstruct Basic Wave and derivative: '''
 '''========================================'''
-avgpc = avgpc / np.max(np.abs(avgpc))
+# avgpc = avgpc / np.max(np.abs(avgpc))
 d_avgpc_est = hp.coefs_to_array_arbitrary_intervals_dYdX(A, Xavgpc, I, avgpc.size)
 
 pcx = interpolate.interp1d(np.linspace(0, 1, avgpc_est.size), avgpc_est, "cubic")
 d_pcx = interpolate.interp1d(np.linspace(0, 1, d_avgpc_est.size), d_avgpc_est, "cubic")
 Wp = np.zeros(n)
 d_Wp = np.zeros(n)
-for i in range(Xpc_est.size - 1):
-  x0 = Xpc_est[i]
-  x1 = Xpc_est[i + 1]
+for i in range(Xpc.size - 1):
+  x0 = Xpc[i]
+  x1 = Xpc[i + 1]
   # Wp[x0 : x1] = pcx(np.linspace(0, 1, x1 - x0 + 1))[0:-1]
   # d_Wp[x0 : x1] = d_pcx(np.linspace(0, 1, x1 - x0 + 1))[0:-1]
   Wp[x0 : x1] = pcx(np.linspace(0, 1, x1 - x0, endpoint=False))
@@ -151,6 +143,7 @@ Ae = hp.constrained_least_squares_arbitrary_intervals_X_to_Y(Wp, d_Wp, W, Ie, 2,
 E = hp.coefs_to_array_arbitrary_intervals(Ae, X, Ie, n)
 
 se.save_wav( E * Wp, f"{name}_est.wav", fps=fps)
+se.save_wav( W - E * Wp, f"{name}_res.wav", fps=fps)
 print("############# HERE #############")
 
 '''====================================================================================================================='''
@@ -332,7 +325,7 @@ if False:
 '''==========================='''
 ''' PLOT Average pcs waveform '''
 '''==========================='''
-if True:
+if False:
   fig = go.Figure()
   fig.layout.template ="plotly_white"
   fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
@@ -389,10 +382,10 @@ if True:
     )
   )
 
-  X_local, Y_local = to_plot(norm_pcs_ref)
+  X_local, Y_local = to_plot(norm_pcs_0)
   fig.add_trace(
     go.Scattergl(
-      name="Normalized Pseudo Cycles_ref", # <|<|<|<|<|<|<|<|<|<|<|<|
+      name="Normalized Pseudo Cycles 0", # <|<|<|<|<|<|<|<|<|<|<|<|
       x=X_local,
       y=Y_local,
       # fill="toself",
@@ -424,9 +417,27 @@ if True:
 
   fig.add_trace(
     go.Scattergl(
-      name="Average Waveform_ref", # <|<|<|<|<|<|<|<|<|<|<|<|
-      x=np.linspace(0, 1, avgpc_ref.size),
-      y=avgpc_ref / np.max(np.abs(avgpc_ref)),
+      name="Average Waveform 2", # <|<|<|<|<|<|<|<|<|<|<|<|
+      x=np.linspace(0, 1, avgpc.size) + 1,
+      y=avgpc,
+      # fill="toself",
+      mode="lines",
+      line=dict(
+          width=2,
+          color="red",
+          dash="dot"
+          # showscale=False
+      ),
+      visible = "legendonly"
+    )
+  )
+
+
+  fig.add_trace(
+    go.Scattergl(
+      name="Average Waveform 0", # <|<|<|<|<|<|<|<|<|<|<|<|
+      x=np.linspace(0, 1, avgpc_0.size),
+      y=avgpc_0,
       # fill="toself",
       mode="lines",
       line=dict(
@@ -435,6 +446,23 @@ if True:
           # showscale=False
       ),
       # visible = "legendonly"
+    )
+  )
+
+  fig.add_trace(
+    go.Scattergl(
+      name="Average Waveform 0 2", # <|<|<|<|<|<|<|<|<|<|<|<|
+      x=np.linspace(0, 1, avgpc_0.size) + 1,
+      y=avgpc_0 / np.max(np.abs(avgpc_0)),
+      # fill="toself",
+      mode="lines",
+      line=dict(
+          width=2,
+          color="green",
+          dash="dot"
+          # showscale=False
+      ),
+      visible = "legendonly"
     )
   )
 
@@ -456,26 +484,10 @@ if True:
           color="gray",
           # showscale=False
       ),
-      # visible = "legendonly"
-    )
-  )
-
-  fig.add_trace(
-    go.Scattergl(
-      name="Average Waveform 2", # <|<|<|<|<|<|<|<|<|<|<|<|
-      x=np.arange(avgpc.size) + avgpc.size - 1,
-      y=avgpc,
-      # fill="toself",
-      mode="lines",
-      line=dict(
-          width=2,
-          color="red",
-          dash="dot"
-          # showscale=False
-      ),
       visible = "legendonly"
     )
   )
+
 
   fig.add_trace(
     go.Scattergl(
@@ -490,7 +502,7 @@ if True:
           # dash="dot"
           # showscale=False
       ),
-      # visible = "legendonly"
+      visible = "legendonly"
     )
   )
 
@@ -568,7 +580,7 @@ if True:
 '''=================================='''
 ''' PLOT Xpos, Xneg, Xpc and Xpc_est '''
 '''=================================='''
-if False:
+if True:
   fig = go.Figure()
   fig.layout.template ="plotly_white"
   # fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
@@ -588,6 +600,40 @@ if False:
     family="Computer Modern",
     color="black",
     size=12
+    )
+  )
+
+  fig.add_trace(
+    go.Scattergl(
+      name="Maxima_orig", # <|<|<|<|<|<|<|<|<|<|<|<|
+      # x=Xpos,
+      y=Xpos_orig,
+      # fill="toself",
+      mode="lines",
+      line=dict(
+          width=1,
+          color="black",
+          dash="dot"
+          # showscale=False
+      ),
+      visible = "legendonly"
+    )
+  )
+
+  fig.add_trace(
+    go.Scattergl(
+      name="Minima_orig", # <|<|<|<|<|<|<|<|<|<|<|<|
+      # x=Xpos,
+      y=Xneg_orig,
+      # fill="toself",
+      mode="lines",
+      line=dict(
+          width=1,
+          color="gray",
+          dash="dot"
+          # showscale=False
+      ),
+      visible = "legendonly"
     )
   )
 
@@ -625,11 +671,11 @@ if False:
 
   fig.add_trace(
     go.Scattergl(
-      name="Xpc", # <|<|<|<|<|<|<|<|<|<|<|<|
+      name="Xpc_0", # <|<|<|<|<|<|<|<|<|<|<|<|
       # x=Xpos,
-      y=Xpc,
+      y=Xpc_0,
       # fill="toself",
-      mode="lines",
+      mode="lines+markers",
       line=dict(
           width=2,
           color="red",
@@ -643,9 +689,9 @@ if False:
     go.Scattergl(
       name="Xpc refined", # <|<|<|<|<|<|<|<|<|<|<|<|
       # x=Xpos,
-      y=Xpc_ref,
+      y=Xpc,
       # fill="toself",
-      mode="lines",
+      mode="lines+markers",
       line=dict(
           width=1,
           color="green",

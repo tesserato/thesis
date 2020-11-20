@@ -156,7 +156,7 @@ def coefs_to_array_arbitrary_intervals_dYdX(A, X, I, n):
 
 def average_pc_waveform(Xp, W):
   # amp = np.max(np.abs(W))
-  max_T = np.max(np.abs(Xp[1:] - Xp[:-1]))
+  max_T = int(np.max(np.abs(Xp[1:] - Xp[:-1])))
   Xlocal = np.linspace(0, 1, max_T)
 
   orig_pcs = []
@@ -305,6 +305,67 @@ def constrained_least_squares_arbitrary_intervals_X_to_Y(X, dX, Y, I:list, k=2, 
   return np.reshape(A, (len(I) - 1, -1))
 
 
+def refine_Xpc(Xpc, avgpc, W):
+  # maxT = np.max(np.abs(Xpc[1 :] - Xpc[: - 1])).astype(np.int)
+  # slack = maxT // 2
+
+  div = 3
+  print(">>>", Xpc.size)
+  pcx = interpolate.interp1d(np.linspace(0, 1, avgpc.size), avgpc, "cubic")
+  Xpc_ref = np.zeros(Xpc.size, np.int)
+
+  '''first'''
+  x0 = Xpc[0]
+  x1 = Xpc[1]
+  length = x1 - x0
+  pc = pcx(np.linspace(0, 1, length, endpoint=False))
+  c0 = 0
+  c1 = min(x1 + length // div, W.size)
+  values = np.zeros((c1 - c0) - length)
+  for j in range(values.size):
+    l0 = c0 + j
+    l1 = l0 + length
+    values[j] = np.sum(pc * W[l0:l1])
+  Xpc_ref[0] = c0 + np.argmax(values)
+
+  '''middle'''
+  for i in range(1, Xpc.size - 2):
+    x0 = Xpc[i]
+    x1 = Xpc[i + 1]
+    length = x1 - x0
+    pc = pcx(np.linspace(0, 1, length, endpoint=False))
+    c0 = max(0, x0 - length // div)
+    c1 = min(x1 + length // div, W.size)
+    # print(f"c0={c0}, c1={c1}, x0={x0}, x1={x1}")
+    
+    if (c1 - c0) - length > 0:
+      values = np.zeros((c1 - c0) - length)
+      for j in range(values.size):
+        l0 = c0 + j
+        l1 = l0 + length
+        values[j] = np.sum(pc * W[l0:l1])
+      Xpc_ref[i] = c0 + np.argmax(values)
+    else:
+      Xpc_ref[i] = x0
+
+  '''last'''
+  x0 = Xpc[-2]
+  x1 = Xpc[-1]
+  length = x1 - x0
+  pc = pcx(np.linspace(0, 1, length, endpoint=False))
+  c0 = max(0, x0 - length // div)
+  c1 = min(x1 + length // div, W.size)
+  if (c1 - c0) - length > 0:
+    values = np.zeros((c1 - c0) - length)
+    for j in range(values.size):
+      l0 = c0 + j
+      l1 = l0 + length
+      values[j] = np.sum(pc * W[l0:l1])
+    Xpc_ref[-1] = c0 + np.argmax(values)
+  else:
+    Xpc_ref[-1] = x0
+
+  return np.unique(Xpc_ref[Xpc_ref> 0])
 
 
 
