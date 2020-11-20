@@ -305,11 +305,11 @@ def constrained_least_squares_arbitrary_intervals_X_to_Y(X, dX, Y, I:list, k=2, 
   return np.reshape(A, (len(I) - 1, -1))
 
 
-def refine_Xpc(Xpc, avgpc, W):
+def _refine_Xpc(Xpc, avgpc, W):
   # maxT = np.max(np.abs(Xpc[1 :] - Xpc[: - 1])).astype(np.int)
   # slack = maxT // 2
 
-  div = 3
+  div = 4
   print(">>>", Xpc.size)
   pcx = interpolate.interp1d(np.linspace(0, 1, avgpc.size), avgpc, "cubic")
   Xpc_ref = np.zeros(Xpc.size, np.int)
@@ -345,8 +345,8 @@ def refine_Xpc(Xpc, avgpc, W):
         l1 = l0 + length
         values[j] = np.sum(pc * W[l0:l1])
       Xpc_ref[i] = c0 + np.argmax(values)
-    else:
-      Xpc_ref[i] = x0
+    # else:
+    #   Xpc_ref[i] = x0
 
   '''last'''
   x0 = Xpc[-2]
@@ -362,10 +362,33 @@ def refine_Xpc(Xpc, avgpc, W):
       l1 = l0 + length
       values[j] = np.sum(pc * W[l0:l1])
     Xpc_ref[-1] = c0 + np.argmax(values)
-  else:
-    Xpc_ref[-1] = x0
+  # else:
+  #   Xpc_ref[-1] = x0
 
   return np.unique(Xpc_ref[Xpc_ref> 0])
+
+def refine_Xpc_iter(Xpc, W):
+  L = Xpc[1:] - Xpc[:-1]
+  avgL = mode(L)
+  stdL = np.average(np.abs(L - avgL))
+  avgpc, orig_pcs, norm_pcs = average_pc_waveform(Xpc, W)
+  Xpc_new = _refine_Xpc(Xpc, avgpc, W)
+
+  L_new = Xpc_new[1:] - Xpc_new[:-1]
+  avgL_new = mode(L_new)
+  stdL_new = np.average(np.abs(L_new - avgL_new))
+
+  print(f"{stdL} > {stdL_new} = {stdL > stdL_new}")
+  while stdL_new < stdL:
+    print(f"{stdL} to {stdL_new}")
+    Xpc = np.copy(Xpc_new)
+    stdL = stdL_new
+    avgpc, orig_pcs, norm_pcs = average_pc_waveform(Xpc, W)
+    Xpc_new = _refine_Xpc(Xpc, avgpc, W)
+    L_new = Xpc_new[1:] - Xpc_new[:-1]
+    avgL_new = mode(L_new)
+    stdL_new = np.average(np.abs(L_new - avgL_new))
+  return Xpc, avgpc, orig_pcs, norm_pcs
 
 
 

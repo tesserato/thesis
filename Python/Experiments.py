@@ -3,14 +3,14 @@ import numpy as np
 import signal_envelope as se
 import helper as hp # <|<|<|
 import numpy.polynomial.polynomial as poly
-from scipy.signal import savgol_filter
+from statistics import mode
 from scipy import interpolate
 
 '''==============='''
 ''' Read wav file '''
 '''==============='''
 
-name = "tom"
+name = "piano33"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 amp = np.max(np.abs(W))
@@ -42,15 +42,10 @@ Xpc_0 = np.unique((Xpc_0[Xpc_0 > 0]))
 
 avgpc_0, orig_pcs_0, norm_pcs_0 = hp.average_pc_waveform(Xpc_0, W)
 
+Xpc, avgpc, orig_pcs, norm_pcs = hp.refine_Xpc_iter(Xpc_0, W)
 
-Xpc_before = Xpc_0
-Xpc = hp.refine_Xpc(Xpc_before, avgpc_0, W)
-# while not (Xpc_before == Xpc).all():
-for _ in range(10):
-  print("loop", "(Xpc_before == Xpc).all()")
-  Xpc_before = Xpc
-  avgpc, orig_pcs, norm_pcs = hp.average_pc_waveform(Xpc_before, W)
-  Xpc = hp.refine_Xpc(Xpc_before, avgpc, W)
+
+
 
 
 '''==========================='''
@@ -162,7 +157,7 @@ def to_plot(Matrix):
 '''==========================='''
 ''' PLOT Signal & frontiers '''
 '''==========================='''
-if False:
+if True:
   fig = go.Figure()
   fig.layout.template ="plotly_white"
   # fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
@@ -300,6 +295,28 @@ if False:
   XI = []
   YI = []
   # maxI = np.max(np.abs(avgpc))
+  for i in Xpc:
+    XI. append(i), XI. append(i), XI. append(None)
+    YI. append(-amp), YI. append(amp), YI. append(None)
+  fig.add_trace(
+    go.Scattergl(
+      name="pulses", # <|<|<|<|<|<|<|<|<|<|<|<|
+      x=XI,
+      y=YI,
+      # fill="toself",
+      mode="lines",
+      line=dict(
+          width=1,
+          color="gray",
+          # showscale=False
+      ),
+      visible = "legendonly"
+    )
+  )
+
+  XI = []
+  YI = []
+  # maxI = np.max(np.abs(avgpc))
   for i in Ie:
     XI. append(i), XI. append(i), XI. append(None)
     YI. append(-amp), YI. append(amp), YI. append(None)
@@ -315,7 +332,7 @@ if False:
           color="gray",
           # showscale=False
       ),
-      # visible = "legendonly"
+      visible = "legendonly"
     )
   )
 
@@ -325,7 +342,7 @@ if False:
 '''==========================='''
 ''' PLOT Average pcs waveform '''
 '''==========================='''
-if False:
+if True:
   fig = go.Figure()
   fig.layout.template ="plotly_white"
   fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
