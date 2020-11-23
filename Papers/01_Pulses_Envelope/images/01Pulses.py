@@ -1,7 +1,9 @@
 import sys
-sys.path.append("c:/Users/tesse/Desktop/Files/Dropbox/0_Thesis/Python")
-import numpy as np
+print(sys.version)
 import plotly.graph_objects as go
+sys.path.append("c:/Users/tesse/Desktop/Files/Dropbox/0_Thesis/Python/01_Envelope")
+import numpy as np
+
 from Helper import signal_to_pulses, get_pulses_area
 
 '''Generating Wave'''
@@ -27,25 +29,48 @@ W = W / np.max(np.abs(W))
 pulses = signal_to_pulses(W)
 pulses_X, pulses_Y = get_pulses_area(pulses)
 
+'''============================================================================'''
+'''                              PLOT LINES                                    '''
+'''============================================================================'''
+FONT = dict(
+    family="Latin Modern Roman",
+    color="black",
+    size=13.3333
+  )
 
 '''Plotting'''
 fig = go.Figure()
 fig.layout.template ="plotly_white" 
 fig.update_layout(
-  xaxis_title="$i$",
-  yaxis_title="Amplitude",
+  xaxis_title="<b><i>i</i></b>",
+  yaxis_title="<b>Normalized Amplitude</b>",
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
-  margin=dict(l=5, r=5, b=5, t=5),
-  font=dict(
-  family="Latin Modern",
-  color="black",
-  size=18
-  )
+  margin=dict(l=0, r=0, b=0, t=0),
+  font=FONT,
+  titlefont=FONT
 )
+fig.layout.xaxis.title.font=FONT
+fig.layout.yaxis.title.font=FONT
+
 fig.update_xaxes(showline=False, showgrid=False, zeroline=False)
-fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=2, zerolinecolor='gray')
+fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=2, zerolinecolor='black')
 
 '''Samples'''
+fig.add_trace(
+  go.Scatter(
+    name="Samples",
+    showlegend=False,
+    x=X,
+    y=W,
+    mode='markers',
+    fill="tozeroy",
+    fillcolor="gray",
+    marker=dict(
+        size=5,
+        color="black",
+    )
+  )
+)
 fig.add_trace(
   go.Scatter(
     name= "Samples Stem",
@@ -56,28 +81,36 @@ fig.add_trace(
     line=go.scatter.Line(color="black", width=1)
   )
 )
+
+''' Samples Legend'''
 fig.add_trace(
   go.Scatter(
     name="Samples",
-    x=X,
-    y=W,
-    mode='markers',
-    marker=dict(
-        size=5,
-        color="black",
+    x=[None],#pulses_X,
+    y=[None],#pulses_Y,
+    # fill="tozeroy",
+    mode="markers",
+      marker=dict(
+      size=5,
+      color="black",
     )
+    # visible = "legendonly"
   )
 )
 
-''' Pulses '''
+''' Pulses Legend'''
 fig.add_trace(
   go.Scatter(
-    name="Pulses",
-    x=pulses_X,
-    y=pulses_Y,
+    name="Half Pseudo Cycles",
+    x=[None],#pulses_X,
+    y=[None],#pulses_Y,
     fill="tozeroy",
     mode="none",
-    fillcolor="rgba(0,0,0,0.16)",
+    fillcolor="gray",
+    marker=dict(
+      size=5,
+      color="black",
+    )
     # visible = "legendonly"
   )
 )
@@ -92,7 +125,7 @@ for x in pulses_X[2:-3:4]:
 
 fig.add_trace(
   go.Scatter(
-    name="Pseudo-Cycles",
+    name="Divisions between Pseudo Cycles  ",
     x=cycles_X,
     y=cycles_Y,
     # marker_symbol="line-ns",
@@ -100,14 +133,14 @@ fig.add_trace(
     line=dict(
       # width=5,
       color="black",
-      dash="dash"
+      dash="dot"
     )
     # marker_line_width=2, 
     # marker_size=50,
   )
 )
 
-# fig.show()
-save_name = "./" + sys.argv[0].split('/')[-1].replace(".py", ".pdf")
-fig.write_image(save_name, width=800, height=400, scale=1, engine="kaleido")
+fig.show(config=dict({'scrollZoom': True}))
+save_name = "./images/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
+fig.write_image(save_name, width=650, height=300, engine="kaleido", format="svg")
 print("saved:", save_name)

@@ -42,21 +42,39 @@ Besides the most direct applications of this work to audio classification and sy
 
 
 \section{Introduction}
-Envelope detection is ubiquitous in both analogue and digital signal processing \parencite{2011CaetanoImproved}. Nevertheless, the literature in this area is very fragmented \parencite{2017LyonsDigital}. Besides, most envelope detection techniques are designed to account for very specific settings, like pure sinusoids with moderate noise content, a limitation that excludes most physical signals, as is the case of recorded sound, for example; that limitation arises in part due to the lack of a strict mathematical definition of a temporal envelope \parencite{2013Mengempirical}.
+Envelope detection, also known as demodulation, is ubiquitous in both analogue and digital signal processing \parencite{2011CaetanoImproved}. Nevertheless, the literature in this area is very fragmented \parencite{2017LyonsDigital}. Besides, most envelope detection techniques are designed to account for very specific settings, like pure sinusoids with moderate noise content, a limitation that excludes most physical signals, as is the case of recorded sound, for example; that limitation arises in part due to the lack of a strict mathematical definition of a temporal envelope \parencite{2013Mengempirical}.
 
-In many natural signals, however, the temporal amplitude envelope of a signal plays a prominent role in the characteristics exhibited: according to \textcite{2017QiRelative}, for example, the envelope is at least as important as the fine structure of a sound wave in the context of the intelligibility of mandarin tones. This is also the case for English \parencite{1995ShannonSpeech}, where even envelopes modulating mostly noise were still capable of conveying meaning. 
+In many contexts, however, the temporal amplitude envelope of a signal plays a prominent role: according to \textcite{2017QiRelative}, for example, the envelope is at least as important as the fine structure of a sound wave in the context of the intelligibility of Mandarin tones. This is also the case for the English language \parencite{1995ShannonSpeech}, where even envelopes modulating mostly noise were still capable of conveying meaning. 
 
-The envelope helps to impart emotion and identity to the human voice \parencite{2018ZhuContributions}, and envelope preserving characteristics in concert halls are associated with their pleasantness \parencite{2011LokkiEngaging}.
+The envelope also helps to impart emotion and identity to the human voice \parencite{2018ZhuContributions}, and envelope preserving characteristics in concert halls are associated with their pleasantness \parencite{2011LokkiEngaging}.
 
 When dealing with broadband signals, approaches tailored to specific applications are prevalent, such as the one presented by \textcite{2014YangFast} for the distributed monitoring of fibre optic or the one formulated by \textcite{2018AssefModeling} in the context of medical ultrasound imaging.
 
-Addressing the different units in the horizontal and vertical axes, one can transform the DSP problem of envelope detection into the geometric problem of defining the shape of a set of points in $ \mathbb{R}^2 $. For that purpose, \textcite{1983Edelsbrunnershape} introduced the concept of alpha-shapes, a mathematically well-defined extension to the convex hull of a finite set of points, closely related to the Delaunay triangulation and Voronoi diagrams of those points.
+The problem of envelope detection, normally associated with the field of digital signal processing, can be made equivalent to the geometric problem of defining the (outer) shape of a set of points in $ \mathbb{R}^2 $, provided a method for addressing the difference of units in the horizontal, time related and vertical, amplitude related, axes of a digital signal is available, rendering the original DSP problem readily approachable via geometric techniques.
 
-This approach is used in areas such as the detection of features in images \parencite{2016VarytimidisAlpha}, reconstruction of surfaces from a cloud of points \parencite{2015WuAutomated} and Spectroscopy \parencite{2019XuModeling}, with the last work, which involves the estimation and removal of the Blaze function (a kind of envelope) of an echelle spectrograph, being particularly illustrative of the potential of cross-fertilization.
+One direct way of defining the shape of a set of points in $ \mathbb{R}^2 $ is using the convex hull: as defined in \textcite{2008BergComputational}, the convex hull of a set of points $ S $ in two dimensional space is the smallest convex subset of the plane that contains all the points in $ S $. Convex hulls are unique, in the sense that a set of points define one and only one convex hull.
 
-Steps in the direction of translating geometric algorithms to the context of envelope detection were also made by \textcite{2015YangSkeleton} via an algorithm based on the construction of a skeleton underlying the wave, and also via the direct translation of computer vision methods to the task \parencite{2015YangRepresenting}.
+Generalizing that definition, \textcite{1983Edelsbrunnershape} introduced the concept of alpha-shapes, that can be seen as a Concave Hull; a mathematically well-defined generalization of the Convex Hull of a finite set of points, closely related to the Delaunay triangulation and Voronoi diagrams of those points. 
 
-Following this path, we present a general approach to envelope detection, exploiting the intrinsic characteristics of a generic, spectrally complex wave, in order to avoid the need for manual intervention or parameter tuning.
+The intuition behind the alpha shapes algorithm as that only points that can be touched by a circle of radius $ \alpha $ coming from an infinite distance towards the set of points of interest are part of the frontier, that is, of the Concave Hull of this set.
+
+Once an $ \alpha $ parameter is defined alpha shapes conserve the uniqueness property, besides reducing to the Convex Hull when $ \alpha = \infty $. Consider, for example, the artificially generate discrete wave in figure \ref{fig:Hulls}
+below, where the links between consecutive samples were deemphasised to highlight the "set of points" nature of a signal: The Convex Hull and a Concave Hull, in the form of an alpha shape with a particular value of $ \alpha $ are illustrated.
+
+\begin{figure}[ht!]
+  \centering
+    \includegraphics{images/00ConvexHull.pdf}
+  \caption{A discrete signal interpreted as a set of points in the Cartesian plane, and the Convex Hull and Concave Hull at $ \alpha=300 $ defined by it}
+  \label{fig:Hulls}
+\end{figure}
+
+The alpha shapes approach is used in areas such as the detection of features in images \parencite{2016VarytimidisAlpha}, reconstruction of surfaces from a cloud of points \parencite{2015WuAutomated} and Spectroscopy \parencite{2019XuModeling}, with the last work, which involves the estimation and removal of the Blaze function (a kind of envelope) of an echelle spectrograph, being particularly illustrative of the potential of synergy between geometric and DSP approaches.
+
+Other steps in the direction of translating geometric algorithms to the context of envelope detection were also made by \textcite{2015YangSkeleton} via an algorithm based on the construction of a skeleton underlying the digital wave of interest, and also via the direct translation of computer vision methods to the task of envelope detection \parencite{2015YangRepresenting}.
+
+Following this path, we present a general approach to envelope detection, exploiting the intrinsic characteristics of a generic, spectrally complex wave, in order to avoid as much as possible the need for manual intervention or parameter tuning, such as the choice of $ \alpha $.
+
+% <|<|<|<|<| TODO 
 
 While the robustness of the proposed approach allows it to be used as a plug-in replacement for many methods encountered in the literature, we feel that it would be particularly useful for sound synthesis.
 
@@ -69,15 +87,79 @@ We then proceed to illustrate the results of the application of the algorithm in
 We then discuss the implications of the work, emphasizing the focus on the construction of new interpretations of the relationship between time domain and frequency domain sound descriptions, and our vision of the impact of this methodology in the field of sound synthesis, providing directions for future developments.
 
 
+\section{Characterization of the temporal envelope}
+
+The interest in the theory of envelope detection arose in the analogue domain, with the widespread adoption of radio communications, where the problem is typically restricted to simple sinusoids, often with well defined frequencies \parencite{2011TurnerDemodulation}.
+
+In this context, the most mathematically sound definition of an envelope involves the representation of its underlying wave as an analytic signal, introduced by Gabor in 1946 \parencite{2007HahnHistory}. In his work, \textcite{1946GaborTheory} applies the then relatively new mathematical machinery of the quantum mechanics to unify the time and frequency domain representations of a wave, showing how the Hilbert transform could be applied to a real signal in order to obtain an equivalent complex signal, later known as the analytic signal.
+
+This analytic signal has the form $ a(t) = s(t) + \mathbb{H}(s(t)) \ \text{i} $ \parencite{2016HePraat} where $ s(t) $ is the original real signal. $ \mathbb{H}(s(t)) $, the Hilbert transform of the original signal, becomes the imaginary part of the analytic signal; the envelope of a signal thus represented can be straightforwardly obtained by the computation of its complex modulus.
+
+Despite its widespread use, and effectiveness in the context of narrowband signals, envelope detection techniques based on the Hilbert transform don't behave well for broadband signals \parencite{2012DauSpeech}, being even physically
+paradoxical in some cases \parencite{1996Loughlinamplitude}.
+
+Figure \ref{fig:AnalyticSignal} exemplifies that, showing the envelope obtained via the analytic signal, for a pure sinusoid with a local frequency of 20 cycles, modulated by a polynomial of the third degree, illustrating the difference in the shape of the envelope in the presence and absence of Gaussian white noise with standard deviation of $ 1/10 $ of the wave's maximum amplitude.
+
+It is readily noticeable from figure \ref{fig:AnalyticSignal} that, as soon as noise is introduced in the original signal, it is reflected in the envelope.
+
+\begin{figure}[ht!]
+  \centering
+    \includegraphics[width=0.8\linewidth]{02AnalyticSignal.pdf}
+  \caption{Envelope of a pure sinusoid modulated by a polynomial of degree 3, as obtained by the Hilbert Transform approach. In the first half, the sinusoid is free of noise, while in the second half white gaussian noise with a standard deviation of $ 1/10 $ of the maximum amplitude of the wave was added to the base signal.}
+  \label{fig:AnalyticSignal}
+\end{figure}
+
+In general, the problem of envelope detection, or demodulation, can be interpreted as the task of, given a continuous wave $ W(t) $, decomposing it in two components $ E(t) $ and $ C(t) $, such that $ W(t) = E(t) C(t) $ \parencite{2011TurnerDemodulation}. 
+$ E(t) $ represents the slow varying part of the wave, also known as the (temporal) envelope, modulator component, or amplitude modulation (AM) of $ W $, while $ C(t) $ models its fast varying part, called throughout the literature as its (temporal) fine structure, carrier component, or frequency modulation (FM).
+
+In the case of broadband signals, the problem of envelope detection of an arbitrary wave is ill posed, in the sense that an infinite number of pairs of $ E(t) $ and $ C(t) $ can result in the same specific $ W(t) $ \parencite{2011TurnerDemodulation, 2013Mengempirical, 1996Loughlinamplitude}.
+
+We address this problem by assuming $ C(t) $ normalized between $ \{-1, 1\}$. This assumption doesn't cause any loss of generality since, given an arbitrary $ C(t) $, we can obtain its normalization by dividing the function by its absolute global maximum, that is $ \hat{C}(t) = C(t) / \max(|C(t)|) $ provided that $ \max(|C(t)|) != 0 $.
+
+Also, in this work we are concerned with the discrete version of this problem: given a finite digital wave represented by the vector $ W \in \mathbb{R}^n $, obtaining the temporal envelope of $ W $. The preceding definitions can be translated to a discrete setting assuming that the discrete quantities arise from observing the continuous ones at regular time intervals. In that case, the equality $ i = t \ \mathit{fps} $ can be used, where $ i $ is the index of each observation, $ t $ stands for the time in seconds, and $ \mathit{fps} $ is the frame rate, or the number of observations made in the period of a second. 
+
+% <|<|<|<|<| TODO We can thus define:
+
+
+
+
+
+
 \section{Methodology}
+% Overview of methods
 
-In this work it is assumed, without loss of generality, that one is interested in retrieving the mathematically ill-defined \parencite{2013Mengempirical} temporal envelope of an arbitrary physical sound wave, of which only a digital representation is available. 
+ Since $ W $ is a wave, we expect it to be quasi-periodic, as well as uniformly sampled. 
 
-Naturally, due to the necessary truncations both in time and amplitude, as well as measurement errors introduced by the instruments used to record the signal, it is not possible to exactly recover the original, continuous wave, from its digital counterpart.
+Instrumental to the method here presented is the definition of a pulse $ P \subset W $: each time $ W $ crosses the horizontal axis, the beginning of a pulse is defined, with the next crossing defining its end. 
 
-The best representation one can hope to get of the original wave is, then, the recording itself. It is sensible, thus, to characterize the envelope of the wave in terms of a subset of the exact samples that comprise its digital representation.
+This definition is in line with the one presented in \textcite{national1996telecommunications}, where a pulse is defined as
+a rapid change in the amplitude of a signal, followed by a fast return to the baseline value.
 
-To that end, this work will emphasize the concept of frontier, as the points of the digital wave that mark the wave's upper and lower boundaries; from those points an envelope, conforming to the vague definitions of uniqueness and smoothness, can be trivially constructed, as will be shown.
+With a pulse thus defined, we can interpret a wave as composed of a succession of alternating positive and negative pulses.
+
+
+As such, some structures can be defined, as illustrated in figure \ref{fig:Pulses}.
+
+$ W = \{w_0, w_1, \cdots, w_{n-1}\} $
+
+% <|<|<|<|<|
+
+Half of a pseudo cycle, then, can be defined as the maximum set of adjacent samples with the same sign. Two adjacent half pseudo cycles form a full pseudo cycle, with the whole wave being formed by groups of adjacent pseudo cycles. The wave in figure \ref{fig:Pulses} if formed by 100 samples, that can be divided in 7 half pseudo cycles, of which two - the leftmost and the rightmost - are malformed, since they are not completely observable in the data provided by $ W $. 
+
+With the remaining half pseudo cycles, two full pseudo cycles can be formed. Given the quasi-periodicity of the digital wave $ W $, the order in which two adjacent half pseudo cycles are joined to form a full pseudo cycle can be chosen arbitrarily, provided consistency is maintained; in figure \ref{fig:Pulses}, a positive half pseudo cycle is followed by the adjacent negative one, forming a pseudo cycle.
+
+\begin{figure}[ht!]
+  \centering
+    \includegraphics{images/01Pulses.pdf}
+  \caption{Example of a discrete wave. The black circles are the individual samples of the signal, representing the intensity of the wave at regular time intervals. The grey areas are the half pseudo cycles. The dashed lines mark the divisions between adjacent pseudo cycles.}
+  \label{fig:Pulses}
+\end{figure}
+
+From figure \ref{fig:Pulses} and keeping in mind the fact that the variation of the temporal envelope is much slower than the temporal fine structure variation, it is reasonable to suppose that the envelope would ideally pass through the point of maximum amplitude of each half pseudo cycle, following the least sinuous trajectory possible, while still tangencing each half pseudo cycle.
+
+
+
+% <|<|<|<|<|
 
 We start by defining a pulse as a series of consecutive samples of a discrete wave that have the same sign. More formally, let $ W[i] \in \mathbb{R} \ \forall \ i \in \mathbb{N}_0; \ i < n \in \mathbb{N}_0 $ be a real, discrete and finite signal indexed, without loss of generality, over an adjacent subset of the natural numbers starting at zero. This definition relates closely to the concept of an array or vector in most programming languages, and is used in the interest of simplicity.
 
@@ -89,27 +171,21 @@ Naturally, each pulse can be classified as positive ($ P[j]^+ $) or negative ($ 
 
 For an arbitrary continuous function, then, a pulse would correspond to the regions between its roots; for a sinusoid, a pulse would be equal to half of its cycle. In analogy, two consecutive pulses, naturally with opposing signs, have the potential to delimitate a pseudo-cycle, as illustrated in figure \ref{fig:Pulses}. For that to be true, however, the pulses need to make part of the frontiers of the signal, as yet to be defined.
 
-  \begin{figure}[ht!]
-    \centering
-      \includegraphics[width=0.8\linewidth]{01Pulses.pdf}
-    \caption{Example of a discrete wave. The black stems represent the individual samples of the signal. The grey areas encompass the simplified convex hulls of the pulses. The dashed lines mark the frontiers between pseudo-cycles.}
-    \label{fig:Pulses}
-  \end{figure}
 
-The most mathematically sound definition of an envelope involves the representation of its underlying wave as an analytic signal, introduced by Gabor in 1946 \parencite{2007HahnHistory}. In his work, \textcite{1946GaborTheory} applies the then relatively new mathematical machinery of the quantum mechanics to unify the time and frequency representations of a wave, showing how the Hilbert transform could be applied to a real signal in order to obtain an equivalent complex signal, later known as the analytic signal.
+ 
 
-This analytic signal has the form $ a(t) = s(t) + \mathbb{H}(s(t)) \ \text{i} $ \parencite{2016HePraat} where $ s(t) $ is the original real signal. $ \mathbb{H}(s(t)) $, the Hilbert transform of the original signal, becomes the imaginary part of the analytic signal; the envelope of a signal thus represented can be straightforwardly obtained by the computation of its complex modulus.
+Naturally, due to the necessary truncations both in time and amplitude, as well as measurement errors introduced by the instruments used to record the signal, it is not possible to exactly recover the original, continuous wave, from its digital counterpart.
 
-Figure \ref{fig:AnalyticSignal} shows the envelope obtained via the analytic signal, for a pure sinusoid with a local frequency of 20 cycles, modulated by a polynomial of the third degree, illustrating the difference in the shape of the envelope in the presence and absence of gaussian white noise with standard deviation of $ 1/10 $ of the wave's maximum amplitude.
+The best representation one can hope to get of the original wave is, then, the digital wave itself. It is sensible, thus, to characterize the envelope of the wave in terms of a subset of the exact samples that comprise its digital representation.
 
-\begin{figure}[ht!]
-  \centering
-    \includegraphics[width=0.8\linewidth]{02AnalyticSignal.pdf}
-  \caption{Envelope of a pure sinusoid modulated by a polynomial of degree 3, as obtained by the Hilbert Transform. In the first half, the sinusoid is free of noise, while in the second half white gaussian noise with a standard deviation of $ 1/10 $ of the maximum amplitude of the wave was added to the base signal.}
-  \label{fig:AnalyticSignal}
-\end{figure}
+To that end, this work will emphasize the concept of frontier, as the points of the digital wave that mark the wave's upper and lower boundaries; from those points an envelope, conforming to the vague definitions of uniqueness and smoothness, can be trivially constructed, as will be shown.
 
-It is readily noticeable from figure \ref{fig:AnalyticSignal} that, as soon as noise is introduced in the original signal, it is reflected in the envelope, breaking our assumption of smoothness. Other than that, this definition yields a unique, positive envelope.
+% 
+
+
+
+
+
 
 In practice, however, is not uncommon for a discrete wave, especially in the case of sound, to present somewhat different positive and negative contours; to account for this discrepancy, we will define a positive (upper) and a negative (lower) frontier of a discrete wave. They will be composed by the points $ (i, W[i]) $ that are, necessarily but not sufficiently, the points of respectively maximum and minimum amplitude of their pulses, i.e. $ (P[j]^\pm_x, P[j]^\pm_y) $.
 
