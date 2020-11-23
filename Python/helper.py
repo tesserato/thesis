@@ -395,7 +395,10 @@ def refine_Xpc_alt(Xpc, W):
   L = Xpc[1:] - Xpc[:-1]
   avgL = mode(L)
   stdL = np.average(np.abs(L - avgL))
+  
   avgpc, orig_pcs, norm_pcs = average_pc_waveform(Xpc, W)
+  avgpc = avgpc / np.max(np.abs(avgpc))
+  
   pcx = interpolate.interp1d(np.linspace(0, 1, avgpc.size), avgpc, "cubic")
   mult = 5
   padding = max(int(avgL - mult * stdL), int(mult * stdL))
@@ -408,7 +411,8 @@ def refine_Xpc_alt(Xpc, W):
     # print(f"size = {size}")
     pc = pcx(np.linspace(0, 1, size, endpoint=False))
     for x0 in posit:
-      idxs[size - int(avgL - mult * stdL), x0] = np.average(pc * W[x0 : x0 + size])
+      w = W[x0 : x0 + size] / np.max(np.abs(W[x0 : x0 + size]))
+      idxs[size - int(avgL - mult * stdL), x0] = np.average(pc * w)
       # print(f"x0={x0}, {idxs[size, x0]}")
   opt_size, opt_x0 = np.unravel_index(idxs.argmax(), idxs.shape)
   print(f"opt_size idx = {opt_size}, opt_x0 idx = {opt_x0} |||| opt_size = {opt_size + int(avgL - mult * stdL)} of max = {int(avgL + mult * stdL) + 1}")
@@ -423,7 +427,8 @@ def refine_Xpc_alt(Xpc, W):
     max_conv = 0
     for size in sizes:
       pc = pcx(np.linspace(0, 1, size, endpoint=False))
-      conv = np.average(pc * W[x0 : x0 + size])
+      w = W[x0 : x0 + size] / np.max(np.abs(W[x0 : x0 + size]))
+      conv = np.average(pc * w)
       if conv > max_conv:
         opt_size = size
         max_conv = conv
