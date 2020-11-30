@@ -178,31 +178,36 @@ std::vector<size_t> get_frontier(const std::vector<double>& W, const std::vector
 	double sumY{ 0.0 };
 	double sumY_vec{ W[X[n-1]] - W[X[0]] };
 	size_t sumX_vec{ X[n-1] - X[0] };
+
+	//std::cout << "HERE 01!\n";
 	for (size_t i = 0; i < n; i++) {
 		sumY += W[X[i]];
 	}
 	double scaling{ (sumX_vec / 2.0) / sumY };
-	double m0{ scaling * sumY_vec / sumX_vec };
+	//double m0{ scaling * sumY_vec / sumX_vec };0
 	double sumk{ 0.0 };
-	double mm{ sqrt(m0 * m0 + 1 )};
+	//double mm{ sqrt(m0 * m0 + 1 )};1
 	double x;
 	double y;
+
 	std::vector<double> Y(n);
 	Y[0] = W[X[0]] * scaling;
+	//std::cout << "HERE 02!\n";
 	for (size_t i = 1; i < n; i++) {
 		Y[i] = W[X[i]] * scaling;
 		x = X[i] - X[i - 1];
 		y = Y[i] - Y[i - 1];
-		sumk += -(m0 * x - y) / (x * mm * sqrt(x * x + y * y));
+		sumk += y / (x * sqrt(x * x + y * y));
 	}
+	//std::cout << "HERE 03!\n";
 	double r{ 1.0 / (sumk / (n - 1)) };
 	double rr{ r * r };
-	//std::cout << "m0: " << m0 << " k: " << sumk << " n: " << n << " r: " << r << " Y0: " << W[X[0]] * scaling << "\n";
 	size_t idx1{ 0 };
 	size_t idx2{ 1 };
 	std::vector<size_t> frontierX = { X[0] };
 	point pc;
 	bool empty;
+	//std::cout << "HERE 04!\n";
 	while (idx2 < n) {
 		pc = get_circle(X[idx1], Y[idx1], X[idx2], Y[idx2], r);
 		empty = true;
