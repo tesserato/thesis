@@ -9,9 +9,9 @@ n = 44100
 X = np.arange(n)
 Y = np.zeros(n)
 
-f = 5
+f = 100
 p = np.pi
 Y = np.cos(p + 2 * np.pi * f * X / n)
 
 
-save_wav(5000 * Y, f"Samples/local_f={np.round(f, 2)}-p={np.round(p, 2)}-n={n}.wav")
+save_wav(8000 * Y)
