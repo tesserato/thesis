@@ -35,27 +35,35 @@ analytic_signal = hilbert(W)
 hilbert_envelope = np.abs(analytic_signal)
 
 
+'''============================================================================'''
+'''                              PLOT LINES                                    '''
+'''============================================================================'''
+FONT = dict(
+    family="Latin Modern Roman",
+    color="black",
+    size=13.3333
+  )
+
 '''Plotting'''
 fig = go.Figure()
 fig.layout.template ="plotly_white" 
 fig.update_layout(
-  xaxis_title="$i$",
-  yaxis_title="Amplitude",
+  xaxis_title="<b><i>i</i></b>",
+  yaxis_title="<b>Amplitude</b>",
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
-  margin=dict(l=5, r=5, b=5, t=5),
-  font=dict(
-  family="Latin Modern Roman",
-  color="black",
-  size=18
-  )
+  margin=dict(l=0, r=0, b=0, t=0),
+  font=FONT,
+  titlefont=FONT
 )
+fig.layout.xaxis.title.font=FONT
+fig.layout.yaxis.title.font=FONT
 fig.update_xaxes(showline=False, showgrid=False, zeroline=False)
 fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=2, zerolinecolor="silver")
 
 '''Plotting Signal'''
 fig.add_trace(
   go.Scatter(
-    name="Signal",
+    name="Signal      ",
     # x=X,
     y=W,
     mode="lines",
@@ -68,7 +76,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Hilbert Envelope",
+    name="Hilbert Envelope      ",
     # x=X,
     y=hilbert_envelope,
     mode="lines",
@@ -81,7 +89,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="$ i = n/2 $",
+    name="<i>i = n/2 </i>      ",
     x=[n//2, n//2],
     y=[-1, 1],
     mode="lines",
@@ -93,7 +101,7 @@ fig.add_trace(
   )
 )
 
-# fig.show()
-save_name = "./" + sys.argv[0].split('/')[-1].replace(".py", ".pdf")
-fig.write_image(save_name, width=800, height=400, scale=1, engine="kaleido")
+# fig.show(config=dict({'scrollZoom': True}))
+save_name = "./images/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
+fig.write_image(save_name, width=650, height=250, engine="kaleido", format="svg")
 print("saved:", save_name)

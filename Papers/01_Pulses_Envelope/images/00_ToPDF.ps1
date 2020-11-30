@@ -1,4 +1,4 @@
-$items = Get-ChildItem | Where-Object {$_.Extension -in ".svg"} #-Encoding UTF8
+$items = Get-ChildItem -Recurse | Where-Object {$_.Extension -in ".svg"} #-Encoding UTF8
 
 # $root = Get-Location
 

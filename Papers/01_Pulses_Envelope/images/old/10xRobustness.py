@@ -177,8 +177,7 @@ fig.add_trace(
     mode="lines",
     line=dict(color="silver"),
     showlegend=True,
-  ),
-  row=1, col=2
+  ), row=1, col=2
 )
 
 fig.add_trace(

@@ -72,7 +72,7 @@ fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=1, zerolinecolor=
 '''Samples'''
 fig.add_trace(
   go.Scatter(
-    name="Samples",
+    name="Samples      ",
     # showlegend=False,
     x=X,
     y=W,
@@ -85,7 +85,7 @@ fig.add_trace(
 I = [v for v in hull.vertices] + [hull.vertices[0]]
 fig.add_trace(
   go.Scatter(
-    name="Convex Hull",
+    name="Convex Hull      ",
     # showlegend=False,
     x=X[I],
     y=W[I],
@@ -100,7 +100,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name=f"Concave Hull (Alpha-Shape, \u03B1={alpha})    ",
+    name=f"Concave Hull (Alpha-Shape, \u03B1={alpha})      ",
     # showlegend=False,
     x=XX,
     y=YY,
@@ -112,7 +112,7 @@ fig.add_trace(
   )
 )
 
-fig.show(config=dict({'scrollZoom': True}))
+# fig.show(config=dict({'scrollZoom': True}))
 save_name = "./images/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
 fig.write_image(save_name, width=650, height=300, engine="kaleido", format="svg")
 print("saved:", save_name)
