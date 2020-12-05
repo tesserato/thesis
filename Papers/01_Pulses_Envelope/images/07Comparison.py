@@ -12,14 +12,22 @@ import sys
 from plotly.subplots import make_subplots
 from timeit import default_timer as timer
 import signal_envelope as se
+from scipy.signal import butter, filtfilt
 
+def butter_lowpass_filter(data, fps, cutoff = 10, order = 2):
+  nyq = 0.5 * fps
+  normal_cutoff = cutoff / nyq
+  # Get the filter coefficients 
+  b, a = butter(order, normal_cutoff, btype='low', analog=False)
+  y = filtfilt(b, a, data)
+  return y
 
 
 
 '''==============='''
 ''' Read wav file '''
 '''==============='''
-name = "bend"
+name = "soprano"
 W, fps = se.read_wav(f"C:/Users/tesse/Desktop/Files/Dropbox/0_Science/reps/envelope/test_samples/{name}.wav")
 W = W - np.average(W)
 amplitude = np.max(np.abs(W))
@@ -33,85 +41,35 @@ X = np.arange(n)
 '''==============='''
 start = timer()
 Ex = se.get_frontiers(W, 1)
-
-
 f = interp1d(Ex, np.abs(W[Ex]), kind="linear", fill_value="extrapolate", assume_sorted=False)
 envY = f(X)
-
 lms = np.average((np.abs(W) - envY * 0.5)**2)
-
-
 print(f"This work: lms ={lms}, time={timer() - start}")
+
+
 '''==============='''
 '''   Smoothing   '''
 '''==============='''
 start = timer()
 envY_smooth = savgol_filter(np.abs(W), 3000 + 1, 3)
-envY_smooth = np.abs(envY_smooth) / np.max(np.abs(envY_smooth))
 lms_smooth = np.average((np.abs(W) - envY_smooth * 0.5)**2)
-# envY_smooth = [y for y in envY_smooth] + [None] + [-y for y in envY_smooth]
-
 print(f"Smoothing: lms ={lms_smooth}, time={timer() - start}")
+
+
 '''==============='''
 '''    Lowpass    '''
 '''==============='''
 start = timer()
-FT = np.fft.rfft(W)
-
-FT[200 :] = (0.0 + 0.0 * 1j)
-# # FT = FT / np.max(FT)
-
-W_lowpass = np.fft.irfft(FT)
-
-
-sign = np.sign(W_lowpass[0])
-x = 1
-while np.sign(W_lowpass[x]) == sign:
-  x += 1
-x0 = x + 1
-sign = np.sign(W_lowpass[x0])
-
-posX = []
-posY = []
-negX = []
-negY = []
-for x in range(x0, W_lowpass.size):
-  if np.sign(W_lowpass[x]) != sign: # Prospective pulse
-    if x - x0 > 2:          # Not noise
-      xp = x0 + np.argmax(np.abs(W[x0 : x]))
-      yp = W_lowpass[xp]
-      if np.sign(yp) >= 0:
-        posX.append(xp)
-        posY.append(yp)
-      else:
-        negX.append(xp)
-        negY.append(yp)
-    x0 = x
-    sign = np.sign(W[x])
-
-posX, posY, negX, negY = np.array(posX), np.array(posY), np.array(negX), np.array(negY)
-
-frontierX = np.concatenate([posX, negX])
-frontierY = np.concatenate([posY, np.abs(negY)])
-
-idxs = np.argsort(frontierX)
-frontierX = frontierX[idxs]
-frontierY = frontierY[idxs]
-
-f = interp1d(frontierX, frontierY, kind="linear", fill_value="extrapolate", assume_sorted=False)
-
-# envY_lowpass = savgol_filter(f(X), 50000 + 1, 2)
-envY_lowpass = savgol_filter(f(X), 5000 + 1, 2)
-envY_lowpass = envY_lowpass / np.max(np.abs(envY_lowpass))
+envY_lowpass = butter_lowpass_filter(np.abs(W), fps)
 lms_lowpass = np.average((np.abs(W) - envY_lowpass * 0.5)**2)
-# envY_lowpass = [y for y in envY_lowpass] + [None] + [-y for y in envY_lowpass]
-
 print(f"Lowpass:   lms ={lms_lowpass}, time={timer() - start}")
+
+
 '''==============='''
 '''    Hilbert    '''
 '''==============='''
 start = timer()
-analytic_signal = hilbert(savgol_filter(np.abs(W), 3000 + 1, 3))
+analytic_signal = hilbert(butter_lowpass_filter(np.abs(W), fps, 100))
 envY_hilbert = np.abs(analytic_signal)
 lms_hilbert = np.average((np.abs(W) - envY_hilbert * 0.5)**2)
 # envY_hilbert = [y for y in envY_hilbert] + [None] + [-y for y in envY_hilbert]
@@ -173,7 +131,7 @@ fig.add_trace(
     x=X,
     y=envY_smooth,
     mode="lines",
-    line=dict(width=1, color="black", dash='dot'),
+    line=dict(width=1, color="blue"),
   )
 )
 
@@ -183,7 +141,7 @@ fig.add_trace(
     x=X,
     y=envY_lowpass,
     mode="lines",
-    line=dict(width=1, color="dimgray", dash='solid'),
+    line=dict(width=1, color="green"),
   )
 )
 
@@ -193,13 +151,13 @@ fig.add_trace(
     x=X,
     y=envY_hilbert,
     mode="lines",
-    line=dict(width=1, color="dimgray", dash='dot'),
+    line=dict(width=1, color="red"),
   )
 )
 
 
 fig.show(config=dict({'scrollZoom': True}))
 
-# save_name = "./" + sys.argv[0].split('/')[-1].replace(".py", ".pdf")
-# fig.write_image(save_name, width=800, height=400, scale=1, engine="kaleido")
-# print("saved:", save_name)
+save_name = "./images/" + sys.argv[0].split('/')[-1].replace(".py", "") + "_" + name + ".svg"
+fig.write_image(save_name, width=650, height=270, engine="kaleido", format="svg")
+print("saved:", save_name)

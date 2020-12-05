@@ -15,8 +15,8 @@ n = 100
 X = np.arange(n)# / fps
 C = np.zeros(n)
 
-f = interp1d([0, 0.25 * n, 0.5 * n, 0.75 * n, n], np.abs(np.random.normal(0, .3, 5)), "cubic")
-E = 1+f(X)
+f = interp1d([0, 0.25 * n, 0.5 * n, 0.75 * n, n], np.abs(1 + np.random.normal(0, .3, 5)), "cubic")
+E = f(X)
 
 afp = [
   [1, 5, 1.4 * np.pi],
