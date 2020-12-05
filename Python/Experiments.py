@@ -145,6 +145,7 @@ print("############# HERE #############")
 
 '''====================================================================================================================='''
 transp_black = "rgba(38, 12, 12, 0.2)"
+
 def to_plot(Matrix):
   X = []
   Y = []
@@ -159,7 +160,7 @@ def to_plot(Matrix):
 '''==========================='''
 ''' PLOT Signal & frontiers '''
 '''==========================='''
-if True:
+if False:
   fig = go.Figure()
   fig.layout.template ="plotly_white"
   # fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
@@ -599,7 +600,7 @@ if True:
 '''=================================='''
 ''' PLOT Xpos, Xneg, Xpc and Xpc_est '''
 '''=================================='''
-if True:
+if False:
   fig = go.Figure()
   fig.layout.template ="plotly_white"
   # fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
