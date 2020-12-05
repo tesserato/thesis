@@ -27,7 +27,7 @@ def butter_lowpass_filter(data, fps, cutoff = 10, order = 2):
 '''==============='''
 ''' Read wav file '''
 '''==============='''
-name = "soprano"
+name = "piano"
 W, fps = se.read_wav(f"C:/Users/tesse/Desktop/Files/Dropbox/0_Science/reps/envelope/test_samples/{name}.wav")
 W = W - np.average(W)
 amplitude = np.max(np.abs(W))
@@ -114,16 +114,16 @@ fig.add_trace(
   )
 )
 
-
 fig.add_trace(
   go.Scatter(
-    name="Present Work", # <|<|<|<|<|<|<|<|<|<|<|<|
+    name="Hilbert", # <|<|<|<|<|<|<|<|<|<|<|<|
     x=X,
-    y=envY,
+    y=envY_hilbert,
     mode="lines",
-    line=dict(width=1, color="black"),
+    line=dict(width=1, color="red"),
   )
 )
+
 
 fig.add_trace(
   go.Scatter(
@@ -147,11 +147,11 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Hilbert", # <|<|<|<|<|<|<|<|<|<|<|<|
+    name="Present Work", # <|<|<|<|<|<|<|<|<|<|<|<|
     x=X,
-    y=envY_hilbert,
+    y=envY,
     mode="lines",
-    line=dict(width=1, color="red"),
+    line=dict(width=1, color="black"),
   )
 )
 
@@ -159,5 +159,5 @@ fig.add_trace(
 fig.show(config=dict({'scrollZoom': True}))
 
 save_name = "./images/" + sys.argv[0].split('/')[-1].replace(".py", "") + "_" + name + ".svg"
-fig.write_image(save_name, width=650, height=270, engine="kaleido", format="svg")
+fig.write_image(save_name, width=650, height=280, engine="kaleido", format="svg")
 print("saved:", save_name)
