@@ -12,14 +12,14 @@
 \usepackage{algorithm}
 \usepackage{algorithmic}
 
-% \usepackage{hyperref}
-% \usepackage{hypcap}
-% \hypersetup{
-%   colorlinks=true, 
-%   allcolors=black,
-%   pdfauthor={Carlos Henrique Tarjano Santos},
-%   pdftitle={Robust Digital Envelope Estimation Via Geometric Properties of an Arbitrary Real Signal}
-% }
+\usepackage{hyperref}
+\usepackage{hypcap}
+\hypersetup{
+  colorlinks=true, 
+  allcolors=black,
+  pdfauthor={Carlos Henrique Tarjano Santos},
+  pdftitle={Robust Digital Envelope Estimation Via Geometric Properties of an Arbitrary Real Signal}
+}
 
 \DeclareMathOperator{\sign}{sign}
 \bibliography{bibli}
@@ -52,7 +52,7 @@ A Python module implementing the algorithm was made available via the Python Pac
 Besides the most direct applications of this work to audio classification and synthesis, we foresee impact in compression techniques and machine learning approaches to audio. We briefly discuss some potential paths in this direction. The discrete curvature definition presented could also be extended to three-dimensional settings, to improve shape detection algorithms based on alpha shapes.
 \end{abstract}
 
-{\bf Keywords:} DSP, alpha shapes, envelope detection, discrete curvature estimation, demodulation
+{\bf Keywords:} DSP; alpha shapes; envelope detection; discrete curvature estimation; demodulation
 
 
 \section{Introduction}
@@ -100,7 +100,7 @@ In the results section, we present some illustrations of the envelopes obtained 
 We follow with suggestions about how the approach here presented can be useful beyond envelope detection, exemplifying with some applications, such as the extractions of the average waveform of a digital wave, and concluding with commentary on potential future developments of the method.
 
 
-\section{Methodology}
+\section{Methods}
 After defining what will be considered an envelope in the context of this work, in this section we explore some simplifications that can be applied to a discrete wave, defining the representation that will be used in the subsequent part of the work. 
 
 We next explore the concept of discrete curvature, putting forth our own method, tailored to the definition of the equivalent circle of a wave; we end this section by showing how this circle can be used to identify the envelope of a discrete wave, in a similar approach to that of the alpha shapes theory, but taking advantage of some unique structure present in discrete waves.
@@ -136,11 +136,11 @@ In this work we are concerned with the discrete version of this problem: given a
 The preceding definitions can be translated to this discrete scenario assuming that the discrete quantities arise from observing the continuous ones at regular time intervals. In that case, the equality $ i = t \ \text{fps} $ can be used to link both settings, where $ i $ is the index of each observation, $ t $ stands for the time in seconds, and fps is the frame rate, or the number of observations made in the period of a second. We can thus define:
 
 \begin{align} \label{eq:Envelope}
-  & \textbf{w}, \textbf{e}, \textbf{c} \in \mathbb{R}^n \\
-  & \textbf{w} = (w_0, w_1, \cdots, w_{n-1}) \\
-  & \textbf{e} = (e_0, e_1, \cdots, e_{n-1}) \\
-  & \textbf{c} = (c_0, c_1, \cdots, c_{n-1}) \\
-  & \textbf{w} = \textbf{e} \odot \textbf{c} \quad \therefore \quad w_i = e_i c_i \quad \forall \quad i, 0 \le i \le n-1
+  & \mathbf{w}, \mathbf{e}, \mathbf{c} \in \mathbb{R}^n \\
+  & \mathbf{w} = (w_0, w_1, \cdots, w_{n-1}) \\
+  & \mathbf{e} = (e_0, e_1, \cdots, e_{n-1}) \\
+  & \mathbf{c} = (c_0, c_1, \cdots, c_{n-1}) \\
+  & \mathbf{w} = \mathbf{e} \odot \mathbf{c} \ \therefore \ w_i = e_i c_i \ \forall \ i, \ 0 \le i \le n-1
 \end{align}
 
 The $ \odot $ operator in \ref{eq:Envelope} stands for the Hadamard product, denoting element-wise multiplication of two vectors. Figure \ref{fig:Envelope} provides an example of the vectors just defined: \textbf{w} is obtained by modulating the normalized carrier wave \textbf{c} using the envelope \textbf{e}.
@@ -290,7 +290,7 @@ The procedure is formalized in the algorithm \ref{FindEnvelope}. We don't provid
 The set E obtained via algorithm \ref{FindEnvelope} is a set of points. The most straightforward way to transform those points into the vector $ \textbf{e} \in \mathbb{R}^n $ is via linear interpolation, the approach used in this work. 
 It is worth noting, however, that many other procedures are available, both for the interpolation and the smooth approximation of points.
 
-\section{Results}
+\section{Results and Discussion}
 Given the lack of a precise definition of what an envelope should be, we begin this section suggesting an empirical metric, based on the behaviour of the carrier wave \textbf{c}. We also comment on some metrics presented in the literature, and compare our algorithm with traditional demodulation approaches, both in relation to execution time and accuracy; to this last end, a numerical indicator is also introduced.
 
 We also illustrate how the method here presented can be used to isolate not only a single envelope of the wave, but the superior and inferior envelopes as well, that we call frontiers, ending the section with a suggestion on how the proposed algorithm can be useful beyond envelope detection, by identifying the approximate locations of the pseudo-cycles in a quasi-periodic wave.
@@ -454,7 +454,7 @@ Figure \ref{fig:FullFrontiers} illustrates the frontiers of six diverse discrete
 The frontiers are satisfactorily detected in the case of harmonic and inharmonic sounds, and are robust in relation to the number of samples and the frequencies of the waves. That is a peculiarity of our algorithm: the traditional algorithms are unable to generate two distinct envelopes for the same wave.
 
 
-\section{Approximated location of pseudo-cycles}
+\subsection{Approximated location of pseudo-cycles}
 
 The envelope is shown to add complexity to the spectral representation of a wave \parencite{2019TarjanoNeuro}, and an accurate description of the envelope, while describing the evolution of the instantaneous amplitude of a signal in time, would also simplify further spectral analysis. Figure \ref{fig:Fourier} shows the frequency-domain power spectrum for the wave and the carrier presented in \ref{fig:Envelope}. For the carrier, the power spectrum presents two nonzero values, while the power spectrum for the wave composed of the carrier modulated by the envelope is more complex.
 
@@ -483,6 +483,7 @@ One can see in figure \ref{fig:PCs} a section of the plot of where the local max
   \label{fig:AvgPc}
 \end{figure}
 
+
 \section{Conclusion}
 This work fills a gap identified in the theory of digital signal processing, where the lack of general procedures for the accurate identification of the temporal envelope of arbitrary waves poses an obstacle to the complete description and eventual manipulation of signals.
 
@@ -490,7 +491,7 @@ By presenting a general approach for envelope detection, and eliminating the nee
 
 Illustrating the efficiency of an algorithm inspired by geometric aspects of a discrete signal on a wide range of real-world signals, we also hope to encourage research in this direction.
 
-The present work also highlights some gaps in our current understanding and definition of temporal envelope and, in so doing, endeavors to motivate further research in this topic, that can ultimately give rise to a more mathematically sound envelope theory, especially concerning broadband waves; suggestions in this direction are also presented.
+The present work also highlights some gaps in our current understanding and definition of temporal envelope and, in so doing, endeavours to motivate further research in this topic, that can ultimately give rise to a more mathematically sound envelope theory, especially concerning broadband waves; suggestions in this direction are also presented.
 
 While relevant in its own accord, the procedure here presented approximately isolates the individual pseudo-cycles of a wave, pinpointing them in the time-domain. 
 
