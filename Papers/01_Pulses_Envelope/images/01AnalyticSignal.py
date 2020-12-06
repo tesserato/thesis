@@ -44,6 +44,8 @@ FONT = dict(
     size=13.3333
   )
 
+  
+
 '''Plotting'''
 fig = go.Figure()
 fig.layout.template ="plotly_white" 
