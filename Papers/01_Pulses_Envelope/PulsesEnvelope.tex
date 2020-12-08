@@ -1,25 +1,28 @@
 \documentclass{article}
+\usepackage{float}
 \usepackage{lmodern} % Latin Modern Font
 \usepackage[T1]{fontenc}
 \usepackage{authblk}
+\usepackage{amsmath}
 \usepackage{amsfonts} % \mathbb
+\usepackage{amssymb} % \therefore
 \usepackage[margin=0.5in]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage[backend=biber]{biblatex}
-\usepackage{amsmath}
+
 
 \usepackage{algorithm}
 \usepackage{algorithmic}
 
-\usepackage{hyperref}
-\usepackage{hypcap}
-\hypersetup{
-  colorlinks=true, 
-  allcolors=black,
-  pdfauthor={Carlos Henrique Tarjano Santos},
-  pdftitle={Robust Digital Envelope Estimation Via Geometric Properties of an Arbitrary Real Signal}
-}
+% \usepackage{hyperref}
+% \usepackage{hypcap}
+% \hypersetup{
+%   colorlinks=true, 
+%   allcolors=black,
+%   pdfauthor={Carlos Henrique Tarjano Santos},
+%   pdftitle={Robust Digital Envelope Estimation Via Geometric Properties of an Arbitrary Real Signal}
+% }
 
 \DeclareMathOperator{\sign}{sign}
 \bibliography{bibli}
@@ -74,7 +77,7 @@ The intuition behind the alpha shapes algorithm is that only points that can be 
 
 Once a radius $ \alpha $ is defined, alpha shapes conserve the uniqueness property, in fact tending to the convex hull when $ \alpha \to \infty $. Consider, for example, the artificially generated discrete wave in figure \ref{fig:Hulls} below, where the links between consecutive samples were deemphasized to highlight the “set of points” nature of a signal: The convex hull and a concave hull, in the form of an alpha shape with a particular value of $ \alpha $ are illustrated.
 
-\begin{figure}[ht!]
+\begin{figure}[H]
   \centering
     \includegraphics{images/00ConvexHull.pdf}
   \caption{A discrete signal interpreted as a set of points in the Cartesian plane, and the convex and concave hull at $ \alpha=300 $ defined by it.}
@@ -116,7 +119,7 @@ Despite its widespread use, and effectiveness in the context of narrowband signa
 
 Figure \ref{fig:AnalyticSignal} exemplifies the Hilbert envelope, for a pure sinusoid modulated by a polynomial, illustrating the difference in the shape of the envelope in the presence and absence of Gaussian white noise. It is readily noticeable from the figure that, as soon as noise is introduced in the original signal, it is reflected in the envelope.
 
-\begin{figure}[ht!]
+\begin{figure}[H]
   \centering
     \includegraphics{images/01AnalyticSignal.pdf}
   \caption{Envelope of a pure sinusoid with a local frequency of 20 cycles modulated by a polynomial of degree 3, as obtained by the Hilbert Transform approach. In the first half, the sinusoid is free of noise, while in the second half Gaussian noise with a standard deviation of $ 1/10 $ of the maximum amplitude of the wave was added to the base signal.}
@@ -135,13 +138,15 @@ In this work we are concerned with the discrete version of this problem: given a
 
 The preceding definitions can be translated to this discrete scenario assuming that the discrete quantities arise from observing the continuous ones at regular time intervals. In that case, the equality $ i = t \ \text{fps} $ can be used to link both settings, where $ i $ is the index of each observation, $ t $ stands for the time in seconds, and fps is the frame rate, or the number of observations made in the period of a second. We can thus define:
 
-\begin{align} \label{eq:Envelope}
+\begin{subequations}\label{eq:Envelope}
+\begin{align}
   & \mathbf{w}, \mathbf{e}, \mathbf{c} \in \mathbb{R}^n \\
   & \mathbf{w} = (w_0, w_1, \cdots, w_{n-1}) \\
-  & \mathbf{e} = (e_0, e_1, \cdots, e_{n-1}) \\
+  & \mathbf{e} = (e_0, e_1, \cdots, e_{n-1}) \\  
   & \mathbf{c} = (c_0, c_1, \cdots, c_{n-1}) \\
   & \mathbf{w} = \mathbf{e} \odot \mathbf{c} \ \therefore \ w_i = e_i c_i \ \forall \ i, \ 0 \le i \le n-1
 \end{align}
+\end{subequations}
 
 The $ \odot $ operator in \ref{eq:Envelope} stands for the Hadamard product, denoting element-wise multiplication of two vectors. Figure \ref{fig:Envelope} provides an example of the vectors just defined: \textbf{w} is obtained by modulating the normalized carrier wave \textbf{c} using the envelope \textbf{e}.
 
@@ -155,7 +160,7 @@ This is accomplished with the use of a circle with a defined radius, large enoug
 
 In the next section, a compatible geometric representation will be formulated, along with the necessary tools to estimate the average curvature of the wave and, consequently, the appropriate radius of the circle.
 
-\begin{figure}[ht!]
+\begin{figure}[H]
   \centering
     \includegraphics{images/02Envelope.pdf}
   \caption{Example of a discrete wave \textbf{w} composed by the element-wise multiplication of an envelope \textbf{e} and a carrier \textbf{c}. The local extrema of \textbf{w} are highlighted with a circle.}
@@ -172,7 +177,7 @@ For this reason we define P as the set of the points $ \{P_0, P_1, \cdots, P_{m-
 
 This relation is illustrated in figure \ref{fig:Pulses}. We call it P to emphasize the connection with the pulses of \textbf{w}.
 
-\begin{figure}[ht!]
+\begin{figure}[H]
   \centering
     \includegraphics{images/03Pulses.pdf}
   \caption{Example of a discrete wave \textbf{w} divided into pulses, of which the extrema are highlighted with a circle. P is the set of the points $ P_j = (i_j, \lvert w_j \lvert) $ representing the absolute value of those extrema.}
@@ -191,10 +196,12 @@ The drawback is that we would lose the direct link between P and \textbf{w} that
 
 In this new coordinate system we have a basis vector $ \mathbf{b}^\prime = \{ \mathbf{b}^\prime_x, \mathbf{b}^\prime_y \}$ where $ \mathbf{b}^\prime_x = (i, 0) $ and $\mathbf{b}^\prime_y = (0, i) $, related to the original basis vector by equation \ref{eq:Basis}:
 
-\begin{align} \label{eq:Basis}
+\begin{subequations}  \label{eq:Basis}
+\begin{align}
 \mathbf{b}^\prime_x &= \mathbf{b}_x  \\
 \mathbf{b}^\prime_y &= \frac{\left( \frac{i_{m-1} - i_0}{m-1} \right)}{\left( \frac{\sum_{j=0}^{m-1} \lvert w_j \lvert}{m} \right)} \mathbf{b}_y 
 \end{align}
+\end{subequations}
 
 The effect of this normalization can be seen in the points shown in figure \ref{fig:Vectors}, shown in scale in both coordinate systems. The set V of the vectors from each point of P to the next is also shown in the picture, and it will be used to estimate the average curvature of P. We define this set in equation \ref{eq:Vectors} below.
 
@@ -202,7 +209,7 @@ The effect of this normalization can be seen in the points shown in figure \ref{
 \text{V} = \{ v_0, v_1, v_{m-2} \} \quad \text{where} \quad v_k = P_{j+1} - P_j \quad \forall \quad 0 \le k \le m-2
 \end{equation}
 
-\begin{figure}[ht!]
+\begin{figure}[H]
   \centering
     \includegraphics{images/04Vectors.pdf}
   \caption{The set of points P and the set V of vectors between two adjacent points of P, in both the original and normalized coordinate systems, shown in scale.}
@@ -230,7 +237,7 @@ The rationale is to find, for each vector $ v_k \in \text{V} $, the radius $ r_k
 
 From figure \ref{fig:DiscreteCurvature} is easy to see that $ r_k = v_{k,x} \sin(\theta_k)$ where $ v_{k,x} $ is the component of $ v_k $ in the horizontal direction; $ \theta_k $ itself can be obtained using the slope $ m_0 = 0 $ of a line in the horizontal direction and the slope $ m_k = v_{k,y} / v_{k,x} $ defined by $ v_k $ via the equality $ \theta_k = \arctan \big( (m_k - m_0) / (1 + m_k m_0) \big) $.
 
-\begin{figure}[ht!]
+\begin{figure}[H]
   \centering
     \includegraphics{images/05DiscreteCurvature.pdf}
   \caption{The tangent unit vector of the circle changes from the horizontal direction in $ \hat{u}_0 $ to an inclination of $ \theta_k $ in $ \hat{u}_1 $, $ \theta_k $ being the angle that the vector $ v_k $ makes with the horizontal direction.}
@@ -252,11 +259,13 @@ Let $ P_a, P_b, P_c \in \text{P}, \quad P_a \ne P_b \ne P_c $ be three different
 
 For all circles of center $ x_o, y_o $ and radius $ r $ that can be constructed to pass through any two different points of P, that is, $ \forall \quad P_b, P_c $ such that $ (P_{b,x} - x_o)^2 + (P_{b,y} - y_o)^2 = (P_{c,x} - x_o)^2 + (P_{c,y} - y_o)^2 = r^2 $, $ P_a $ will be part of the set $ E $ of the points belonging to the envelope if and only if none of those circles contain $ P_a $, or $ P_a \in \text{E} \leftrightarrow (P_{b,x} - x_o)^2 + (P_{b,y} - y_o)^2 > r^2 $. Summarizing this, we have equation \ref{eq:InEnvelope}:
 
-\begin{align} \label{eq:InEnvelope}
+\begin{subequations} \label{eq:InEnvelope}
+\begin{align}
 & P_a \in \text{E} \leftrightarrow (P_{b,x} - x_o)^2 + (P_{b,y} - y_o)^2 > r^2, \\
 & \forall \ P_b, P_c \mid (P_{b,x} - x_o)^2 + (P_{b,y} - y_o)^2 = (P_{c,x} - x_o)^2 + (P_{c,y} - y_o)^2 = r^2, \\
 & P_a, P_b, P_c \in \text{P}, \quad P_a \ne P_b \ne P_c \quad \text{and} \quad x_o, y_o \in \mathbb{R}, \quad 0 \le y_o < +\infty
 \end{align}
+\end{subequations}
 
 The algorithm follows directly from the definition in \ref{eq:InEnvelope} after noting that the first and last members of P will always be part of the envelope, since they are reachable by a circle of any radius $ r $. From $ P_0 $, our first pivot point, we construct circles passing through $ P_1, P_2, \cdots, P_d $ until a circle that doesn't contain any point in P is found; $ P_d $ then becomes the new pivot point and is included in E, and this procedure continues until $ P_{m-1} $ is reached.
 
@@ -310,21 +319,21 @@ From figure \ref{fig:spoken_voice} it can be seen that the algorithm performs we
 
 These characteristics are in stark contrast with those of the sang voice in figure \ref{fig:singer_voice}, where a recording of an alto singer is shown; there, the wave is almost periodic, with a stable waveform.
 
-\begin{figure}[ht!]
+\begin{figure}[H]
   \centering
     \includegraphics{images/06Graph_bend.pdf}
   \caption{Signal, envelope and carrier for a record of a bend performed on an electric guitar.}
   \label{fig:Bend}
 \end{figure}
 
-\begin{figure}[ht!]
+\begin{figure}[H]
   \centering
     \includegraphics{images/06Graph_spoken_voice.pdf}
   \caption{Signal, envelope and carrier for a record of male voice uttering the word “amazing”.}
   \label{fig:spoken_voice}
 \end{figure}
 
-\begin{figure}[ht!]
+\begin{figure}[H]
   \centering
     \includegraphics{images/06Graph_alto.pdf}
   \caption{Signal, envelope and carrier for a record of an alto singer.}
@@ -359,7 +368,7 @@ Nevertheless, insight can be gained from a comparison of the results of the meth
 
 In \ref{fig:Comparison_sinusoid} we illustrate the envelope extracted by the conventional algorithms, contrasting it with the result of the method presented in this work, for a simple sinusoid. Note that none of the conventional algorithms complies with the third condition proposed in \textcite{1996Loughlinamplitude} that the envelope of a periodic wave should be a straight line.
 
-\begin{figure}[ht!]
+\begin{figure}[H]
   \centering
     \includegraphics{images/07Comparison_sinusoid.pdf}
   \caption{Comparison of envelope detection algorithms for a simple sinusoid}
@@ -368,7 +377,7 @@ In \ref{fig:Comparison_sinusoid} we illustrate the envelope extracted by the con
 
 For a recording of the key 33 of a grand piano, where parts of the sound are highly percussive and noisy, the Hilbert approach presents considerable oscillations, as can be seen in figure \ref{fig:Comparison_piano}.
 
-\begin{figure}[ht!]
+\begin{figure}[H]
   \centering
     \includegraphics{images/07Comparison_piano.pdf}
   \caption{Comparison of envelope detection algorithms for the recording of the key 33 of a grand piano}
@@ -377,7 +386,7 @@ For a recording of the key 33 of a grand piano, where parts of the sound are hig
 
 In figure \ref{fig:Comparison_soprano} all envelopes exhibit a similar movement along the samples, but the ones generated by traditional algorithms are undershooting the original wave.
 
-\begin{figure}[ht!]
+\begin{figure}[H]
   \centering
     \includegraphics{images/07Comparison_soprano.pdf}
   \caption{Comparison of envelope detection algorithms for the recording of the vocalization of a soprano singer}
@@ -391,7 +400,7 @@ Table \ref{table:Error_comparison} presents a comparison of the average errors o
 
 We can see from the table \ref{table:Error_comparison} that the method presented here consistently outperforms the traditional approaches for all waves tested, yielding an error 33\% smaller, on average, than the other methods. It is also worth noting that the errors of the traditional methods are very similar between them.
 
-\begin{table}[ht!]
+\begin{table}[H]
 \centering
 \begin{tabular}{lcccc}
 \hline
@@ -415,7 +424,7 @@ Average       & 0.037        & 0.055     & 0.055   & 0.054
 
 The times taken for the algorithms compared here to process each wave are shown in \ref{table:Time_comparison}. We used specialized implementations available in libraries of the Python programming language. The presented algorithm is in average the second-fastest.
 
-\begin{table}[ht!]
+\begin{table}[H]
 \centering
 \begin{tabular}{lcccc}
 \hline
@@ -444,7 +453,7 @@ In practice, is not uncommon for a discrete wave, especially in the case of soun
 
 Figure \ref{fig:FullFrontiers} illustrates the frontiers of six diverse discrete sound waves, as well as an in-detail view of the highlighted segment for each signal. All waves are records of physical sounds, chosen to represent the applicability of the algorithm in real-world scenarios.
 
-\begin{figure}[ht!]
+\begin{figure}[H]
   \centering
     \includegraphics{images/08FullFrontiers.pdf}
   \caption{Positive and negative frontiers of six digital waves, as extracted by the algorithm here presented. For each wave, the region highlighted in black is shown in detail besides the whole wave. For each wave, the horizontal axis is the sample number $ i $, while the vertical axis is the normalized amplitude. All 6 waves were recorded at 44100 fps.}
@@ -458,7 +467,7 @@ The frontiers are satisfactorily detected in the case of harmonic and inharmonic
 
 The envelope is shown to add complexity to the spectral representation of a wave \parencite{2019TarjanoNeuro}, and an accurate description of the envelope, while describing the evolution of the instantaneous amplitude of a signal in time, would also simplify further spectral analysis. Figure \ref{fig:Fourier} shows the frequency-domain power spectrum for the wave and the carrier presented in \ref{fig:Envelope}. For the carrier, the power spectrum presents two nonzero values, while the power spectrum for the wave composed of the carrier modulated by the envelope is more complex.
 
-\begin{figure}[ht!]
+\begin{figure}[H]
   \centering
     \includegraphics{images/11Fourier.pdf}
   \caption{Fourier power spectrum for the wave and carrier shown in \ref{fig:Envelope}.}
@@ -467,7 +476,7 @@ The envelope is shown to add complexity to the spectral representation of a wave
 
 Moreover, the algorithm developed in this work naturally divides a signal into its pseudo-cycles, pinpointing them in the time-domain, thus providing the building blocks for the reconstruction of the fine structure of the wave.
 
-\begin{figure}[ht!]
+\begin{figure}[H]
   \centering
     \includegraphics{images/09PCs.pdf}
   \caption{Section of the lines formed by the positions of the positive and negative frontiers of the digital wave illustrated in \ref{fig:singer_voice}, as extracted by the algorithm presented, and their average.}
@@ -476,7 +485,7 @@ Moreover, the algorithm developed in this work naturally divides a signal into i
 
 One can see in figure \ref{fig:PCs} a section of the plot of where the local maxima and minima occurs in the recording of an alto singer show in \ref{fig:singer_voice}. The average between the two is also shown. With this information, one can split a discrete wave into its pseudo-cycles, as is illustrated in Figure \ref{fig:AvgPc}: It shows the superposition of this extracted pseudo-cycles, after being normalized by length, and their average. This same average is shown shifted, to exemplify that approximate $C^0$ and $C^1$ continuity is achieved. 
 
-\begin{figure}[ht!]
+\begin{figure}[H]
   \centering
     \includegraphics{images/10AvgPc.pdf}
   \caption{Pseudo-cycles of the wave illustrated in \ref{fig:singer_voice}, segmented and superposed, and their average. The average is also shown shifted by one average period, to illustrate the average continuity.}
