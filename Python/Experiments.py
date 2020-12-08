@@ -10,7 +10,7 @@ from scipy import interpolate
 ''' Read wav file '''
 '''==============='''
 
-name = "piano33"
+name = "alto"
 W, fps = se.read_wav(f"Samples/{name}.wav")
 W = W - np.average(W)
 amp = np.max(np.abs(W))
