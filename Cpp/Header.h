@@ -363,11 +363,11 @@ void refine_frontier(std::vector<pulse>& Pulses, const std::vector<size_t>& Xp, 
 			Xzeroes.clear();
 			currsign = sgn(W[p.start]) ;
 			for (size_t i = p.start + 1; i < p.end; i++)	{
-				if (currsign == 0) {
-					Xzeroes.push_back(i - 1);
-					currsign = sgn(W[i]);
-				}
-				else if (currsign != sgn(W[i])){
+				//if (currsign == 0) {
+				//	Xzeroes.push_back(i - 1);
+				//	currsign = sgn(W[i]);
+				//}
+				if (currsign != sgn(W[i])){
 					Xzeroes.push_back(i);
 					currsign = sgn(W[i]);
 				}
@@ -378,7 +378,7 @@ void refine_frontier(std::vector<pulse>& Pulses, const std::vector<size_t>& Xp, 
 				Pulses_to_test.push_back(pulse(x, p.end));
 			}
 		}
-		std::cout << "Pulses_to_split size:" << Pulses_to_split.size() << "\n";
+		//std::cout << "Pulses_to_split size:" << Pulses_to_split.size() << "\n";
 		Pulses_to_split.clear();
 
 
@@ -389,7 +389,7 @@ void refine_frontier(std::vector<pulse>& Pulses, const std::vector<size_t>& Xp, 
 				Pulses.push_back(p);
 			}
 		}
-		std::cout << "Pulses_to_test size:" << Pulses_to_test.size() << "\n";
+		//std::cout << "Pulses_to_test size:" << Pulses_to_test.size() << "\n";
 		Pulses_to_test.clear();
 	}
 }
@@ -566,9 +566,9 @@ std::vector<size_t> refine_Xpcs(const std::vector<double>& W, const std::vector<
 		step = 1.0 / float(size);
 		for (size_t x0 = 1; x0 < min_size; x0++) {
 			curr_val = 0.0;
-			amp = std::abs(*std::max_element(Wpadded.begin() + x0, Wpadded.begin() + x0 + size, abs_compare));
+			//amp = std::abs(*std::max_element(Wpadded.begin() + x0, Wpadded.begin() + x0 + size, abs_compare));
 			for (size_t i = 0; i <= size; i++) {
-				curr_val += Wpadded[x0 + i] * spline(i * step) / amp;
+				curr_val += Wpadded[x0 + i] * spline(i * step);// / amp;
 			}
 			if (curr_val > best_val) {
 				best_val = curr_val;
@@ -595,9 +595,9 @@ std::vector<size_t> refine_Xpcs(const std::vector<double>& W, const std::vector<
 		for (size_t size = min_size; size <= max_size; size++) {
 			step = 1.0 / float(size);
 			curr_val = 0.0;
-			amp = std::abs(*std::max_element(Wpadded.begin() + curr_x0, Wpadded.begin() + curr_x0 + size, abs_compare));
+			//amp = std::abs(*std::max_element(Wpadded.begin() + curr_x0, Wpadded.begin() + curr_x0 + size, abs_compare));
 			for (size_t i = 0; i <= size; i++) {
-				curr_val += Wpadded[curr_x0 + i] * spline(i * step);
+				curr_val += Wpadded[curr_x0 + i] * spline(i * step);// / amp;
 			}
 			if (curr_val > best_val) {
 				best_val = curr_val;
