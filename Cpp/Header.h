@@ -562,13 +562,16 @@ std::vector<size_t> refine_Xpcs(const std::vector<double>& W, const std::vector<
 	double step{ 0.0 };
 	double amp{0.0};
 	std::vector<size_t> Xpc;
+	std::vector<std::vector<double>> interps(max_size - min_size+1, std::vector<double>(max_size + 1));
 	for (size_t size = min_size; size <= max_size; size++) {
 		step = 1.0 / float(size);
 		for (size_t x0 = 1; x0 < min_size; x0++) {
 			curr_val = 0.0;
 			//amp = std::abs(*std::max_element(Wpadded.begin() + x0, Wpadded.begin() + x0 + size, abs_compare));
 			for (size_t i = 0; i <= size; i++) {
-				curr_val += Wpadded[x0 + i] * spline(i * step);// / amp;
+				interps[size - min_size][i] = spline(i * step);
+				curr_val += Wpadded[x0 + i] * interps[size - min_size][i];// / amp;
+
 			}
 			if (curr_val > best_val) {
 				best_val = curr_val;
@@ -597,7 +600,7 @@ std::vector<size_t> refine_Xpcs(const std::vector<double>& W, const std::vector<
 			curr_val = 0.0;
 			//amp = std::abs(*std::max_element(Wpadded.begin() + curr_x0, Wpadded.begin() + curr_x0 + size, abs_compare));
 			for (size_t i = 0; i <= size; i++) {
-				curr_val += Wpadded[curr_x0 + i] * spline(i * step);// / amp;
+				curr_val += Wpadded[curr_x0 + i] * interps[size - min_size][i];// / amp;
 			}
 			if (curr_val > best_val) {
 				best_val = curr_val;
