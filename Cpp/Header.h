@@ -184,7 +184,7 @@ template <typename T> int sgn(T val) {
 int argabsmax(const std::vector<double>& V, const int x0, const int x1) {
 	double max{ std::abs(V[x0]) };
 	int idx = x0;
-	for (size_t i = x0; i <= x1; i++) {
+	for (size_t i = x0; i < x1; i++) {
 		if (std::abs(V[i]) > max) {
 			max = std::abs(V[i]);
 			idx = i;
@@ -217,29 +217,6 @@ int argmin(const std::vector<double>& V, const int x0, const int x1) {
 	return idx;
 }
 
-//int argextremum(const std::vector<double>& V, const int x0, const int x1, const double sign) {
-//	//std::cout << sign << "\n";
-//	int idx = 0;
-//	if (sign >= 0) {
-//		double max{ V[0] };
-//		for (int i = x0; i < x1; i++) {
-//			if (V[i] > max) {
-//				max = V[i];
-//				idx = i;
-//			}
-//		}
-//	} 
-//	else {
-//		double min{ V[0] };
-//		for (int i = x0; i < x1; i++) {
-//			if (V[i] < min) {
-//				min = V[i];
-//				idx = i;
-//			}
-//		}
-//	}
-//	return idx;
-//}
 
 std::vector<size_t> find_zeroes(const std::vector<double>& W) {
 	int sign{ sgn(W[0]) };
@@ -254,37 +231,63 @@ std::vector<size_t> find_zeroes(const std::vector<double>& W) {
 	return id_of_zeroes;
 }
 
-void get_pulses(const std::vector<double>& W, std::vector<size_t>& posX,  std::vector<size_t>& negX) {
+void get_pulses(const std::vector<double>& W, std::vector<size_t>& posX, std::vector<size_t>& negX) {
 	size_t n{ W.size() };
 	int sign{ sgn(W[0]) };
-	int x{ 1 };
-	int x0{ 0 };
-	while (sgn(W[x]) == sign) {
-		x++;
-	}
-	x0 = x + 1;
-	sign = sgn(W[x0]);
-	int xp{ 0 };
-	for (size_t x1 = x0; x1 < n; x1++) {
-		if (sgn(W[x1])!=sign) {
-			if (x1 - x0 > 2) {
-				xp = argabsmax(W, x0, x1);
-				if (sgn(W[xp]) >= 0) {
+	int i0{ 0 };
+	int im{ 0 };
+	posX.clear();
+	negX.clear();
+	for (size_t i = 1; i < W.size(); i++) {
+		if (sgn(W[i]) != sign) {
+			sign = sgn(W[i]);
+			if (i - i0 > 4) {
+				im = argabsmax(W, i0, i);
+				i0 = i;
+				if (sgn(W[im]) >= 0) {
 					//std::cout << "pos " << xp << "\n";
-					posX.push_back(xp);
+					posX.push_back(im);
 				}
 				else {
 					//std::cout << "neg " << xp << "\n";
-					negX.push_back(xp);
+					negX.push_back(im);
 				}
 			}
-			x0 = x1;
-			sign = sgn(W[x1]);
 		}
-	}
-	//std::cout << "opa " << x0 << "\n";
-	return;
+	}	return;
 }
+
+//void get_pulses(const std::vector<double>& W, std::vector<size_t>& posX,  std::vector<size_t>& negX) {
+//	size_t n{ W.size() };
+//	int sign{ sgn(W[0]) };
+//	int x{ 1 };
+//	int x0{ 0 };
+//	while (sgn(W[x]) == sign) {
+//		x++;
+//	}
+//	x0 = x + 1;
+//	sign = sgn(W[x0]);
+//	int xp{ 0 };
+//	for (size_t x1 = x0; x1 < n; x1++) {
+//		if (sgn(W[x1])!=sign) {
+//			if (x1 - x0 > 2) {
+//				xp = argabsmax(W, x0, x1);
+//				if (sgn(W[xp]) >= 0) {
+//					//std::cout << "pos " << xp << "\n";
+//					posX.push_back(xp);
+//				}
+//				else {
+//					//std::cout << "neg " << xp << "\n";
+//					negX.push_back(xp);
+//				}
+//			}
+//			x0 = x1;
+//			sign = sgn(W[x1]);
+//		}
+//	}
+//	//std::cout << "opa " << x0 << "\n";
+//	return;
+//}
 
 std::vector<size_t> get_frontier(const std::vector<double>& W, const std::vector<size_t>& X) {
 	size_t n{ X.size() };
@@ -504,18 +507,19 @@ mode_abdm average_pc_waveform(std::vector<double>& pcw, const std::vector<size_t
 	double step{ 1.0 / double(mode) };
 	pcw.resize(mode + 1);
 	std::fill(pcw.begin(), pcw.end(), 0.0);
-
+	double amp;
 	for (size_t i = 0; i < Xp.size() - 1; i++) {
 		x0 = Xp[i];
 		x1 = Xp[i + 1];
 		if (x1 - x0 > 5) {
+			amp = std::abs(*std::max_element(W.begin() + x0, W.begin() + x1, abs_compare));
 			boost::math::interpolators::cardinal_cubic_b_spline<double> spline(W.begin() + x0, W.begin() + x1, 0, 1.0 / float(x1 - x0));
 			for (size_t i = 0; i <= mode; i++) {
-				pcw[i] += spline(i * step);
+				pcw[i] += spline(i * step);// *amp* amp;
 			}			
 		}
 	}
-	double amp{std::abs(*std::max_element(pcw.begin(), pcw.end(), abs_compare))};
+	amp = std::abs(*std::max_element(pcw.begin(), pcw.end(), abs_compare));
 	for (size_t i = 0; i <= mode; i++) {
 		pcw[i] = pcw[i] / amp;
 	}
@@ -613,3 +617,5 @@ std::vector<size_t> refine_Xpcs(const std::vector<double>& W, const std::vector<
 	}
 	return Xpc;
 }
+
+

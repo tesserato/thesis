@@ -17,8 +17,10 @@ int main() {
 	Chronograph time;
 
 
-	std::string name = "piano33";
-	auto W = read_wav(name + ".wav").W;
+	std::string name = "bend";
+	auto WV = read_wav(name + ".wav");
+	auto W = WV.W;
+	//WV.write();
 
 
 	std::vector<size_t> posX, negX;
@@ -61,7 +63,7 @@ int main() {
 	std::vector<size_t> Xpcs;
 	std::vector<double> avg(best_avg);
 
-	for (size_t i = 0; i < 200; i++) {
+	for (size_t i = 0; i < 100; i++) {
 		Xpcs = refine_Xpcs(W, avg, min_size, max_size);
 		ma = average_pc_waveform(avg, Xpcs, W);
 		int min_size = std::max(10, int(ma.mode) - int(mult * ma.abdm));
@@ -97,15 +99,15 @@ int main() {
 }
 
 //int main() {
-//	std::string name = "tom";
+//	std::string name = "amazing";
 //	auto W = read_wav(name + ".wav").W;
-//	for (size_t i = 500; i < 800; i++) {
-//		W[i] = 0;
-//	}
+//	//for (size_t i = 500; i < 800; i++) {
+//	//	W[i] = 0;
+//	//}
 //
-//	for (size_t i = 1000; i < 1700; i++) {
-//		W[i] = 0;
-//	}
+//	//for (size_t i = 1000; i < 1700; i++) {
+//	//	W[i] = 0;
+//	//}
 //
 //	std::vector<size_t> Xz = find_zeroes(W);
 //	write_vector(Xz, name + "_zeroes.csv");

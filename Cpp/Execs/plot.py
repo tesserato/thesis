@@ -19,7 +19,7 @@ def save_wav(signal, name = 'test.wav', fps = 44100):
   o.writeframes(np.int16(signal)) # Int16
   o.close()
 
-name = "tom"
+name = "amazing"
 W, fps = read_wav(name + ".wav")
 amp = np.max(np.abs(W))
 Xpos = np.genfromtxt(name + "_pos.csv", delimiter=",").astype(int)
@@ -30,7 +30,7 @@ Xneg_n = np.genfromtxt(name + "_neg_n.csv", delimiter=",").astype(int)
 
 Xpc = np.genfromtxt(name + "_Xpcs.csv", delimiter=",").astype(int)
 
-Xpc_2 = np.genfromtxt(name + "_Xpcs_best.csv", delimiter=",").astype(int)
+# Xpc_2 = np.genfromtxt(name + "_Xpcs_best.csv", delimiter=",").astype(int)
 
 '''============================================================================'''
 '''                                    PLOT                                    '''
@@ -157,24 +157,24 @@ fig.add_trace(
   )
 )
 
-XX = []
-YY = []
-for x in Xpc_2:
-  XX.append(x), XX.append(x), XX.append(None)
-  YY.append(-amp), YY.append(amp), YY.append(None)
-fig.add_trace(
-  go.Scatter(
-    name="Xpc_2", # <|<|<|<|<|<|<|<|<|<|<|<|
-    x=XX,
-    y=YY,
-    # fill="toself",
-    mode="lines",
-    line=dict(
-        width=1,
-        color="green",
-        # showscale=False
-    ),
-    # visible = "legendonly"
-  )
-)
+# XX = []
+# YY = []
+# for x in Xpc_2:
+#   XX.append(x), XX.append(x), XX.append(None)
+#   YY.append(-amp), YY.append(amp), YY.append(None)
+# fig.add_trace(
+#   go.Scatter(
+#     name="Xpc_2", # <|<|<|<|<|<|<|<|<|<|<|<|
+#     x=XX,
+#     y=YY,
+#     # fill="toself",
+#     mode="lines",
+#     line=dict(
+#         width=1,
+#         color="green",
+#         # showscale=False
+#     ),
+#     # visible = "legendonly"
+#   )
+# )
 fig.show(config=dict({'scrollZoom': True}))

@@ -19,7 +19,7 @@ def save_wav(signal, name = 'test.wav', fps = 44100):
   o.writeframes(np.int16(signal)) # Int16
   o.close()
 
-name = "tom"
+name = "amazing"
 W, fps = read_wav(name + "_alt.csv")
 amp = np.max(np.abs(W))
 Xzeroes = np.genfromtxt(name + "_zeroes.csv", delimiter=",").astype(int)
