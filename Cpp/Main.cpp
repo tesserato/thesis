@@ -4,7 +4,7 @@
 
 template <typename T> void write_vector(std::vector<T>& V, std::string path = "teste.csv") {
 	std::ofstream out(path);
-	for (size_t i = 0; i < V.size() - 1; ++i) {
+	for (pint i = 0; i < V.size() - 1; ++i) {
 		out << V[i] << ",";
 	}
 	out << V.back();
@@ -23,7 +23,7 @@ int main() {
 	//WV.write();
 
 
-	std::vector<size_t> posX, negX;
+	std::vector<pint> posX, negX;
 	get_pulses(W, posX, negX);
 
 
@@ -38,7 +38,7 @@ int main() {
 	write_vector(posF, name + "_pos_n.csv");
 	write_vector(negF, name + "_neg_n.csv");
 
-	int mult{ 2 };
+	inte mult{ 2 };
 
 	std::vector<double> best_avg;
 	auto best_Xpcs = get_Xpcs(posF, negF);
@@ -46,8 +46,8 @@ int main() {
 	mode_abdm ma = average_pc_waveform(best_avg, best_Xpcs, W);
 	write_vector(best_avg, name + "_avgpcw.csv");
 	double best_avdv = average_pc_metric(best_avg, best_Xpcs, W);
-	int min_size = std::max(10, int(ma.mode) - int(mult * ma.abdm));
-	int max_size = ma.mode + int(mult * ma.abdm);
+	inte min_size = std::max(10, int(ma.mode) - int(mult * ma.abdm));
+	inte max_size = ma.mode + int(mult * ma.abdm);
 
 	std::cout
 		<< "START>> n:" << W.size()
@@ -60,10 +60,10 @@ int main() {
 		<< ", E:" << best_avdv << "\n";
 
 	double avdv;
-	std::vector<size_t> Xpcs;
+	std::vector<pint> Xpcs;
 	std::vector<double> avg(best_avg);
 
-	for (size_t i = 0; i < 100; i++) {
+	for (pint i = 0; i < 100; i++) {
 		Xpcs = refine_Xpcs(W, avg, min_size, max_size);
 		ma = average_pc_waveform(avg, Xpcs, W);
 		int min_size = std::max(10, int(ma.mode) - int(mult * ma.abdm));
@@ -101,15 +101,15 @@ int main() {
 //int main() {
 //	std::string name = "amazing";
 //	auto W = read_wav(name + ".wav").W;
-//	//for (size_t i = 500; i < 800; i++) {
+//	//for (pos_integer i = 500; i < 800; i++) {
 //	//	W[i] = 0;
 //	//}
 //
-//	//for (size_t i = 1000; i < 1700; i++) {
+//	//for (pos_integer i = 1000; i < 1700; i++) {
 //	//	W[i] = 0;
 //	//}
 //
-//	std::vector<size_t> Xz = find_zeroes(W);
+//	std::vector<pos_integer> Xz = find_zeroes(W);
 //	write_vector(Xz, name + "_zeroes.csv");
 //
 //	Wav wav(W);
@@ -121,7 +121,7 @@ int main() {
 //	if (argc > 1) {
 //		std::cout << "has args\n";
 //		Chronograph time;
-//		for (size_t i = 1; i < argc; i++) {
+//		for (pos_integer i = 1; i < argc; i++) {
 //			std::cout << i << ": " << argv[i] << "\n";
 //			//frontier_from_wav(argv[i]);
 //		}

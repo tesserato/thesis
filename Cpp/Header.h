@@ -12,21 +12,31 @@
 #include <tuple>
 #include <boost/math/interpolators/cardinal_cubic_b_spline.hpp>
 
-const double PI = 3.14159265358979323846;
+//typedef int pos_integer;
+typedef unsigned long long pint;
+typedef long long          inte;
+typedef double             real;
 
-static bool abs_compare(double a, double b) {
+typedef std::vector<pint> v_pint;
+typedef std::vector<real> v_real;
+
+
+const real PI = 3.14159265358979323846;
+
+
+static bool abs_compare(real a, real b) {
 	return (std::abs(a) < std::abs(b));
 }
 
 struct point {
-	double x;
-	double y;
+	real x;
+	real y;
 };
 
 struct pulse {
-	size_t start;
-	size_t end;
-	pulse(int s, int e) {
+	pint start;
+	pint end;
+	pulse(inte s, inte e) {
 		if (s < 0) {
 			std::cout << "negative start for Pulse\n";
 		}
@@ -39,13 +49,13 @@ struct pulse {
 };
 
 struct mode_abdm { // mode & average absolute deviation from mode
-	size_t mode;
-	double abdm;
+	pint mode;
+	real abdm;
 	mode_abdm() {
 		mode = 0;
 		abdm = 0.0;
 	}
-	mode_abdm(size_t m, double a) {
+	mode_abdm(pint m, real a) {
 		mode = m;
 		abdm = a;
 	}
@@ -80,9 +90,9 @@ public:
 class Wav {
 public:
 	int fps;
-	std::vector<double> W;
+	v_real W;
 
-	Wav(std::vector<double> W_, int fps_=44100) {
+	Wav(v_real W_, int fps_=44100) {
 		fps = fps_;
 		W = W_;
 		std::cout << " n: " << W.size() << " fps: " << fps << "\n";
@@ -107,20 +117,20 @@ public:
 
 class Compressed {
 public:
-	std::vector<size_t> X_PCs; // start of each pulse
-	std::vector<double> Envelope;
-	std::vector<double> Waveform;
-	Compressed(std::vector<size_t> Xp, std::vector<double> W, const std::vector<double>& S) {
+	v_pint X_PCs; // start of each pulse
+	v_real Envelope;
+	v_real Waveform;
+	Compressed(v_pint Xp, v_real W, const v_real& S) {
 		X_PCs = Xp;
 		Waveform = W; // TODO
-		for (size_t i = 0; i < Xp.size() - 1; i++) {
+		for (pint i = 0; i < Xp.size() - 1; i++) {
 			Envelope.push_back(std::abs(*std::max_element(S.begin()+ Xp[i], S.begin()+ Xp[i + 1], abs_compare)));
 		}
 	}
-	Wav reconstruct(int fps = 44100) {
-		std::vector<double> Wave;
-		for (double & e : Envelope) {
-			for (size_t i = 0; i < Waveform.size() - 1; i++) {
+	Wav reconstruct(pint fps = 44100) {
+		v_real Wave;
+		for (real & e : Envelope) {
+			for (pint i = 0; i < Waveform.size() - 1; i++) {
 				Wave.push_back(e * Waveform[i]);
 			}
 		}
@@ -153,18 +163,18 @@ Wav read_wav(std::string path) {
 	static int n = file.frames();
 	std::cout << "Successfully opened file at:" << path << "\n";
 
-	std::vector<double> W(n);
+	v_real W(n);
 	file.read(&W[0], n);
 	return Wav(W, fps);
 };
 
-point get_circle(double x0, double y0, double x1, double y1, double r) {
-	double q{ sqrt(pow(x1 - x0, 2.0) + pow(y1 - y0, 2.0)) };
-	double c{ sqrt(r * r - pow(q / 2.0, 2.0)) };
+point get_circle(real x0, real y0, real x1, real y1, real r) {
+	real q{ sqrt(pow(x1 - x0, 2.0) + pow(y1 - y0, 2.0)) };
+	real c{ sqrt(r * r - pow(q / 2.0, 2.0)) };
 
-	double x3{ (x0 + x1) / 2.0 };
-	double y3{ (y0 + y1) / 2.0 };
-	double xc, yc;
+	real x3{ (x0 + x1) / 2.0 };
+	real y3{ (y0 + y1) / 2.0 };
+	real xc, yc;
 
 	if (y0 + y1 >= 0) {
 		xc = x3 + c * (y0 - y1) / q;
@@ -177,14 +187,14 @@ point get_circle(double x0, double y0, double x1, double y1, double r) {
 	return { xc, yc };
 }
 
-template <typename T> int sgn(T val) {
+template <typename T> inte sgn(T val) {
 	return (T(0) < val) - (val < T(0));
 }
 
-int argabsmax(const std::vector<double>& V, const int x0, const int x1) {
-	double max{ std::abs(V[x0]) };
-	int idx = x0;
-	for (size_t i = x0; i < x1; i++) {
+inte argabsmax(const v_real& V, const inte x0, const inte x1) {
+	real max{ std::abs(V[x0]) };
+	inte idx = x0;
+	for (pint i = x0; i < x1; i++) {
 		if (std::abs(V[i]) > max) {
 			max = std::abs(V[i]);
 			idx = i;
@@ -193,10 +203,10 @@ int argabsmax(const std::vector<double>& V, const int x0, const int x1) {
 	return idx;
 }
 
-int argmax(const std::vector<double>& V, const int x0, const int x1) {
-	double max{ std::abs(V[x0]) };
-	int idx = x0;
-	for (size_t i = x0; i <= x1; i++) {
+inte argmax(const v_real& V, const inte x0, const inte x1) {
+	real max{ std::abs(V[x0]) };
+	inte idx = x0;
+	for (pint i = x0; i <= x1; i++) {
 		if (V[i] > max) {
 			max = V[i];
 			idx = i;
@@ -205,10 +215,10 @@ int argmax(const std::vector<double>& V, const int x0, const int x1) {
 	return idx;
 }
 
-int argmin(const std::vector<double>& V, const int x0, const int x1) {
-	double min{ std::abs(V[x0]) };
-	int idx = x0;
-	for (size_t i = x0; i <= x1; i++) {
+inte argmin(const v_real& V, const inte x0, const inte x1) {
+	real min{ std::abs(V[x0]) };
+	inte idx = x0;
+	for (pint i = x0; i <= x1; i++) {
 		if (V[i] < min) {
 			min = V[i];
 			idx = i;
@@ -217,12 +227,11 @@ int argmin(const std::vector<double>& V, const int x0, const int x1) {
 	return idx;
 }
 
+v_pint find_zeroes(const v_real& W) {
+	inte sign{ sgn(W[0]) };
+	v_pint id_of_zeroes;
 
-std::vector<size_t> find_zeroes(const std::vector<double>& W) {
-	int sign{ sgn(W[0]) };
-	std::vector<size_t> id_of_zeroes;
-
-	for (size_t i = 0; i < W.size(); i++) {
+	for (pint i = 0; i < W.size(); i++) {
 		if (sgn(W[i]) != sign) {
 			id_of_zeroes.push_back(i);
 			sign = sgn(W[i]);
@@ -231,14 +240,14 @@ std::vector<size_t> find_zeroes(const std::vector<double>& W) {
 	return id_of_zeroes;
 }
 
-void get_pulses(const std::vector<double>& W, std::vector<size_t>& posX, std::vector<size_t>& negX) {
-	size_t n{ W.size() };
-	int sign{ sgn(W[0]) };
-	int i0{ 0 };
-	int im{ 0 };
+void get_pulses(const v_real& W, v_pint& posX, v_pint& negX) {
+	pint n{ W.size() };
+	inte sign{ sgn(W[0]) };
+	inte i0{ 0 };
+	inte im{ 0 };
 	posX.clear();
 	negX.clear();
-	for (size_t i = 1; i < W.size(); i++) {
+	for (pint i = 1; i < W.size(); i++) {
 		if (sgn(W[i]) != sign) {
 			sign = sgn(W[i]);
 			if (i - i0 > 4) {
@@ -257,77 +266,43 @@ void get_pulses(const std::vector<double>& W, std::vector<size_t>& posX, std::ve
 	}	return;
 }
 
-//void get_pulses(const std::vector<double>& W, std::vector<size_t>& posX,  std::vector<size_t>& negX) {
-//	size_t n{ W.size() };
-//	int sign{ sgn(W[0]) };
-//	int x{ 1 };
-//	int x0{ 0 };
-//	while (sgn(W[x]) == sign) {
-//		x++;
-//	}
-//	x0 = x + 1;
-//	sign = sgn(W[x0]);
-//	int xp{ 0 };
-//	for (size_t x1 = x0; x1 < n; x1++) {
-//		if (sgn(W[x1])!=sign) {
-//			if (x1 - x0 > 2) {
-//				xp = argabsmax(W, x0, x1);
-//				if (sgn(W[xp]) >= 0) {
-//					//std::cout << "pos " << xp << "\n";
-//					posX.push_back(xp);
-//				}
-//				else {
-//					//std::cout << "neg " << xp << "\n";
-//					negX.push_back(xp);
-//				}
-//			}
-//			x0 = x1;
-//			sign = sgn(W[x1]);
-//		}
-//	}
-//	//std::cout << "opa " << x0 << "\n";
-//	return;
-//}
-
-std::vector<size_t> get_frontier(const std::vector<double>& W, const std::vector<size_t>& X) {
-	size_t n{ X.size() };
-	double sumY{ 0.0 };
-	double sumY_vec{ W[X[n-1]] - W[X[0]] };
-	size_t sumX_vec{ X[n-1] - X[0] };
+v_pint get_frontier(const v_real& W, const v_pint& X) {
+	pint n{ X.size() };
+	real sumY{ 0.0 };
+	real sumY_vec{ W[X[n-1]] - W[X[0]] };
+	pint sumX_vec{ X[n-1] - X[0] };
 
 	//std::cout << "HERE 01!\n";
-	for (size_t i = 0; i < n; i++) {
+	for (pint i = 0; i < n; i++) {
 		sumY += W[X[i]];
 	}
-	double scaling{ (sumX_vec / 2.0) / sumY };
-	//double m0{ scaling * sumY_vec / sumX_vec };0
-	double sumk{ 0.0 };
-	//double mm{ sqrt(m0 * m0 + 1 )};1
-	double x;
-	double y;
+	real scaling{ (sumX_vec / 2.0) / sumY };
+	real sumk{ 0.0 };
+	real x;
+	real y;
 
-	std::vector<double> Y(n);
+	v_real Y(n);
 	Y[0] = W[X[0]] * scaling;
 	//std::cout << "HERE 02!\n";
-	for (size_t i = 1; i < n; i++) {
+	for (pint i = 1; i < n; i++) {
 		Y[i] = W[X[i]] * scaling;
 		x = X[i] - X[i - 1];
 		y = Y[i] - Y[i - 1];
 		sumk += y / (x * sqrt(x * x + y * y));
 	}
 	//std::cout << "HERE 03!\n";
-	double r{ 1.0 / (sumk / (n - 1)) };
-	double rr{ r * r };
-	size_t idx1{ 0 };
-	size_t idx2{ 1 };
-	std::vector<size_t> frontierX = { X[0] };
+	real r{ 1.0 / (sumk / (n - 1)) };
+	real rr{ r * r };
+	pint idx1{ 0 };
+	pint idx2{ 1 };
+	v_pint frontierX = { X[0] };
 	point pc;
 	bool empty;
 	//std::cout << "HERE 04!\n";
 	while (idx2 < n) {
 		pc = get_circle(X[idx1], Y[idx1], X[idx2], Y[idx2], r);
 		empty = true;
-		for (size_t i = idx2 + 1; i < n; i++) {
+		for (pint i = idx2 + 1; i < n; i++) {
 			if (pow(pc.x - X[i], 2.0) + pow(pc.y - Y[i], 2.0) < rr) {
 				empty = false;
 				idx2 ++;
@@ -343,20 +318,20 @@ std::vector<size_t> get_frontier(const std::vector<double>& W, const std::vector
 	return frontierX;
 }
 
-void refine_frontier(std::vector<pulse>& Pulses, const std::vector<size_t>& Xp, const std::vector<double>& W, int avgL, double stdL, int n_stds = 3) {
+void refine_frontier(std::vector<pulse>& Pulses, const v_pint& Xp, const v_real& W, inte avgL, real stdL, inte n_stds = 3) {
 	std::vector<pulse> Pulses_to_split;
 	std::vector<pulse> Pulses_to_test;
-	std::vector<size_t> Xzeroes;
-	std::function<int(const std::vector<double>& V, const int x0, const int x1)> arg;
+	v_pint Xzeroes;
+	std::function<inte(const v_real& V, const inte x0, const inte x1)> arg;
 	if (W[Xp[0]] >= 0) {
 		arg = argmax;
 	}
 	else {
 		arg = argmin;
 	}
-	int currsign, x;
+	inte currsign, x;
 	std::cout << "Refining frontier; TH=" << avgL + n_stds * stdL << "\n";
-	for (size_t i = 1; i < Xp.size(); i++) {
+	for (pint i = 1; i < Xp.size(); i++) {
 		if (Xp[i] - Xp[i - 1] >= avgL + n_stds * stdL) {
 			Pulses_to_split.push_back(pulse(Xp[i - 1], Xp[i]));
 		}
@@ -365,7 +340,7 @@ void refine_frontier(std::vector<pulse>& Pulses, const std::vector<size_t>& Xp, 
 		for (pulse p : Pulses_to_split) {
 			Xzeroes.clear();
 			currsign = sgn(W[p.start]) ;
-			for (size_t i = p.start + 1; i < p.end; i++)	{
+			for (pint i = p.start + 1; i < p.end; i++)	{
 				//if (currsign == 0) {
 				//	Xzeroes.push_back(i - 1);
 				//	currsign = sgn(W[i]);
@@ -397,12 +372,12 @@ void refine_frontier(std::vector<pulse>& Pulses, const std::vector<size_t>& Xp, 
 	}
 }
 
-mode_abdm get_mode_and_abdm(std::vector<size_t>& T) {
+mode_abdm get_mode_and_abdm(v_pint& T) {
 	std::sort(T.begin(), T.end());
-	size_t curr_value = T[0];
-	size_t curr_count = 0;
-	size_t max_count = 0;
-	size_t mode = 0;
+	pint curr_value = T[0];
+	pint curr_count = 0;
+	pint max_count = 0;
+	pint mode = 0;
 	for (auto t: T) {
 		if (t == curr_value){
 			curr_count++;
@@ -420,29 +395,29 @@ mode_abdm get_mode_and_abdm(std::vector<size_t>& T) {
 		max_count = curr_count;
 		mode = curr_value;
 	}
-	int abdm{ 0 };
+	inte abdm{ 0 };
 	for (auto t : T) {
-		abdm += std::abs(int(t) - int(mode));
+		abdm += std::abs(inte(t) - inte(mode));
 	}
 	
-	return mode_abdm(mode, double(abdm) / double(T.size()));
+	return mode_abdm(mode, real(abdm) / real(T.size()));
 }
 
-void refine_frontier_iter(std::vector<size_t>& Xp, const std::vector<double>& W) {
-	std::vector<size_t> T(Xp.size() - 1);
-	for (size_t i = 0; i < Xp.size() - 1; i++)	{
+void refine_frontier_iter(v_pint& Xp, const v_real& W) {
+	v_pint T(Xp.size() - 1);
+	for (pint i = 0; i < Xp.size() - 1; i++)	{
 		T[i] = Xp[i + 1] - Xp[i];
 	}
 
 	mode_abdm modeabdm = get_mode_and_abdm(T);
-	size_t mde{ modeabdm.mode };
-	double std{ modeabdm.abdm };
+	pint mde{ modeabdm.mode };
+	real std{ modeabdm.abdm };
 
 	std::vector<pulse> Pulses;
 	refine_frontier(Pulses, Xp, W, mde, std);
 
-	size_t psize{ 0 };
-	double std_c{ 0.0 };
+	pint psize{ 0 };
+	real std_c{ 0.0 };
 	while (Pulses.size() > psize) {
 		std::cout << "Xp size before:" << Xp.size() << "\n";
 		psize = Pulses.size();
@@ -450,11 +425,11 @@ void refine_frontier_iter(std::vector<size_t>& Xp, const std::vector<double>& W)
 			Xp.push_back(p.start);
 			Xp.push_back(p.end);
 		}
-		std::vector<size_t>::iterator it=std::unique(Xp.begin(), Xp.end());
+		v_pint::iterator it=std::unique(Xp.begin(), Xp.end());
 		Xp.resize(std::distance(Xp.begin(), it));
 		std::cout << "Xp size after:" << Xp.size() << "\n";
 		T.resize(Xp.size() - 1);
-		for (size_t i = 0; i < Xp.size() - 1; i++) {
+		for (pint i = 0; i < Xp.size() - 1; i++) {
 			T[i] = Xp[i + 1] - Xp[i];
 		}
 
@@ -473,106 +448,98 @@ void refine_frontier_iter(std::vector<size_t>& Xp, const std::vector<double>& W)
 	}
 }
 
-//void write_frontier(const std::vector<double>& W, const std::vector<size_t>& X, std::string path = "teste.csv") {
-//	std::ofstream out(path);
-//	for (size_t i = 0; i < X.size(); ++i) {
-//		out << X[i] << "," << W[X[i]] << "\n";
-//	}
-//	out.close();
-//}
-
-std::vector<size_t> get_Xpcs(const std::vector<size_t>& Xpos, const std::vector<size_t>& Xneg) {
-	size_t min_id{ std::min(Xpos.size(),Xneg.size()) };
-	std::vector<size_t> Xpcs(min_id);
-	for (size_t i = 0; i < min_id; i++)	{
-		Xpcs[i] = std::round((float(Xpos[i]) + float(Xneg[i])) / 2);
+v_pint get_Xpcs(const v_pint& Xpos, const v_pint& Xneg) {
+	pint min_id{ std::min(Xpos.size(),Xneg.size()) };
+	v_pint Xpcs(min_id);
+	for (pint i = 0; i < min_id; i++)	{
+		Xpcs[i] = std::round((real(Xpos[i]) + real(Xneg[i])) / 2);
 	}
-	std::vector<size_t>::iterator it = std::unique(Xpcs.begin(), Xpcs.end());
+	v_pint::iterator it = std::unique(Xpcs.begin(), Xpcs.end());
 	Xpcs.resize(std::distance(Xpcs.begin(), it));
 	std::sort(Xpcs.begin(), Xpcs.end());
 	return Xpcs;
 }
 
-mode_abdm average_pc_waveform(std::vector<double>& pcw, const std::vector<size_t>& Xp, const std::vector<double>& W) {
-	std::vector<size_t> T(Xp.size() - 1);
-	for (size_t i = 0; i < Xp.size() - 1; ++i) {
+mode_abdm average_pc_waveform(v_real& pcw, const v_pint& Xp, const v_real& W) {
+	v_pint T(Xp.size() - 1);
+	for (pint i = 0; i < Xp.size() - 1; ++i) {
 		T[i] = Xp[i + 1] - Xp[i];
 	}
 
 	mode_abdm modeabdm = get_mode_and_abdm(T);
-	size_t mode{ modeabdm.mode };
+	pint mode{ modeabdm.mode };
 
-	int x0{ 0 };
-	int x1{ 0 };
-	double step{ 1.0 / double(mode) };
+	inte x0{ 0 };
+	inte x1{ 0 };
+	real step{ 1.0 / real(mode) };
 	pcw.resize(mode + 1);
 	std::fill(pcw.begin(), pcw.end(), 0.0);
-	double amp;
-	for (size_t i = 0; i < Xp.size() - 1; i++) {
+	real amp;
+	for (pint i = 0; i < Xp.size() - 1; i++) {
 		x0 = Xp[i];
 		x1 = Xp[i + 1];
 		if (x1 - x0 > 5) {
 			amp = std::abs(*std::max_element(W.begin() + x0, W.begin() + x1, abs_compare));
-			boost::math::interpolators::cardinal_cubic_b_spline<double> spline(W.begin() + x0, W.begin() + x1, 0, 1.0 / float(x1 - x0));
-			for (size_t i = 0; i <= mode; i++) {
+			boost::math::interpolators::cardinal_cubic_b_spline<real> spline(W.begin() + x0, W.begin() + x1, 0, 1.0 / real(x1 - x0));
+			for (pint i = 0; i <= mode; i++) {
 				pcw[i] += spline(i * step);// *amp* amp;
 			}			
 		}
 	}
 	amp = std::abs(*std::max_element(pcw.begin(), pcw.end(), abs_compare));
-	for (size_t i = 0; i <= mode; i++) {
+	for (pint i = 0; i <= mode; i++) {
 		pcw[i] = pcw[i] / amp;
 	}
 	return modeabdm;
 }
 
-double average_pc_metric(const std::vector<double>& pcw, const std::vector<size_t>& Xp, const std::vector<double>& W) {
-	size_t mode{ pcw.size() };
+real average_pc_metric(const v_real& pcw, const v_pint& Xp, const v_real& W) {
+	pint mode{ pcw.size() };
 
-	int x0{ 0 };
-	int x1{ 0 };
-	size_t ac{ 0 };
-	double step{ 1.0 / double(mode) };
-	double avdv{ 0.0 };
-	for (size_t i = 0; i < Xp.size() - 1; i++) {
+	inte x0{ 0 };
+	inte x1{ 0 };
+	pint ac{ 0 };
+	real step{ 1.0 / real(mode) };
+	real avdv{ 0.0 };
+	for (pint i = 0; i < Xp.size() - 1; i++) {
 		x0 = Xp[i];
 		x1 = Xp[i + 1];
 		if (x1 - x0 > 5) {
-			boost::math::interpolators::cardinal_cubic_b_spline<double> spline(W.begin() + x0, W.begin() + x1, 0, 1.0 / double(x1 - x0));
-			for (size_t i = 0; i <= mode; i++) {
+			boost::math::interpolators::cardinal_cubic_b_spline<real> spline(W.begin() + x0, W.begin() + x1, 0, 1.0 / real(x1 - x0));
+			for (pint i = 0; i <= mode; i++) {
 				avdv += std::abs(spline(i * step) - W[x0 + i]);
 				ac++;
 			}
 		}
 	}
-	avdv += avdv / double(ac);
+	avdv += avdv / real(ac);
 	return avdv;
 }
 
-std::vector<size_t> refine_Xpcs(const std::vector<double>& W, const std::vector<double>& avgpc, size_t min_size, size_t max_size) {
+v_pint refine_Xpcs(const v_real& W, const v_real& avgpc, pint min_size, pint max_size) {
 	if (avgpc.size() <= 5) {
 		std::cout << "Average Pseudo Cycle waveform size <= 5";
 		throw std::invalid_argument("Average Pseudo Cycle waveform size <= 5");
 	}
-	boost::math::interpolators::cardinal_cubic_b_spline<double> spline(avgpc.begin(), avgpc.end(), 0, 1.0 / avgpc.size());
-	std::vector<double> Wpadded(W.size() + 2 * min_size, 0.0);
-	for (size_t i = min_size; i < W.size() + min_size; i++) {
+	boost::math::interpolators::cardinal_cubic_b_spline<real> spline(avgpc.begin(), avgpc.end(), 0, 1.0 / avgpc.size());
+	v_real Wpadded(W.size() + 2 * min_size, 0.0);
+	for (pint i = min_size; i < W.size() + min_size; i++) {
 		Wpadded[i] = W[i - min_size];
 	}
-	size_t best_size{ 0 };
-	size_t best_x0{ 0 };
-	double best_val{ 0.0 };
-	double curr_val{ 0.0 };
-	double step{ 0.0 };
-	double amp{0.0};
-	std::vector<size_t> Xpc;
-	std::vector<std::vector<double>> interps(max_size - min_size+1, std::vector<double>(max_size + 1));
-	for (size_t size = min_size; size <= max_size; size++) {
-		step = 1.0 / float(size);
-		for (size_t x0 = 1; x0 < min_size; x0++) {
+	pint best_size{ 0 };
+	pint best_x0{ 0 };
+	real best_val{ 0.0 };
+	real curr_val{ 0.0 };
+	real step{ 0.0 };
+	real amp{0.0};
+	v_pint Xpc;
+	std::vector<v_real> interps(max_size - min_size+1, v_real(max_size + 1));
+	for (pint size = min_size; size <= max_size; size++) {
+		step = 1.0 / real(size);
+		for (pint x0 = 1; x0 < min_size; x0++) {
 			curr_val = 0.0;
 			//amp = std::abs(*std::max_element(Wpadded.begin() + x0, Wpadded.begin() + x0 + size, abs_compare));
-			for (size_t i = 0; i <= size; i++) {
+			for (pint i = 0; i <= size; i++) {
 				interps[size - min_size][i] = spline(i * step);
 				curr_val += Wpadded[x0 + i] * interps[size - min_size][i];// / amp;
 
@@ -584,14 +551,14 @@ std::vector<size_t> refine_Xpcs(const std::vector<double>& W, const std::vector<
 			}
 		}
 	}
-	int x0{ int(best_x0) - int(min_size) };
+	inte x0{ inte(best_x0) - inte(min_size) };
 	//std::cout << "best c:" << x0 << "\n";
 	if (x0 > 0) {
 		Xpc.push_back(x0);
 	}
-	size_t curr_x0{ best_x0 + best_size };
+	pint curr_x0{ best_x0 + best_size };
 
-	x0 = int(curr_x0) - int(min_size);
+	x0 = inte(curr_x0) - inte(min_size);
 
 	if (x0 > 0) {
 		Xpc.push_back(x0);
@@ -599,11 +566,11 @@ std::vector<size_t> refine_Xpcs(const std::vector<double>& W, const std::vector<
 	
 	while (curr_x0 + max_size - min_size < W.size()) {
 		best_val = 0.0;
-		for (size_t size = min_size; size <= max_size; size++) {
-			step = 1.0 / float(size);
+		for (pint size = min_size; size <= max_size; size++) {
+			step = 1.0 / real(size);
 			curr_val = 0.0;
 			//amp = std::abs(*std::max_element(Wpadded.begin() + curr_x0, Wpadded.begin() + curr_x0 + size, abs_compare));
-			for (size_t i = 0; i <= size; i++) {
+			for (pint i = 0; i <= size; i++) {
 				curr_val += Wpadded[curr_x0 + i] * interps[size - min_size][i];// / amp;
 			}
 			if (curr_val > best_val) {
@@ -619,3 +586,42 @@ std::vector<size_t> refine_Xpcs(const std::vector<double>& W, const std::vector<
 }
 
 
+//void get_pulses(const v_real& W, std::vector<pos_integer>& posX,  std::vector<pos_integer>& negX) {
+//	pos_integer n{ W.size() };
+//	int sign{ sgn(W[0]) };
+//	int x{ 1 };
+//	int x0{ 0 };
+//	while (sgn(W[x]) == sign) {
+//		x++;
+//	}
+//	x0 = x + 1;
+//	sign = sgn(W[x0]);
+//	int xp{ 0 };
+//	for (pos_integer x1 = x0; x1 < n; x1++) {
+//		if (sgn(W[x1])!=sign) {
+//			if (x1 - x0 > 2) {
+//				xp = argabsmax(W, x0, x1);
+//				if (sgn(W[xp]) >= 0) {
+//					//std::cout << "pos " << xp << "\n";
+//					posX.push_back(xp);
+//				}
+//				else {
+//					//std::cout << "neg " << xp << "\n";
+//					negX.push_back(xp);
+//				}
+//			}
+//			x0 = x1;
+//			sign = sgn(W[x1]);
+//		}
+//	}
+//	//std::cout << "opa " << x0 << "\n";
+//	return;
+//}
+
+//void write_frontier(const v_real& W, const std::vector<pos_integer>& X, std::string path = "teste.csv") {
+//	std::ofstream out(path);
+//	for (pos_integer i = 0; i < X.size(); ++i) {
+//		out << X[i] << "," << W[X[i]] << "\n";
+//	}
+//	out.close();
+//}
