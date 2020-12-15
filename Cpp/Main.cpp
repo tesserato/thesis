@@ -17,7 +17,7 @@ int main() {
 	Chronograph time;
 
 
-	std::string name = "bend";
+	std::string name = "piano33";
 	auto WV = read_wav(name + ".wav");
 	auto W = WV.W;
 	//WV.write();
@@ -40,14 +40,14 @@ int main() {
 
 	inte mult{ 2 };
 
-	std::vector<double> best_avg;
-	auto best_Xpcs = get_Xpcs(posF, negF);
+	v_real best_avg;
+	v_pint best_Xpcs = get_Xpcs(posF, negF);
 	write_vector(best_Xpcs, name + "_Xpcs.csv");
 	mode_abdm ma = average_pc_waveform(best_avg, best_Xpcs, W);
 	write_vector(best_avg, name + "_avgpcw.csv");
-	double best_avdv = average_pc_metric(best_avg, best_Xpcs, W);
-	inte min_size = std::max(10, int(ma.mode) - int(mult * ma.abdm));
-	inte max_size = ma.mode + int(mult * ma.abdm);
+	real best_avdv = average_pc_metric(best_avg, best_Xpcs, W);
+	inte min_size = std::max(inte(10), inte(ma.mode) - inte(mult * ma.abdm));
+	inte max_size = ma.mode + inte(mult * ma.abdm);
 
 	std::cout
 		<< "START>> n:" << W.size()
@@ -59,15 +59,15 @@ int main() {
 		<< ", max size:" << max_size
 		<< ", E:" << best_avdv << "\n";
 
-	double avdv;
-	std::vector<pint> Xpcs;
-	std::vector<double> avg(best_avg);
+	real avdv;
+	v_pint Xpcs;
+	v_real avg(best_avg);
 
 	for (pint i = 0; i < 100; i++) {
 		Xpcs = refine_Xpcs(W, avg, min_size, max_size);
 		ma = average_pc_waveform(avg, Xpcs, W);
-		int min_size = std::max(10, int(ma.mode) - int(mult * ma.abdm));
-		int max_size = ma.mode + int(mult * ma.abdm);
+		inte min_size = std::max(inte(10), inte(ma.mode) - inte(mult * ma.abdm));
+		inte max_size = ma.mode + inte(mult * ma.abdm);
 		avdv = average_pc_metric(avg, Xpcs, W);
 
 		std::cout
