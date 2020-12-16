@@ -16,14 +16,13 @@ template <typename T> void write_vector(std::vector<T>& V, std::string path = "t
 int main() {
 	Chronograph time;
 
-
-	std::string name = "piano33";
+	std::string name = "amazing";
 	auto WV = read_wav(name + ".wav");
 	auto W = WV.W;
+	auto fps = WV.fps;
 	//WV.write();
 
-
-	std::vector<pint> posX, negX;
+	v_pint posX, negX;
 	get_pulses(W, posX, negX);
 
 
@@ -38,14 +37,16 @@ int main() {
 	write_vector(posF, name + "_pos_n.csv");
 	write_vector(negF, name + "_neg_n.csv");
 
-	inte mult{ 2 };
-
-	v_real best_avg;
-	v_pint best_Xpcs = get_Xpcs(posF, negF);
+	inte mult{ 3 };
+	v_inte best_Xpcs = get_Xpcs(posF, negF);
 	write_vector(best_Xpcs, name + "_Xpcs.csv");
+	v_real best_avg;
 	mode_abdm ma = average_pc_waveform(best_avg, best_Xpcs, W);
 	write_vector(best_avg, name + "_avgpcw.csv");
-	real best_avdv = average_pc_metric(best_avg, best_Xpcs, W);
+
+	Compressed Wave_rep = Compressed(best_Xpcs, best_avg, W);
+	//Wav Wave = Wave_rep.reconstruct_full(fps);
+	real best_avdv = error(Wave_rep.W_reconstructed, W);// average_pc_metric(best_avg, best_Xpcs, W);
 	inte min_size = std::max(inte(10), inte(ma.mode) - inte(mult * ma.abdm));
 	inte max_size = ma.mode + inte(mult * ma.abdm);
 
@@ -58,17 +59,19 @@ int main() {
 		<< ", min size:" << min_size
 		<< ", max size:" << max_size
 		<< ", E:" << best_avdv << "\n";
-
 	real avdv;
-	v_pint Xpcs;
+	v_inte Xpcs;
 	v_real avg(best_avg);
 
-	for (pint i = 0; i < 100; i++) {
+	for (pint i = 0; i < 500; i++) {
 		Xpcs = refine_Xpcs(W, avg, min_size, max_size);
 		ma = average_pc_waveform(avg, Xpcs, W);
 		inte min_size = std::max(inte(10), inte(ma.mode) - inte(mult * ma.abdm));
 		inte max_size = ma.mode + inte(mult * ma.abdm);
-		avdv = average_pc_metric(avg, Xpcs, W);
+
+		Wave_rep = Compressed(Xpcs, avg, W);
+		//Wave = Wave_rep.reconstruct_full(fps);
+		real avdv = error(Wave_rep.W_reconstructed, W);
 
 		std::cout
 			<< "i:" << i
@@ -89,8 +92,8 @@ int main() {
 		}
 	}
 
-	Compressed Wave_rep = Compressed(best_Xpcs, best_avg, W);
-	Wav Wave = Wave_rep.reconstruct();
+	Wave_rep = Compressed(best_Xpcs, best_avg, W);
+	Wav Wave = Wav(Wave_rep.W_reconstructed, fps);
 	Wave.write(name + "_rec.wav");
 	write_vector(best_Xpcs, name + "_Xpcs_best.csv");
 	write_vector(best_avg, name + "_avgpcw_best.csv");

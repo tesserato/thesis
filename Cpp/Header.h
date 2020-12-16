@@ -18,6 +18,7 @@ typedef long long          inte;
 typedef double             real;
 
 typedef std::vector<pint> v_pint;
+typedef std::vector<inte> v_inte;
 typedef std::vector<real> v_real;
 
 
@@ -89,10 +90,10 @@ public:
 
 class Wav {
 public:
-	int fps;
+	pint fps;
 	v_real W;
 
-	Wav(v_real W_, int fps_=44100) {
+	Wav(v_real W_, pint fps_=44100) {
 		fps = fps_;
 		W = W_;
 		std::cout << " n: " << W.size() << " fps: " << fps << "\n";
@@ -117,21 +118,70 @@ public:
 
 class Compressed {
 public:
-	v_pint X_PCs; // start of each pulse
+	v_inte X_PCs; // start of each pulse
 	v_real Envelope;
 	v_real Waveform;
-	Compressed(v_pint Xp, v_real W, const v_real& S) {
+	v_real W_reconstructed;
+	pint fps;
+	Compressed(v_inte Xp, v_real W, const v_real& S, pint f = 44100) {
 		X_PCs = Xp;
-		Waveform = W; // TODO
-		for (pint i = 0; i < Xp.size() - 1; i++) {
-			Envelope.push_back(std::abs(*std::max_element(S.begin()+ Xp[i], S.begin()+ Xp[i + 1], abs_compare)));
+		Waveform = W;
+		boost::math::interpolators::cardinal_cubic_b_spline<real> spline(Waveform.begin(), Waveform.end(), 0.0, 1.0 / real(Waveform.size()));
+		W_reconstructed.resize(S.size(), 0.0);
+		inte x0{ X_PCs[0] };
+		inte x1{ X_PCs[1] };
+		real step{ 1.0 / (x1 - x0) };
+		real e;// { std::abs(*std::max_element(S.begin()), S.begin() + Xp[1], abs_compare)) }
+		for (pint i = 1; i < Xp.size() - 1; i++) {
+			x0 = X_PCs[i];
+			x1 = X_PCs[i + 1];
+			e = std::abs(*std::max_element(S.begin() + Xp[i], S.begin() + Xp[i + 1], abs_compare));
+			Envelope.push_back(e);
+			if (x1 - x0 > 3) {
+				step = 1.0 / real(x1 - x0);
+				//std::cout << "Step:" << step << " ,last step:" << (x1 - x0) * step << "\n";
+				for (inte j = x0; j < x1; j++) {
+					W_reconstructed[j] = e * spline((j - x0) * step);
+				}
+			}
+			else {
+				std::cout << "Warning: Pseudo cycle with period < 4 between " << x0 << " and " << x1 << "\n";
+			}
 		}
+		Envelope.push_back(std::abs(*std::max_element(S.begin() + Xp.back(), S.end(), abs_compare)));
 	}
 	Wav reconstruct(pint fps = 44100) {
 		v_real Wave;
 		for (real & e : Envelope) {
 			for (pint i = 0; i < Waveform.size() - 1; i++) {
 				Wave.push_back(e * Waveform[i]);
+			}
+		}
+		return Wav(Wave, fps);
+	}
+	Wav reconstruct_full(pint fps = 44100) {
+		boost::math::interpolators::cardinal_cubic_b_spline<real> spline(Waveform.begin(), Waveform.end(), 0.0, 1.0 / real(Waveform.size()));
+		v_real Wave(X_PCs.back(), 0.0);
+		inte x0{ X_PCs[0] };
+		inte x1{ X_PCs[1] };
+		real step{ 1.0 / (x1 - x0) };
+		//std::cout << "1 Step:" << step << " ,last step:" << (x1 - x0) * step << "\n";
+
+		//for (inte i = 0; i < x1; i++) {
+		//	Wave[i] = Envelope[0] * spline((i - x0) * step);
+		//}
+		for (pint i = 1; i < X_PCs.size() - 1; i++) {
+			x0 = X_PCs[i];
+			x1 = X_PCs[i + 1];
+			if (x1 - x0 > 3) {
+				step = 1.0 / real(x1 - x0);
+				//std::cout << "Step:" << step << " ,last step:" << (x1 - x0) * step << "\n";
+				for (inte j = x0; j < x1; j++) {
+					Wave[j] = Envelope[i] * spline((j - x0) * step);
+				}
+			}
+			else {
+				std::cout << "Warning: Pseudo cycle with period < 4 between " << x0 << " and " << x1 << "\n";
 			}
 		}
 		return Wav(Wave, fps);
@@ -448,19 +498,19 @@ void refine_frontier_iter(v_pint& Xp, const v_real& W) {
 	}
 }
 
-v_pint get_Xpcs(const v_pint& Xpos, const v_pint& Xneg) {
+v_inte get_Xpcs(const v_pint& Xpos, const v_pint& Xneg) {
 	pint min_id{ std::min(Xpos.size(),Xneg.size()) };
-	v_pint Xpcs(min_id);
+	v_inte Xpcs(min_id);
 	for (pint i = 0; i < min_id; i++)	{
 		Xpcs[i] = std::round((real(Xpos[i]) + real(Xneg[i])) / 2);
 	}
-	v_pint::iterator it = std::unique(Xpcs.begin(), Xpcs.end());
+	v_inte::iterator it = std::unique(Xpcs.begin(), Xpcs.end());
 	Xpcs.resize(std::distance(Xpcs.begin(), it));
 	std::sort(Xpcs.begin(), Xpcs.end());
 	return Xpcs;
 }
 
-mode_abdm average_pc_waveform(v_real& pcw, const v_pint& Xp, const v_real& W) {
+mode_abdm average_pc_waveform(v_real& pcw, const v_inte& Xp, const v_real& W) {
 	v_pint T(Xp.size() - 1);
 	for (pint i = 0; i < Xp.size() - 1; ++i) {
 		T[i] = Xp[i + 1] - Xp[i];
@@ -475,14 +525,14 @@ mode_abdm average_pc_waveform(v_real& pcw, const v_pint& Xp, const v_real& W) {
 	pcw.resize(mode + 1);
 	std::fill(pcw.begin(), pcw.end(), 0.0);
 	real amp;
-	for (pint i = 0; i < Xp.size() - 1; i++) {
+	for (pint i = 1; i < Xp.size() - 1; i++) {
 		x0 = Xp[i];
 		x1 = Xp[i + 1];
 		if (x1 - x0 > 5) {
 			amp = std::abs(*std::max_element(W.begin() + x0, W.begin() + x1, abs_compare));
 			boost::math::interpolators::cardinal_cubic_b_spline<real> spline(W.begin() + x0, W.begin() + x1, 0, 1.0 / real(x1 - x0));
-			for (pint i = 0; i <= mode; i++) {
-				pcw[i] += spline(i * step);// *amp* amp;
+			for (pint j = 0; j <= mode; j++) {
+				pcw[j] += spline(j * step);// *amp* amp;
 			}			
 		}
 	}
@@ -493,30 +543,7 @@ mode_abdm average_pc_waveform(v_real& pcw, const v_pint& Xp, const v_real& W) {
 	return modeabdm;
 }
 
-real average_pc_metric(const v_real& pcw, const v_pint& Xp, const v_real& W) {
-	pint mode{ pcw.size() };
-
-	inte x0{ 0 };
-	inte x1{ 0 };
-	pint ac{ 0 };
-	real step{ 1.0 / real(mode) };
-	real avdv{ 0.0 };
-	for (pint i = 0; i < Xp.size() - 1; i++) {
-		x0 = Xp[i];
-		x1 = Xp[i + 1];
-		if (x1 - x0 > 5) {
-			boost::math::interpolators::cardinal_cubic_b_spline<real> spline(W.begin() + x0, W.begin() + x1, 0, 1.0 / real(x1 - x0));
-			for (pint i = 0; i <= mode; i++) {
-				avdv += std::abs(spline(i * step) - W[x0 + i]);
-				ac++;
-			}
-		}
-	}
-	avdv += avdv / real(ac);
-	return avdv;
-}
-
-v_pint refine_Xpcs(const v_real& W, const v_real& avgpc, pint min_size, pint max_size) {
+v_inte refine_Xpcs(const v_real& W, const v_real& avgpc, pint min_size, pint max_size) {
 	if (avgpc.size() <= 5) {
 		std::cout << "Average Pseudo Cycle waveform size <= 5";
 		throw std::invalid_argument("Average Pseudo Cycle waveform size <= 5");
@@ -532,8 +559,8 @@ v_pint refine_Xpcs(const v_real& W, const v_real& avgpc, pint min_size, pint max
 	real curr_val{ 0.0 };
 	real step{ 0.0 };
 	real amp{0.0};
-	v_pint Xpc;
-	std::vector<v_real> interps(max_size - min_size+1, v_real(max_size + 1));
+	v_inte Xpc;
+	std::vector<v_real> interps(max_size - min_size + 1, v_real(max_size + 1));
 	for (pint size = min_size; size <= max_size; size++) {
 		step = 1.0 / real(size);
 		for (pint x0 = 1; x0 < min_size; x0++) {
@@ -553,17 +580,17 @@ v_pint refine_Xpcs(const v_real& W, const v_real& avgpc, pint min_size, pint max
 	}
 	inte x0{ inte(best_x0) - inte(min_size) };
 	//std::cout << "best c:" << x0 << "\n";
-	if (x0 > 0) {
-		Xpc.push_back(x0);
-	}
+	//if (x0 > 0) {
+	Xpc.push_back(x0);
+	//}
 	pint curr_x0{ best_x0 + best_size };
 
 	x0 = inte(curr_x0) - inte(min_size);
 
-	if (x0 > 0) {
-		Xpc.push_back(x0);
-	}
-	
+	//if (x0 > 0) {
+	Xpc.push_back(x0);
+	//}
+
 	while (curr_x0 + max_size - min_size < W.size()) {
 		best_val = 0.0;
 		for (pint size = min_size; size <= max_size; size++) {
@@ -585,6 +612,61 @@ v_pint refine_Xpcs(const v_real& W, const v_real& avgpc, pint min_size, pint max
 	return Xpc;
 }
 
+real error(const v_real& W1, const v_real& W2) {
+	real err{ 0.0 };
+	inte n = std::min(W1.size(), W2.size());
+	for (pint i = 0; i < n; i++) {
+		err += std::abs(W1[i] - W2[i]);
+	}
+	return err / n;
+}
+
+//real average_pc_metric(const v_real& pcw, const v_inte& Xp, const v_real& W) {
+//	pint mode{ pcw.size() };
+//
+//	inte x0{ 0 };
+//	inte x1{ 0 };
+//	pint ac{ 0 };
+//	real step{ 1.0 / real(mode) };
+//	real avdv{ 0.0 };
+//	for (pint i = 1; i < Xp.size() - 1; i++) {
+//		x0 = Xp[i];
+//		x1 = Xp[i + 1];
+//		if (x1 - x0 > 5) {
+//			boost::math::interpolators::cardinal_cubic_b_spline<real> spline(W.begin() + x0, W.begin() + x1, 0, 1.0 / real(x1 - x0));
+//			for (pint i = 0; i <= mode; i++) {
+//				avdv += std::abs(spline(i * step) - W[x0 + i]);
+//				ac++;
+//			}
+//		}
+//	}
+//	avdv += avdv / real(ac);
+//	return avdv;
+//}
+
+//real average_pc_metric(const v_real& pcw, const v_inte& Xp, const v_real& W) {
+//	//pint mode{ pcw.size() };
+//	inte x0{ 0 };
+//	inte x1{ 0 };
+//	pint ac{ 0 };
+//	real step;
+//	real avdv{ 0.0 };
+//	boost::math::interpolators::cardinal_cubic_b_spline<real> spline(pcw.begin(), pcw.end(), 0, 1.0 / real(pcw.size()));
+//
+//	for (pint i = 1; i < Xp.size() - 1; i++) {
+//		x0 = Xp[i];
+//		x1 = Xp[i + 1];
+//		if (x1 - x0 > 3) {
+//			step = 1.0 / real(x1 - x0);
+//			for (pint j = 1; j < x1 - x0; j++) {
+//				avdv += std::abs(spline(j * step) - W[x0 + j]);
+//				ac++;
+//			}
+//		}
+//	}
+//	avdv += avdv / real(ac);
+//	return avdv;
+//}
 
 //void get_pulses(const v_real& W, std::vector<pos_integer>& posX,  std::vector<pos_integer>& negX) {
 //	pos_integer n{ W.size() };
@@ -625,3 +707,4 @@ v_pint refine_Xpcs(const v_real& W, const v_real& avgpc, pint min_size, pint max
 //	}
 //	out.close();
 //}
+
