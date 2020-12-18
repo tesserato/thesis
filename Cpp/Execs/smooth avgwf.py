@@ -36,7 +36,7 @@ avgwf_old = np.copy(avgwf)
 
 dmax0 = np.max(avgwf[1:]-avgwf[:-1])
 dmin0 = np.min(avgwf[1:]-avgwf[:-1])
-dmax = min(abs(dmax0), abs(dmin0))
+dmax = max(abs(dmax0), abs(dmin0))
 dmin = -dmax
 
 avg = (avgwf[0] + avgwf[-1]) / 2
@@ -57,11 +57,11 @@ for i in range(avgwf.size//2):
   if dev > dmax:
     print(i, "maior")
     # avgwf[i + 1] = ((i) * avgwf[i + 1] + (avgwf.size//2 - (i)) * (avgwf[i + 1] + dev - dmax)) / (avgwf.size//2)
-    avgwf[i + 1] = ((avgwf[i] + np.abs(dmax)))# * (no2 - i) + avgwf[i + 1] * i) / no2
+    avgwf[i + 1] = ((avgwf[i] + np.abs(dmax)) * (no2 - i) + avgwf[i + 1] * i) / no2
   if dev < dmin:
     print(i, "menor")
     # avgwf[i + 1] = ((i) * avgwf[i + 1] + (avgwf.size//2 - (i)) * (avgwf[i + 1] - dev + dmin)) / (avgwf.size//2)
-    avgwf[i + 1] = ((avgwf[i] - np.abs(dmin)))# * (no2 - i) + avgwf[i + 1] * i) / no2
+    avgwf[i + 1] = ((avgwf[i] - np.abs(dmin)) * (no2 - i) + avgwf[i + 1] * i) / no2
 
 
 for i in range(avgwf.size//2):
@@ -69,11 +69,11 @@ for i in range(avgwf.size//2):
   if dev > dmax:
     print(i, "maior")
     # avgwf[i + 1] = ((i) * avgwf[i + 1] + (avgwf.size//2 - (i)) * (avgwf[i + 1] + dev - dmax)) / (avgwf.size//2)
-    avgwf[avgwf.size - i - 2] = ((avgwf[avgwf.size - i - 1] + np.abs(dmax)))# * (no2 - i) + avgwf[i + 1] * i) / no2
+    avgwf[avgwf.size - i - 2] = ((avgwf[avgwf.size - i - 1] + np.abs(dmax)) * (no2 - i) + avgwf[avgwf.size - i - 2] * i) / no2
   if dev < dmin:
     print(i, "menor")
     # avgwf[i + 1] = ((i) * avgwf[i + 1] + (avgwf.size//2 - (i)) * (avgwf[i + 1] - dev + dmin)) / (avgwf.size//2)
-    avgwf[avgwf.size - i - 2] = ((avgwf[avgwf.size - i - 1] - np.abs(dmin)))# * (no2 - i) + avgwf[i + 1] * i) / no2
+    avgwf[avgwf.size - i - 2] = ((avgwf[avgwf.size - i - 1] - np.abs(dmin)) * (no2 - i) + avgwf[avgwf.size - i - 2] * i) / no2
 
 
 '''============================================================================'''
