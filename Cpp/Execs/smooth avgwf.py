@@ -21,21 +21,16 @@ def save_wav(signal, name = 'test.wav', fps = 44100):
   o.writeframes(np.int16(signal)) # Int16
   o.close()
 
-name = "amazing"
-# W, fps = read_wav(name + ".wav")
-# amp = np.max(np.abs(W))
+name = "bend"
 avgwf = np.genfromtxt(name + "_avgpcw_best.csv", delimiter=",")
-
-
-# for i in range(avgwf.size):
-#   avgwf[i] = i / avgwf.size
-# avgwf = avgwf[::-1]
-
 
 avgwf_old = np.copy(avgwf)
 
 dmax0 = np.max(avgwf[1:]-avgwf[:-1])
 dmin0 = np.min(avgwf[1:]-avgwf[:-1])
+
+print(dmax0, dmin0)
+
 dmax = max(abs(dmax0), abs(dmin0))
 dmin = -dmax
 
@@ -56,23 +51,18 @@ for i in range(avgwf.size//2):
   dev = avgwf[i + 1] - avgwf[i]
   if dev > dmax:
     print(i, "maior")
-    # avgwf[i + 1] = ((i) * avgwf[i + 1] + (avgwf.size//2 - (i)) * (avgwf[i + 1] + dev - dmax)) / (avgwf.size//2)
     avgwf[i + 1] = ((avgwf[i] + np.abs(dmax)) * (no2 - i) + avgwf[i + 1] * i) / no2
   if dev < dmin:
     print(i, "menor")
-    # avgwf[i + 1] = ((i) * avgwf[i + 1] + (avgwf.size//2 - (i)) * (avgwf[i + 1] - dev + dmin)) / (avgwf.size//2)
     avgwf[i + 1] = ((avgwf[i] - np.abs(dmin)) * (no2 - i) + avgwf[i + 1] * i) / no2
-
 
 for i in range(avgwf.size//2):
   dev = avgwf[avgwf.size - i - 2] - avgwf[avgwf.size - i - 1]
   if dev > dmax:
     print(i, "maior")
-    # avgwf[i + 1] = ((i) * avgwf[i + 1] + (avgwf.size//2 - (i)) * (avgwf[i + 1] + dev - dmax)) / (avgwf.size//2)
     avgwf[avgwf.size - i - 2] = ((avgwf[avgwf.size - i - 1] + np.abs(dmax)) * (no2 - i) + avgwf[avgwf.size - i - 2] * i) / no2
   if dev < dmin:
     print(i, "menor")
-    # avgwf[i + 1] = ((i) * avgwf[i + 1] + (avgwf.size//2 - (i)) * (avgwf[i + 1] - dev + dmin)) / (avgwf.size//2)
     avgwf[avgwf.size - i - 2] = ((avgwf[avgwf.size - i - 1] - np.abs(dmin)) * (no2 - i) + avgwf[avgwf.size - i - 2] * i) / no2
 
 
