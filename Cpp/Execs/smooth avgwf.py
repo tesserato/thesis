@@ -3,7 +3,7 @@ import wave
 import numpy as np
 import plotly.graph_objects as go
 from scipy.signal import savgol_filter
-from numpy.polynomial import polynomial
+# from numpy.polynomial import polynomial
 
 def read_wav(path): 
   """returns signal & fps"""
@@ -24,46 +24,47 @@ def save_wav(signal, name = 'test.wav', fps = 44100):
 name = "bend"
 avgwf = np.genfromtxt(name + "_avgpcw_best.csv", delimiter=",")
 
+for i in range(avgwf.size):
+  avgwf[i] = i / avgwf.size
+# avgwf = avgwf[::-1]
+
 avgwf_old = np.copy(avgwf)
 
-dmax0 = np.max(avgwf[1:]-avgwf[:-1])
-dmin0 = np.min(avgwf[1:]-avgwf[:-1])
 
-print(dmax0, dmin0)
+dmax = np.abs(np.max(avgwf[1:]-avgwf[:-1]))
+dmin = -np.abs(np.min(avgwf[1:]-avgwf[:-1]))
 
-dmax = max(abs(dmax0), abs(dmin0))
-dmin = -dmax
 
 avg = (avgwf[0] + avgwf[-1]) / 2
 
 dev = avgwf[0] - avgwf[-1]
 if dev > dmax:
   print("start maior")
-  avgwf[0]  = avg + np.abs(dmax) / 2
-  avgwf[-1] = avg - np.abs(dmax) / 2
-if dev < dmin:
+  avgwf[0]  = avg + dmax / 2
+  avgwf[-1] = avg - dmax / 2
+elif dev < dmin:
   print("start menor")
-  avgwf[0]  = avg - np.abs(dmin) / 2
-  avgwf[-1] = avg + np.abs(dmin) / 2
+  avgwf[0]  = avg + dmin / 2
+  avgwf[-1] = avg - dmin / 2
 
 no2 = avgwf.size//2
 for i in range(avgwf.size//2):
   dev = avgwf[i + 1] - avgwf[i]
   if dev > dmax:
     print(i, "maior")
-    avgwf[i + 1] = ((avgwf[i] + np.abs(dmax)) * (no2 - i) + avgwf[i + 1] * i) / no2
-  if dev < dmin:
+    avgwf[i + 1] = ((avgwf[i] + dmax) * (no2 - i) + avgwf[i + 1] * i) / no2
+  elif dev < dmin:
     print(i, "menor")
-    avgwf[i + 1] = ((avgwf[i] - np.abs(dmin)) * (no2 - i) + avgwf[i + 1] * i) / no2
+    avgwf[i + 1] = ((avgwf[i] + dmin) * (no2 - i) + avgwf[i + 1] * i) / no2
 
 for i in range(avgwf.size//2):
   dev = avgwf[avgwf.size - i - 2] - avgwf[avgwf.size - i - 1]
   if dev > dmax:
     print(i, "maior")
-    avgwf[avgwf.size - i - 2] = ((avgwf[avgwf.size - i - 1] + np.abs(dmax)) * (no2 - i) + avgwf[avgwf.size - i - 2] * i) / no2
-  if dev < dmin:
+    avgwf[avgwf.size - i - 2] = ((avgwf[avgwf.size - i - 1] + dmax) * (no2 - i) + avgwf[avgwf.size - i - 2] * i) / no2
+  elif dev < dmin:
     print(i, "menor")
-    avgwf[avgwf.size - i - 2] = ((avgwf[avgwf.size - i - 1] - np.abs(dmin)) * (no2 - i) + avgwf[avgwf.size - i - 2] * i) / no2
+    avgwf[avgwf.size - i - 2] = ((avgwf[avgwf.size - i - 1] + dmin) * (no2 - i) + avgwf[avgwf.size - i - 2] * i) / no2
 
 
 '''============================================================================'''
