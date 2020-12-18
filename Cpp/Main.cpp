@@ -98,6 +98,12 @@ int main() {
 	write_vector(best_Xpcs, name + "_Xpcs_best.csv");
 	write_vector(best_avg, name + "_avgpcw_best.csv");
 
+	v_real err(W.size(), 0.0);
+	for (pint i = 0; i < W.size(); i++) {
+		err[i] = W[i] - Wave_rep.W_reconstructed[i];
+	}
+	Wav error = Wav(err, fps);
+	error.write(name + "_residue.wav");
 	time.stop();
 }
 

@@ -521,8 +521,8 @@ mode_abdm average_pc_waveform(v_real& pcw, const v_inte& Xp, const v_real& W) {
 
 	inte x0{ 0 };
 	inte x1{ 0 };
-	real step{ 1.0 / real(mode) };
-	pcw.resize(mode + 1);
+	real step{ 1.0 / mode };
+	pcw.resize(mode);
 	std::fill(pcw.begin(), pcw.end(), 0.0);
 	real amp;
 	for (pint i = 1; i < Xp.size() - 1; i++) {
@@ -531,13 +531,13 @@ mode_abdm average_pc_waveform(v_real& pcw, const v_inte& Xp, const v_real& W) {
 		if (x1 - x0 > 5) {
 			amp = std::abs(*std::max_element(W.begin() + x0, W.begin() + x1, abs_compare));
 			boost::math::interpolators::cardinal_cubic_b_spline<real> spline(W.begin() + x0, W.begin() + x1, 0, 1.0 / real(x1 - x0));
-			for (pint j = 0; j <= mode; j++) {
+			for (pint j = 0; j < mode; j++) {
 				pcw[j] += spline(j * step);// *amp* amp;
 			}			
 		}
 	}
 	amp = std::abs(*std::max_element(pcw.begin(), pcw.end(), abs_compare));
-	for (pint i = 0; i <= mode; i++) {
+	for (pint i = 0; i < mode; i++) {
 		pcw[i] = pcw[i] / amp;
 	}
 	return modeabdm;
@@ -619,6 +619,10 @@ real error(const v_real& W1, const v_real& W2) {
 		err += std::abs(W1[i] - W2[i]);
 	}
 	return err / n;
+}
+
+void make_seamless(v_real& V) {
+
 }
 
 //real average_pc_metric(const v_real& pcw, const v_inte& Xp, const v_real& W) {
