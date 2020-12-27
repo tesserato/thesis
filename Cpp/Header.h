@@ -8,7 +8,7 @@
 #include <fstream>
 #include <algorithm>
 #include <sndfile.hh> // Wav in and out
-//#include "mkl_dfti.h" // Intel MKL
+#include "mkl_dfti.h" // Intel MKL
 #include <tuple>
 #include <boost/math/interpolators/cardinal_cubic_b_spline.hpp>
 
@@ -24,6 +24,14 @@ typedef std::vector<real> v_real;
 
 const real PI = 3.14159265358979323846;
 
+template <typename T> void write_vector(std::vector<T>& V, std::string path = "teste.csv") {
+	std::ofstream out(path);
+	for (pint i = 0; i < V.size() - 1; ++i) {
+		out << V[i] << ",";
+	}
+	out << V.back();
+	out.close();
+}
 
 static bool abs_compare(real a, real b) {
 	return (std::abs(a) < std::abs(b));
@@ -621,9 +629,89 @@ real error(const v_real& W1, const v_real& W2) {
 	return err / n;
 }
 
-void make_seamless(v_real& V) {
+void make_seamless(v_real& in) {
+	/* Configure a Descriptor */
+	std::vector<std::complex<double>> out(in.size() / 2 + 1);
 
+	write_vector(in, "00before.csv");
+	DFTI_DESCRIPTOR_HANDLE hand;
+	MKL_LONG status;
+	status = DftiCreateDescriptor(&hand, DFTI_DOUBLE, DFTI_REAL, 1, in.size());
+	status = DftiSetValue(hand, DFTI_PLACEMENT, DFTI_NOT_INPLACE);
+	status = DftiSetValue(hand, DFTI_CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
+	status = DftiSetValue(hand, DFTI_BACKWARD_SCALE, 1.0f / in.size());
+	//status = DftiSetValue(hand, DFTI_PACKED_FORMAT, DFTI_CCE_FORMAT);
+
+	//status = DftiSetValue(hand, DFTI_INPUT_STRIDES, <real_strides>);
+	//status = DftiSetValue(hand, DFTI_OUTPUT_STRIDES,<complex_strides>);
+	status = DftiCommitDescriptor(hand);
+	/* Compute an FFT */
+	status = DftiComputeForward(hand, in.data(), out.data());
+
+	float avg{ 0.0 };
+	for (size_t i = 0; i < out.size(); i++) {
+		avg += std::abs(out[i]);
+	}
+	
+	avg = avg / out.size();
+
+	float dev{ 0.0 };
+	for (size_t i = 0; i < out.size(); i++) {
+		dev += std::abs(std::abs(out[i]) - avg);
+	}
+
+	dev = dev / out.size();
+
+	
+	for (size_t i = 0; i < out.size() + 3 * dev; i++) {
+		if (std::abs(out[i]) <= avg) {
+			out[i] = { 0.0,0.0 };
+		}
+	}
+
+	/* Compute an inverse FFT */
+	//std::fill(in.begin(), in.end(), 0.0);
+	status = DftiComputeBackward(hand, out.data(), in.data());
+	DftiFreeDescriptor(&hand);
+	write_vector(in, "01after.csv");
 }
+
+
+//void make_seamless(v_real& in) {
+//
+//	//int n = (in.size() + 1) / 2;
+//	std::vector<std::complex<float>> out(in.size());
+//
+//	DFTI_DESCRIPTOR_HANDLE descriptor;
+//	MKL_LONG status;
+//	// FFT 
+//	status = DftiCreateDescriptor(&descriptor, DFTI_SINGLE, DFTI_REAL, 1, in.size());//Specify size and precision
+//	status = DftiSetValue(descriptor, DFTI_PLACEMENT, DFTI_NOT_INPLACE);             //Out of place FFT
+//	status = DftiCommitDescriptor(descriptor);                                       //Finalize the descriptor
+//	status = DftiComputeForward(descriptor, in.data(), out.data());                  //Compute the Forward FFT
+//	status = DftiFreeDescriptor(&descriptor);                                        //Free the descriptor
+//
+//	//float avg{ 0.0 };
+//	//for (size_t i = 0; i < out.size(); i++) {
+//	//	avg += std::abs(out[i]);
+//	//}
+//
+//	//avg = avg / out.size();
+//
+//	//for (size_t i = 0; i < out.size(); i++) {
+//	//	if (std::abs(out[i]) < avg) {
+//	//		out[i] = { 0.0,0.0 };
+//	//	}
+//	//}
+//
+//	status = DftiCreateDescriptor(&descriptor, DFTI_SINGLE, DFTI_COMPLEX, 1, out.size()); //Specify size and precision
+//	status = DftiSetValue(descriptor, DFTI_PLACEMENT, DFTI_NOT_INPLACE);                  //Out of place FFT
+//	status = DftiSetValue(descriptor, DFTI_BACKWARD_SCALE, 1.0f / out.size());            //Scale down the output
+//	status = DftiCommitDescriptor(descriptor);                                            //Finalize the descriptor
+//	status = DftiComputeBackward(descriptor, out.data(), in.data());                      //Compute the Backward FFT
+//	status = DftiFreeDescriptor(&descriptor);                                             //Free the descriptor
+//
+//}
 
 //real average_pc_metric(const v_real& pcw, const v_inte& Xp, const v_real& W) {
 //	pint mode{ pcw.size() };
@@ -710,5 +798,68 @@ void make_seamless(v_real& V) {
 //		out << X[i] << "," << W[X[i]] << "\n";
 //	}
 //	out.close();
+//}
+
+//std::vector<float> fpa_from_FT(std::vector<std::complex<float>>& FT, std::string path = "") {
+//	int n = FT.size();
+//	int f;
+//	float p;
+//	float a;
+//	float val = 0.0;
+//	float max_val = 0.0;
+//	if (path == "") {
+//		for (std::size_t i = 0; i < n; ++i) {
+//			val = std::pow(FT[i].real(), 2.0) + std::pow(FT[i].imag(), 2.0);
+//			if (val > max_val) {
+//				max_val = val;
+//				f = i;
+//				p = std::arg(FT[i]);
+//				a = std::abs(FT[i]);
+//			}
+//		}
+//	}
+//	else {
+//		std::ofstream outfile(path);
+//		outfile << "Real, Imag\n";
+//		for (std::size_t i = 0; i < n; ++i) {
+//			outfile << FT[i].real() << "," << FT[i].imag() << "\n";
+//			val = std::pow(FT[i].real(), 2.0) + std::pow(FT[i].imag(), 2.0);
+//			if (val > max_val) {
+//				max_val = val;
+//				f = i;
+//				p = std::arg(FT[i]);
+//				a = std::abs(FT[i]);
+//			}
+//		}
+//		outfile.close();
+//		std::cout << "saved FT @" << path << "\n";
+//	}
+//	std::cout << "f=" << f << ", p=" << p << ", a=" << a << ", n=" << n << "\n";
+//	return { float(f), p, a };
+//}
+//
+//std::vector<float> rfft(std::vector<float>& in) {
+//	auto tp = Chronograph();
+//	int n = (in.size() + 1) / 2;
+//	std::vector<std::complex<float>> out(n);
+//
+//	DFTI_DESCRIPTOR_HANDLE descriptor;
+//	MKL_LONG status;
+//	// FFT 
+//	status = DftiCreateDescriptor(&descriptor, DFTI_SINGLE, DFTI_REAL, 1, in.size());//Specify size and precision
+//	status = DftiSetValue(descriptor, DFTI_PLACEMENT, DFTI_NOT_INPLACE);             //Out of place FFT
+//	status = DftiCommitDescriptor(descriptor);                                       //Finalize the descriptor
+//	status = DftiComputeForward(descriptor, in.data(), out.data());                  //Compute the Forward FFT
+//	status = DftiFreeDescriptor(&descriptor);                                        //Free the descriptor
+//
+//	for (size_t i = 0; i < n; i++) {
+//		out[i] = out[i] / float(n);
+//	}
+//
+//	auto fpa = fpa_from_FT(out);
+//
+//	tp.stop("FFT Time: ");
+//	std::cout << "\n";
+//	return fpa;
 //}
 

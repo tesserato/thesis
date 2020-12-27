@@ -2,21 +2,14 @@
 #include <filesystem>
 
 
-template <typename T> void write_vector(std::vector<T>& V, std::string path = "teste.csv") {
-	std::ofstream out(path);
-	for (pint i = 0; i < V.size() - 1; ++i) {
-		out << V[i] << ",";
-	}
-	out << V.back();
-	out.close();
-}
+
 
 
 
 int main() {
 	Chronograph time;
 
-	std::string name = "amazing";
+	std::string name = "alto";
 	auto WV = read_wav(name + ".wav");
 	auto W = WV.W;
 	auto fps = WV.fps;
@@ -92,6 +85,7 @@ int main() {
 		}
 	}
 
+	make_seamless(best_avg);
 	Wave_rep = Compressed(best_Xpcs, best_avg, W);
 	Wav Wave = Wav(Wave_rep.W_reconstructed, fps);
 	Wave.write(name + "_rec.wav");
