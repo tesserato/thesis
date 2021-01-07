@@ -19,7 +19,7 @@ def save_wav(signal, name = 'test.wav', fps = 44100):
   o.writeframes(np.int16(signal)) # Int16
   o.close()
 
-name = "amazing"
+name = "piano33"
 W, fps = read_wav(name + ".wav")
 amp = np.max(np.abs(W))
 Xpos = np.genfromtxt(name + "_pos.csv", delimiter=",").astype(int)

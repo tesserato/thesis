@@ -143,13 +143,13 @@ public:
 		for (pint i = 1; i < Xp.size() - 1; i++) {
 			x0 = X_PCs[i];
 			x1 = X_PCs[i + 1];
-			e = std::abs(*std::max_element(S.begin() + Xp[i], S.begin() + Xp[i + 1], abs_compare));
+			e = std::abs(*std::max_element(S.begin() + x0, S.begin() + x1, abs_compare));
 			Envelope.push_back(e);
 			if (x1 - x0 > 3) {
 				step = 1.0 / real(x1 - x0);
 				//std::cout << "Step:" << step << " ,last step:" << (x1 - x0) * step << "\n";
 				for (inte j = x0; j < x1; j++) {
-					W_reconstructed[j] = e * spline((j - x0) * step);
+					W_reconstructed[j] =  spline((j - x0) * step) * e;
 				}
 			}
 			else {
@@ -158,42 +158,42 @@ public:
 		}
 		Envelope.push_back(std::abs(*std::max_element(S.begin() + Xp.back(), S.end(), abs_compare)));
 	}
-	Wav reconstruct(pint fps = 44100) {
-		v_real Wave;
-		for (real & e : Envelope) {
-			for (pint i = 0; i < Waveform.size() - 1; i++) {
-				Wave.push_back(e * Waveform[i]);
-			}
-		}
-		return Wav(Wave, fps);
-	}
-	Wav reconstruct_full(pint fps = 44100) {
-		boost::math::interpolators::cardinal_cubic_b_spline<real> spline(Waveform.begin(), Waveform.end(), 0.0, 1.0 / real(Waveform.size()));
-		v_real Wave(X_PCs.back(), 0.0);
-		inte x0{ X_PCs[0] };
-		inte x1{ X_PCs[1] };
-		real step{ 1.0 / (x1 - x0) };
-		//std::cout << "1 Step:" << step << " ,last step:" << (x1 - x0) * step << "\n";
+	//Wav reconstruct(pint fps = 44100) {
+	//	v_real Wave;
+	//	for (real & e : Envelope) {
+	//		for (pint i = 0; i < Waveform.size() - 1; i++) {
+	//			Wave.push_back(e * Waveform[i]);
+	//		}
+	//	}
+	//	return Wav(Wave, fps);
+	//}
+	//Wav reconstruct_full(pint fps = 44100) {
+	//	boost::math::interpolators::cardinal_cubic_b_spline<real> spline(Waveform.begin(), Waveform.end(), 0.0, 1.0 / real(Waveform.size()));
+	//	v_real Wave(X_PCs.back(), 0.0);
+	//	inte x0{ X_PCs[0] };
+	//	inte x1{ X_PCs[1] };
+	//	real step{ 1.0 / (x1 - x0) };
+	//	//std::cout << "1 Step:" << step << " ,last step:" << (x1 - x0) * step << "\n";
 
-		//for (inte i = 0; i < x1; i++) {
-		//	Wave[i] = Envelope[0] * spline((i - x0) * step);
-		//}
-		for (pint i = 1; i < X_PCs.size() - 1; i++) {
-			x0 = X_PCs[i];
-			x1 = X_PCs[i + 1];
-			if (x1 - x0 > 3) {
-				step = 1.0 / real(x1 - x0);
-				//std::cout << "Step:" << step << " ,last step:" << (x1 - x0) * step << "\n";
-				for (inte j = x0; j < x1; j++) {
-					Wave[j] = Envelope[i] * spline((j - x0) * step);
-				}
-			}
-			else {
-				std::cout << "Warning: Pseudo cycle with period < 4 between " << x0 << " and " << x1 << "\n";
-			}
-		}
-		return Wav(Wave, fps);
-	}
+	//	//for (inte i = 0; i < x1; i++) {
+	//	//	Wave[i] = Envelope[0] * spline((i - x0) * step);
+	//	//}
+	//	for (pint i = 1; i < X_PCs.size() - 1; i++) {
+	//		x0 = X_PCs[i];
+	//		x1 = X_PCs[i + 1];
+	//		if (x1 - x0 > 3) {
+	//			step = 1.0 / real(x1 - x0);
+	//			//std::cout << "Step:" << step << " ,last step:" << (x1 - x0) * step << "\n";
+	//			for (inte j = x0; j < x1; j++) {
+	//				Wave[j] = Envelope[i] * spline((j - x0) * step);
+	//			}
+	//		}
+	//		else {
+	//			std::cout << "Warning: Pseudo cycle with period < 4 between " << x0 << " and " << x1 << "\n";
+	//		}
+	//	}
+	//	return Wav(Wave, fps);
+	//}
 };
 
 Wav read_wav(std::string path) {
@@ -663,8 +663,8 @@ void make_seamless(v_real& in) {
 	dev = dev / out.size();
 
 	
-	for (size_t i = 0; i < out.size() + 3 * dev; i++) {
-		if (std::abs(out[i]) <= avg) {
+	for (size_t i = 0; i < out.size(); i++) {
+		if (std::abs(out[i]) <= avg + 3 * dev) {
 			out[i] = { 0.0,0.0 };
 		}
 	}
@@ -674,6 +674,64 @@ void make_seamless(v_real& in) {
 	status = DftiComputeBackward(hand, out.data(), in.data());
 	DftiFreeDescriptor(&hand);
 	write_vector(in, "01after.csv");
+}
+
+void smooth_XPCs(v_inte& Xp) {
+
+	v_real T(Xp.size() - 1);
+	for (pint i = 0; i < Xp.size() - 1; i++) {
+		T[i] = Xp[i + 1] - Xp[i];
+	}
+
+
+	/* Configure a Descriptor */
+	std::vector<std::complex<double>> out(T.size() / 2 + 1);
+
+	//write_vector(in, "00before.csv");
+	DFTI_DESCRIPTOR_HANDLE hand;
+	MKL_LONG status;
+	status = DftiCreateDescriptor(&hand, DFTI_DOUBLE, DFTI_REAL, 1, T.size());
+	status = DftiSetValue(hand, DFTI_PLACEMENT, DFTI_NOT_INPLACE);
+	status = DftiSetValue(hand, DFTI_CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
+	status = DftiSetValue(hand, DFTI_BACKWARD_SCALE, 1.0f / T.size());
+	//status = DftiSetValue(hand, DFTI_PACKED_FORMAT, DFTI_CCE_FORMAT);
+
+	//status = DftiSetValue(hand, DFTI_INPUT_STRIDES, <real_strides>);
+	//status = DftiSetValue(hand, DFTI_OUTPUT_STRIDES,<complex_strides>);
+	status = DftiCommitDescriptor(hand);
+	/* Compute an FFT */
+	status = DftiComputeForward(hand, T.data(), out.data());
+
+	float avg{ 0.0 };
+	for (size_t i = 0; i < out.size(); i++) {
+		avg += std::abs(out[i]);
+	}
+
+	avg = avg / out.size();
+
+	float dev{ 0.0 };
+	for (size_t i = 0; i < out.size(); i++) {
+		dev += std::abs(std::abs(out[i]) - avg);
+	}
+
+	dev = dev / out.size();
+
+
+	for (size_t i = 0; i < out.size(); i++) {
+		if (std::abs(out[i]) <= avg + 3 * dev) {
+			out[i] = { 0.0,0.0 };
+		}
+	}
+
+	/* Compute an inverse FFT */
+	//std::fill(in.begin(), in.end(), 0.0);
+	status = DftiComputeBackward(hand, out.data(), T.data());
+	DftiFreeDescriptor(&hand);
+	//write_vector(in, "01after.csv");
+
+	for (pint i = 0; i < Xp.size() - 1; i++) {
+		Xp[i + 1] = Xp[i] + std::round(T[i]);
+	}
 }
 
 

@@ -9,7 +9,7 @@
 int main() {
 	Chronograph time;
 
-	std::string name = "alto";
+	std::string name = "piano33";
 	auto WV = read_wav(name + ".wav");
 	auto W = WV.W;
 	auto fps = WV.fps;
@@ -56,7 +56,7 @@ int main() {
 	v_inte Xpcs;
 	v_real avg(best_avg);
 
-	for (pint i = 0; i < 500; i++) {
+	for (pint i = 0; i < 50; i++) {
 		Xpcs = refine_Xpcs(W, avg, min_size, max_size);
 		ma = average_pc_waveform(avg, Xpcs, W);
 		inte min_size = std::max(inte(10), inte(ma.mode) - inte(mult * ma.abdm));
@@ -86,17 +86,20 @@ int main() {
 	}
 
 	make_seamless(best_avg);
+	smooth_XPCs(best_Xpcs);
 	Wave_rep = Compressed(best_Xpcs, best_avg, W);
 	Wav Wave = Wav(Wave_rep.W_reconstructed, fps);
 	Wave.write(name + "_rec.wav");
+
 	write_vector(best_Xpcs, name + "_Xpcs_best.csv");
 	write_vector(best_avg, name + "_avgpcw_best.csv");
+	write_vector(Wave_rep.Envelope, name + "_envelope.csv");
 
-	v_real err(W.size(), 0.0);
+	v_real residue(W.size(), 0.0);
 	for (pint i = 0; i < W.size(); i++) {
-		err[i] = W[i] - Wave_rep.W_reconstructed[i];
+		residue[i] = W[i] - Wave_rep.W_reconstructed[i];
 	}
-	Wav error = Wav(err, fps);
+	Wav error = Wav(residue, fps);
 	error.write(name + "_residue.wav");
 	time.stop();
 }
