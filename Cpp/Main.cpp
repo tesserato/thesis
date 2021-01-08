@@ -9,7 +9,7 @@
 int main() {
 	Chronograph time;
 
-	std::string name = "piano33";
+	std::string name = "soprano";
 	auto WV = read_wav(name + ".wav");
 	auto W = WV.W;
 	auto fps = WV.fps;
@@ -17,7 +17,6 @@ int main() {
 
 	v_pint posX, negX;
 	get_pulses(W, posX, negX);
-
 
 	auto posF = get_frontier(W, posX);
 	auto negF = get_frontier(W, negX);
@@ -27,8 +26,8 @@ int main() {
 
 	refine_frontier_iter(posF, W);
 	refine_frontier_iter(negF, W);
-	write_vector(posF, name + "_pos_n.csv");
-	write_vector(negF, name + "_neg_n.csv");
+	write_vector(posF, name + "_pos_refined.csv");
+	write_vector(negF, name + "_neg_refined.csv");
 
 	inte mult{ 3 };
 	v_inte best_Xpcs = get_Xpcs(posF, negF);
@@ -37,7 +36,7 @@ int main() {
 	mode_abdm ma = average_pc_waveform(best_avg, best_Xpcs, W);
 	write_vector(best_avg, name + "_avgpcw.csv");
 
-	Compressed Wave_rep = Compressed(best_Xpcs, best_avg, W);
+	Compressed Wave_rep = Compressed::raw(best_Xpcs, best_avg, W);
 	//Wav Wave = Wave_rep.reconstruct_full(fps);
 	real best_avdv = error(Wave_rep.W_reconstructed, W);// average_pc_metric(best_avg, best_Xpcs, W);
 	inte min_size = std::max(inte(10), inte(ma.mode) - inte(mult * ma.abdm));
@@ -62,7 +61,7 @@ int main() {
 		inte min_size = std::max(inte(10), inte(ma.mode) - inte(mult * ma.abdm));
 		inte max_size = ma.mode + inte(mult * ma.abdm);
 
-		Wave_rep = Compressed(Xpcs, avg, W);
+		Wave_rep = Compressed::raw(Xpcs, avg, W);
 		//Wave = Wave_rep.reconstruct_full(fps);
 		real avdv = error(Wave_rep.W_reconstructed, W);
 
@@ -85,9 +84,8 @@ int main() {
 		}
 	}
 
-	make_seamless(best_avg);
-	smooth_XPCs(best_Xpcs);
-	Wave_rep = Compressed(best_Xpcs, best_avg, W);
+
+	Wave_rep = Compressed::raw(best_Xpcs, best_avg, W);
 	Wav Wave = Wav(Wave_rep.W_reconstructed, fps);
 	Wave.write(name + "_rec.wav");
 
@@ -101,6 +99,13 @@ int main() {
 	}
 	Wav error = Wav(residue, fps);
 	error.write(name + "_residue.wav");
+
+	auto Wave_rep_smooth = Compressed::smooth(best_Xpcs, best_avg, Wave_rep.Envelope);
+	Wav Wave_smooth = Wav(Wave_rep_smooth.W_reconstructed, fps);
+	Wave_smooth.write(name + "_rec_smooth.wav");
+	write_vector(Wave_rep_smooth.Waveform, name + "_avgpcw_best_smooth.csv");
+	write_vector(Wave_rep_smooth.Envelope, name + "_envelope_smooth.csv");
+
 	time.stop();
 }
 
