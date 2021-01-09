@@ -8,7 +8,7 @@
 
 int main() {
 	Chronograph time;
-	std::string name = "alto";
+	std::string name = "soprano";
 	auto WV = read_wav(name + ".wav");
 	auto W = WV.W;
 	auto fps = WV.fps;

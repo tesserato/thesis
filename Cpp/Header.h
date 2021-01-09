@@ -316,10 +316,6 @@ public:
 	}
 
 	static Compressed raw(const v_inte Xp, const v_real& W, const v_real& S, pint f = 44100) {
-		//X_PCs = Xp;
-		//Waveform = W;
-		//fps = f;
-		//v_inte Xp(Xp_orig);
 		boost::math::interpolators::cardinal_cubic_b_spline<real> spline(W.begin(), W.end(), 0.0, 1.0 / real(W.size()));
 		v_real W_reconstructed(S.size(), 0.0);
 		v_real Envelope;
@@ -343,44 +339,58 @@ public:
 		}
 		Envelope.push_back(std::abs(*std::max_element(S.begin() + Xp.back(), S.end(), abs_compare)));
 
-		//pint itens{ 5 };
-		//real avg_t{ 0.0 };
-		//real avg_e{ 0.0 };
-		//inte new_Xp0{ 0 };
+		v_inte Xp_new(Xp);
+		v_real En_new(Envelope);
+		pint itens{ 5 };
+		real avg_t{ 0.0 };
+		real avg_e{ 0.0 };
+		while (Xp_new[0] > 0) {
+			for (pint i = 0; i < itens; i++) {
+				avg_t += Xp_new[i + 1] - Xp_new[i];
+				avg_e += En_new[i];
+			}
+			Xp_new.insert(Xp_new.begin(), Xp_new[0] - std::round(avg_t / itens));
+			En_new.insert(En_new.begin(), avg_e / itens);
+		}
+		avg_t = 0.0;
+		avg_e = 0.0;
+		while (Xp_new.back() < S.size()) {
+			for (pint i = Xp_new.size() - itens - 1; i < Xp_new.size() - 1; i++) {
+				avg_t += Xp_new[i + 1] - Xp_new[i];
+				avg_e += En_new[i];
+			}
+			Xp_new.push_back(Xp_new.back() + std::round(avg_t / itens));
+			En_new.push_back(avg_e / itens);
+		}
+		// Filling from 0 to Xp[1]
+		pint ctr = 0;
+		x0 = Xp_new[ctr];
+		x1 = Xp_new[ctr + 1];
+		while (x1 <= Xp[1]) {
+			if (x1 < 0)	{
+				continue;
+			}
+			else {
+				step = 1.0 / real(x1 - x0);
+				for (inte j = x0; j < x1; j++) {
+					if (j >= 0) {
+					W_reconstructed[j] = spline((j - x0) * step) * En_new[ctr];
+					}
+				}
+			}
+			ctr++;
+			x0 = Xp_new[ctr];
+			x1 = Xp_new[ctr + 1];
+		}
 
-		//while (Xp[0] > 0) {
-		//	for (pint i = 0; i < itens; i++) {
-		//		avg_t += Xp[i + 1] - Xp[i];
-		//		avg_e += Envelope[i];
-		//	}
-		//	new_Xp0 = Xp[0] - std::round(avg_t / itens);
-		//	e = avg_e / itens;
-		//	step = 1.0 / real(Xp[0] - new_Xp0);
-		//	for (inte j = new_Xp0; j < Xp[0]; j++) {
-		//		W_reconstructed.insert(W_reconstructed.begin(), spline((j - new_Xp0) * step) * e);
-		//	}
-		//	Xp.insert(Xp.begin(), new_Xp0);
-		//	Envelope.insert(Envelope.begin(), e);
-		//}
-
-		//avg_t = 0.0;
-		//avg_e = 0.0;
-		//while (Xp.back() < S.size()) {
-		//	for (pint i = Xp.size() - itens - 1; i < Xp.size() - 1; i++) {
-		//		avg_t += Xp[i + 1] - Xp[i];
-		//		avg_e += Envelope[i];
-		//	}
-		//	new_Xp0 = Xp.back() + std::round(avg_t / itens);
-		//	e = avg_e / itens;
-		//	step = 1.0 / real(new_Xp0 - Xp.back());
-		//	for (inte j = Xp.back(); j < new_Xp0; j++) {
-		//		W_reconstructed.push_back(spline((j - Xp.back()) * step) * e);
-		//	}
-		//	Xp.push_back(new_Xp0);
-		//	Envelope.push_back(e);
-		//}
-		//auto start = W_reconstructed.begin() - Xp[0];
-		//v_real Wf(start, start + S.size());
+		x0 = Xp.back();
+		x1 = Xp_new.back();
+		step = 1.0 / real(x1 - x0);
+		for (inte j = x0; j < x1; j++) {
+			if (j < S.size()) {
+				W_reconstructed[j] = spline((j - x0) * step) * En_new.back();
+			}
+		}
 		return Compressed(Xp, W, Envelope, W_reconstructed, f);
 	}
 };
@@ -707,7 +717,7 @@ v_inte get_Xpcs(const v_pint& Xpos, const v_pint& Xneg) {
 	return Xpcs;
 }
 
-mode_abdm average_pc_waveform(v_real& pcw, const v_inte& Xp, const v_real& W) {
+mode_abdm average_pc_waveform(v_real& pcw,  v_inte& Xp, const v_real& W) {
 	v_pint T(Xp.size() - 1);
 	for (pint i = 0; i < Xp.size() - 1; ++i) {
 		T[i] = Xp[i + 1] - Xp[i];
@@ -751,6 +761,14 @@ mode_abdm average_pc_waveform(v_real& pcw, const v_inte& Xp, const v_real& W) {
 	}
 
 	std::rotate(pcw.begin(), pcw.begin() + first, pcw.end());
+
+	for (pint i = 0; i < Xp.size(); i++) {
+		Xp[i] = Xp[i] + first;
+	}
+
+	while (Xp.back() >= W.size()) {
+		Xp.pop_back();
+	}
 
 	return modeabdm;
 }
