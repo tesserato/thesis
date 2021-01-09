@@ -4,7 +4,7 @@ import numpy as np
 import plotly.graph_objects as go
 
 
-name = "alto"
+name = "piano33"
 
 Xpc = np.genfromtxt(name + "_Xpcs.csv", delimiter=",").astype(int)
 L = Xpc[1:] - Xpc[:-1]

@@ -8,8 +8,7 @@
 
 int main() {
 	Chronograph time;
-
-	std::string name = "soprano";
+	std::string name = "alto";
 	auto WV = read_wav(name + ".wav");
 	auto W = WV.W;
 	auto fps = WV.fps;
@@ -63,7 +62,7 @@ int main() {
 
 		Wave_rep = Compressed::raw(Xpcs, avg, W);
 		//Wave = Wave_rep.reconstruct_full(fps);
-		real avdv = error(Wave_rep.W_reconstructed, W);
+		avdv = error(Wave_rep.W_reconstructed, W);
 
 		std::cout
 			<< "i:" << i
@@ -100,7 +99,7 @@ int main() {
 	Wav error = Wav(residue, fps);
 	error.write(name + "_residue.wav");
 
-	auto Wave_rep_smooth = Compressed::smooth(best_Xpcs, best_avg, Wave_rep.Envelope);
+	auto Wave_rep_smooth = Compressed::smooth(best_Xpcs, best_avg, Wave_rep.Envelope, W.size());
 	Wav Wave_smooth = Wav(Wave_rep_smooth.W_reconstructed, fps);
 	Wave_smooth.write(name + "_rec_smooth.wav");
 	write_vector(Wave_rep_smooth.Waveform, name + "_avgpcw_best_smooth.csv");
