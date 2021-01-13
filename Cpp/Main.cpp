@@ -1,39 +1,144 @@
 #include "Header.h"
 #include <filesystem>
 
+class layer {
+private:
+	v_real W;
+	bool reconstructed = false;
+public:
+	v_inte X_PCs; // start of each pulse
+	v_real Envelope;
+	v_real Waveform;
+	pint n;
 
 
+	layer(v_inte X, v_real E, v_real W, pint n_) {
+		X_PCs = X;
+		Envelope = E;
+		Waveform = W;
+		n = n_;
+	}
+	pint size() {
+		return X_PCs.size() + Envelope.size() + Waveform.size();
+	}
+	v_real reconstruct() {
+		if (reconstructed) {
+			return W;
+		}
+		boost::math::interpolators::cardinal_cubic_b_spline<real> spline(Waveform.begin(), Waveform.end(), 0.0, 1.0 / real(Waveform.size()));
+		v_real W_reconstructed(n, 0.0);
 
+		inte x0{ X_PCs[0] };
+		inte x1{ X_PCs[1] };
+		real step{ 1.0 / (x1 - x0) };
+		for (pint i = 1; i < X_PCs.size() - 1; i++) {
+			x0 = X_PCs[i];
+			x1 = X_PCs[i + 1];
+			step = 1.0 / real(x1 - x0);
+			for (inte j = x0; j < x1; j++) {
+				W_reconstructed[j] = spline((j - x0) * step) * Envelope[i];
+			}
+			if (x1 - x0 <= 3) {
+				std::cout << "Warning: Pseudo cycle with period < 4 between " << x0 << " and " << x1 << "\n";
+			}
+		}
 
+		inte X_PCs_start = X_PCs[1];
+		inte X_PCs_end = X_PCs.back();
+		pint itens{ 5 };
+		real avg_t{ 0.0 };
+		real avg_e{ 0.0 };
+		while (X_PCs[0] > 0) {
+			avg_t = 0.0;
+			avg_e = 0.0;
+			for (pint i = 0; i < itens; i++) {
+				avg_t += X_PCs[i + 1] - X_PCs[i];
+				avg_e += Envelope[i];
+			}
+			X_PCs.insert(X_PCs.begin(), X_PCs[0] - std::round(avg_t / itens));
+			Envelope.insert(Envelope.begin(), avg_e / itens);
+		}
 
-int main() {
+		while (X_PCs.back() < n) {
+			avg_t = 0.0;
+			avg_e = 0.0;
+			for (pint i = X_PCs.size() - itens - 1; i < X_PCs.size() - 1; i++) {
+				avg_t += X_PCs[i + 1] - X_PCs[i];
+				avg_e += Envelope[i];
+			}
+			X_PCs.push_back(X_PCs.back() + std::round(avg_t / itens));
+			Envelope.push_back(avg_e / itens);
+		}
+
+		// Filling from 0 to Xp[1]
+		pint ctr = 0;
+		x0 = X_PCs[ctr];
+		x1 = X_PCs[ctr + 1];
+		while (x1 <= X_PCs_start) {
+			if (x1 < 0) {
+				continue;
+			}
+			else {
+				step = 1.0 / real(x1 - x0);
+				for (inte j = x0; j < x1; j++) {
+					if (j >= 0) {
+						W_reconstructed[j] = spline((j - x0) * step) * Envelope[ctr];
+					}
+				}
+			}
+			ctr++;
+			x0 = X_PCs[ctr];
+			x1 = X_PCs[ctr + 1];
+		}
+
+		ctr = X_PCs.size() - 1;
+		x0 = X_PCs[ctr - 1];
+		x1 = X_PCs[ctr];
+		while (x0 >= X_PCs_end) {
+			if (x0 >= n) {
+				continue;
+			}
+			else {
+				step = 1.0 / real(x1 - x0);
+				for (inte j = x0; j < x1; j++) {
+					if (j < n) {
+						W_reconstructed[j] = spline((j - x0) * step) * Envelope.back();
+					}
+				}
+			}
+			ctr--;
+			x0 = X_PCs[ctr - 1];
+			x1 = X_PCs[ctr];
+		}
+		reconstructed = true;
+		W = W_reconstructed;
+		return W_reconstructed;
+	}
+};
+
+layer compress(const v_real& W, inte mult=3) {
+
 	Chronograph time;
-	std::string name = "soprano";
-	auto WV = read_wav(name + ".wav");
-	auto W = WV.W;
-	auto fps = WV.fps;
-	//WV.write();
-
 	v_pint posX, negX;
 	get_pulses(W, posX, negX);
 
 	auto posF = get_frontier(W, posX);
 	auto negF = get_frontier(W, negX);
-	write_vector(posF, name + "_pos.csv");
-	write_vector(negF, name + "_neg.csv");
+	//write_vector(posF, name + "_pos.csv");
+	//write_vector(negF, name + "_neg.csv");
 
 
 	refine_frontier_iter(posF, W);
 	refine_frontier_iter(negF, W);
-	write_vector(posF, name + "_pos_refined.csv");
-	write_vector(negF, name + "_neg_refined.csv");
+	//write_vector(posF, name + "_pos_refined.csv");
+	//write_vector(negF, name + "_neg_refined.csv");
 
-	inte mult{ 3 };
+	//inte mult{ 3 };
 	v_inte best_Xpcs = get_Xpcs(posF, negF);
-	write_vector(best_Xpcs, name + "_Xpcs.csv");
+	//write_vector(best_Xpcs, name + "_Xpcs.csv");
 	v_real best_avg;
 	mode_abdm ma = average_pc_waveform(best_avg, best_Xpcs, W);
-	write_vector(best_avg, name + "_avgpcw.csv");
+	//write_vector(best_avg, name + "_avgpcw.csv");
 
 	Compressed Wave_rep = Compressed::raw(best_Xpcs, best_avg, W);
 	//Wav Wave = Wave_rep.reconstruct_full(fps);
@@ -76,7 +181,7 @@ int main() {
 			<< ", E:" << avdv << "\n";
 
 		if (avdv < best_avdv) {
-			std::cout  << "^^^^^IMPROVEMENT!^^^^^\n";
+			std::cout << "^^^^^IMPROVEMENT!^^^^^\n";
 			best_avdv = avdv;
 			best_Xpcs = Xpcs;
 			best_avg = avg;
@@ -85,27 +190,63 @@ int main() {
 
 
 	Wave_rep = Compressed::raw(best_Xpcs, best_avg, W);
-	Wav Wave = Wav(Wave_rep.W_reconstructed, fps);
-	Wave.write(name + "_rec.wav");
+	//Wav Wave = Wav(Wave_rep.W_reconstructed, fps);
+	//Wave.write(name + "_rec.wav");
 
-	write_vector(best_Xpcs, name + "_Xpcs_best.csv");
-	write_vector(best_avg, name + "_avgpcw_best.csv");
-	write_vector(Wave_rep.Envelope, name + "_envelope.csv");
+	//write_vector(best_Xpcs, name + "_Xpcs_best.csv");
+	//write_vector(best_avg, name + "_avgpcw_best.csv");
+	//write_vector(Wave_rep.Envelope, name + "_envelope.csv");
 
-	v_real residue(W.size(), 0.0);
-	for (pint i = 0; i < W.size(); i++) {
-		residue[i] = W[i] - Wave_rep.W_reconstructed[i];
-	}
-	Wav error = Wav(residue, fps);
-	error.write(name + "_residue.wav");
+	//v_real residue(W.size(), 0.0);
+	//for (pint i = 0; i < W.size(); i++) {
+	//	residue[i] = W[i] - Wave_rep.W_reconstructed[i];
+	//}
+	//Wav error = Wav(residue, fps);
+	//error.write(name + "_residue.wav");
 
-	auto Wave_rep_smooth = Compressed::smooth(best_Xpcs, best_avg, Wave_rep.Envelope, W.size());
-	Wav Wave_smooth = Wav(Wave_rep_smooth.W_reconstructed, fps);
-	Wave_smooth.write(name + "_rec_smooth.wav");
-	write_vector(Wave_rep_smooth.Waveform, name + "_avgpcw_best_smooth.csv");
-	write_vector(Wave_rep_smooth.Envelope, name + "_envelope_smooth.csv");
-
+	//auto Wave_rep_smooth = Compressed::smooth(best_Xpcs, best_avg, Wave_rep.Envelope, W.size());
+	//Wav Wave_smooth = Wav(Wave_rep_smooth.W_reconstructed, fps);
+	//Wave_smooth.write(name + "_rec_smooth.wav");
+	//write_vector(Wave_rep_smooth.Waveform, name + "_avgpcw_best_smooth.csv");
+	//write_vector(Wave_rep_smooth.Envelope, name + "_envelope_smooth.csv");
 	time.stop();
+	
+	return layer(best_Xpcs, Wave_rep.Envelope, best_avg, W.size());
+}
+
+v_real get_residue(const v_real& W0, const v_real& W1) {
+	v_real R(W0.size(), 0.0);
+	for (pint i = 0; i < R.size(); i++)	{
+		R[i] = W0[i] - W1[i];
+	}
+	return R;
+}
+
+int main() {
+	
+	std::string name = "alto";
+	auto WV = read_wav(name + ".wav");
+	auto W = WV.W;
+	auto fps = WV.fps;
+
+	auto l1 = compress(W);
+	std::cout << l1.size() << "\n";
+
+	Wav rec1 = Wav(l1.reconstruct(), fps);
+	rec1.write(name + "_reconstructed_01.wav");
+
+
+	auto r1 = get_residue(W, l1.reconstruct());
+
+
+	auto l2 = compress(r1);
+	Wav rec2 = Wav(l2.reconstruct(), fps);
+	rec2.write(name + "_reconstructed_02.wav");
+
+
+
+	//WV.write();
+
 }
 
 //int main() {

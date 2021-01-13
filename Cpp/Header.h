@@ -316,6 +316,7 @@ public:
 	}
 
 	static Compressed raw(const v_inte Xp, const v_real& W, const v_real& S, pint f = 44100) {
+
 		boost::math::interpolators::cardinal_cubic_b_spline<real> spline(W.begin(), W.end(), 0.0, 1.0 / real(W.size()));
 		v_real W_reconstructed(S.size(), 0.0);
 		v_real Envelope;
