@@ -10,13 +10,15 @@ public:
 	v_real Envelope;
 	v_real Waveform;
 	pint n;
+	pint fps;
 
 
-	layer(v_inte X, v_real E, v_real W, pint n_) {
+	layer(v_inte X, v_real E, v_real W, pint n_, pint fps_) {
 		X_PCs = X;
 		Envelope = E;
 		Waveform = W;
 		n = n_;
+		fps = fps_;
 	}
 	pint size() {
 		return X_PCs.size() + Envelope.size() + Waveform.size();
@@ -116,7 +118,7 @@ public:
 	}
 };
 
-layer compress(const v_real& W, inte max_seconds = 100, real max_iterations = std::numeric_limits<double>::infinity(), inte mult = 3) {
+Compressed compress(const v_real& W, inte max_seconds = 100, real max_iterations = std::numeric_limits<double>::infinity(), inte mult = 3) {
 	v_pint posX, negX;
 	get_pulses(W, posX, negX);
 
@@ -177,12 +179,13 @@ layer compress(const v_real& W, inte max_seconds = 100, real max_iterations = st
 			best_Xpcs = Xpcs;
 			best_avg = avg;
 
+			pint cn = 2 * (best_Xpcs.size() + best_avg.size()) + 1;
 			std::cout
 				<< "\n"
 				<< "Iteration " << ctr << "\n"
 				<< "Number of samples in the original signal:" << W.size() << "\n"
 				//<< ", Xpcs[-1]:" << best_Xpcs.back()
-				<< "Appr. compressed size:" << best_Xpcs.size() + best_avg.size() << " (" <<  float(best_Xpcs.size() + best_avg.size()) / float(W.size()) << ")\n"
+				<< "Appr. compressed size:" << cn << " (" <<  float(cn) / float(W.size()) << ")\n"
 				<< "Waveform length mode: " << ma.mode << "\n"
 				<< "Waveform length abdm: " << ma.abdm << "\n"
 				<< "Min waveform length:  " << min_size << "\n"
@@ -193,29 +196,7 @@ layer compress(const v_real& W, inte max_seconds = 100, real max_iterations = st
 		duration = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start).count();
 	}
 
-	Wave_rep = Compressed::raw(best_Xpcs, best_avg, W);
-	//Wav Wave = Wav(Wave_rep.W_reconstructed, fps);
-	//Wave.write(name + "_rec.wav");
-
-	//write_vector(best_Xpcs, name + "_Xpcs_best.csv");
-	//write_vector(best_avg, name + "_avgpcw_best.csv");
-	//write_vector(Wave_rep.Envelope, name + "_envelope.csv");
-
-	//v_real residue(W.size(), 0.0);
-	//for (pint i = 0; i < W.size(); i++) {
-	//	residue[i] = W[i] - Wave_rep.W_reconstructed[i];
-	//}
-	//Wav error = Wav(residue, fps);
-	//error.write(name + "_residue.wav");
-
-	//auto Wave_rep_smooth = Compressed::smooth(best_Xpcs, best_avg, Wave_rep.Envelope, W.size());
-	//Wav Wave_smooth = Wav(Wave_rep_smooth.W_reconstructed, fps);
-	//Wave_smooth.write(name + "_rec_smooth.wav");
-	//write_vector(Wave_rep_smooth.Waveform, name + "_avgpcw_best_smooth.csv");
-	//write_vector(Wave_rep_smooth.Envelope, name + "_envelope_smooth.csv");
-	//time.stop();
-	
-	return layer(best_Xpcs, Wave_rep.Envelope, best_avg, W.size());
+	return Compressed::raw(best_Xpcs, best_avg, W);
 }
 
 v_real get_residue(const v_real& W0, const v_real& W1) {
@@ -231,7 +212,61 @@ inline bool ends_with(std::string const& value, std::string const& ending) {
 	return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 }
 
+void write_bin(std::string path, pint orig_n, pint fps, const v_inte& beg_of_pseudo_cycles, const v_real& waveform, const v_real& amp_of_pseudo_cycles) {
+
+	std::ofstream data_file;      // pay attention here! ofstream
+
+	v_pint pint_data = { orig_n, fps, amp_of_pseudo_cycles.size(), waveform.size() }; // header
+	v_real real_data = { 0.1,1.2,2.3,3.4,4.5,5.6,6.7,7.8,8.9,9.0 };
+	//size_t size = inte_data.size();
+
+	data_file.open(path, std::ios::out | std::ios::binary | std::fstream::trunc);
+	data_file.write((char*) &pint_data[0], pint_data.size() * sizeof(pint));
+	data_file.close();
+
+	data_file.open(path, std::ios::out | std::ios::binary | std::fstream::app);
+	data_file.write((char*)&beg_of_pseudo_cycles[0], beg_of_pseudo_cycles.size() * sizeof(inte));
+	data_file.close();
+
+	data_file.open(path, std::ios::out | std::ios::binary | std::fstream::app);
+	data_file.write((char*)&waveform[0], waveform.size() * sizeof(real));
+	data_file.close();
+
+	data_file.open(path, std::ios::out | std::ios::binary | std::fstream::app);
+	data_file.write((char*)&amp_of_pseudo_cycles[0], amp_of_pseudo_cycles.size() * sizeof(real));
+	data_file.close();
+}
+
+layer read_bin(std::string path) {
+	std::ifstream  data_file;
+	data_file.open(path, std::ios::in | std::ios::binary);
+
+	pint* header = new pint[4];
+	data_file.read(reinterpret_cast<char*>(&header[0]), 4 * sizeof(pint));
+	for (int i = 0; i < 4; ++i) {
+		std::cout << header[i] << "\n";
+	}
+
+	inte* beg_of_pseudo_cycles_buffer = new inte[header[2] + 1];
+	data_file.read((char*)&beg_of_pseudo_cycles_buffer[0], (header[2] + 1) * sizeof(inte));
+	v_inte beg_of_pseudo_cycles(beg_of_pseudo_cycles_buffer, beg_of_pseudo_cycles_buffer + header[2] + 1);
+
+	real* waveform_buffer = new real[header[3]];
+	data_file.read((char*)&waveform_buffer[0], (header[3]) * sizeof(real));
+	v_real waveform(waveform_buffer, waveform_buffer + header[3]);
+
+	real* envelope_buffer = new real[header[2]];
+	data_file.read((char*)&envelope_buffer[0], (header[2]) * sizeof(real));
+	v_real envelope(envelope_buffer, envelope_buffer + header[2]);
+
+
+	data_file.close();
+
+	return layer(beg_of_pseudo_cycles, envelope, waveform, header[0], header[1]);
+}
+
 int main(int argc, char** argv) {
+
 	std::cout << argc << "\n";
 	
 	if (argc == 1) {
@@ -249,11 +284,19 @@ int main(int argc, char** argv) {
 				auto WV = read_wav(argv[i]);
 				auto W = WV.W;
 				auto fps = WV.fps;
-				auto C = compress(W);
+				auto C = compress(W, 5);
+
+				write_bin("t.cmp", W.size(), WV.fps, C.X_PCs, C.Waveform, C.Envelope);
+				auto rec = read_bin("t.cmp");
+				Wav WW = Wav(rec.reconstruct(), rec.fps);
+				WW.write("t.wav");
 			}
 		}
 	}
 	
+
+
+
 	
 	//std::string name = "alto";
 	//auto WV = read_wav(name + ".wav");
