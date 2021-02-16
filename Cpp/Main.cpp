@@ -1,4 +1,4 @@
-#include "Header.h"
+﻿#include "Header.h"
 #include <filesystem>
 
 class layer {
@@ -116,7 +116,7 @@ public:
 	}
 };
 
-layer compress(const v_real& W, inte mult=3) {
+layer compress(const v_real& W, inte max_seconds = 100, real max_iterations = std::numeric_limits<double>::infinity(), inte mult = 3) {
 	v_pint posX, negX;
 	get_pulses(W, posX, negX);
 
@@ -145,21 +145,24 @@ layer compress(const v_real& W, inte mult=3) {
 	inte max_size = ma.mode + inte(mult * ma.abdm);
 
 	std::cout
-		<< "START>> n:" << W.size()
-		<< ", Xpcs[-1]:" << best_Xpcs.back()
-		<< ", Xpcs size:" << best_Xpcs.size()
-		<< ", mode:" << ma.mode
-		<< ", abdm:" << ma.abdm
-		<< ", min size:" << min_size
-		<< ", max size:" << max_size
-		<< ", E:" << best_avdv << "\n";
+		<< "\n"
+		<< "Number of samples in the original signal:" << W.size() << "\n"
+		<< "Appr. compressed size:" << best_Xpcs.size() + best_avg.size() << "\n"
+		<< "Xpcs size:            " << best_Xpcs.size() << "\n"
+		<< "Waveform length mode: " << ma.mode << "\n"
+		<< "Waveform length abdm: " << ma.abdm << "\n"
+		<< "Min waveform length:  " << min_size << "\n"
+		<< "Max waveform length:  " << max_size << "\n"
+		<< "Initial average error:" << best_avdv << "\n";
+
 	real avdv;
 	v_inte Xpcs;
 	v_real avg(best_avg);
 
 	const std::chrono::time_point< std::chrono::steady_clock> start = std::chrono::high_resolution_clock::now();
 	real duration = 0.0;
-	while (duration <= 50.0) {
+	pint ctr = 0;
+	while (duration <= max_seconds && ctr < max_iterations) {
 		Xpcs = refine_Xpcs(W, avg, min_size, max_size);
 		ma = average_pc_waveform(avg, Xpcs, W);
 		inte min_size = std::max(inte(10), inte(ma.mode) - inte(mult * ma.abdm));
@@ -169,23 +172,24 @@ layer compress(const v_real& W, inte mult=3) {
 		//Wave = Wave_rep.reconstruct_full(fps);
 		avdv = error(Wave_rep.W_reconstructed, W);
 
-		std::cout
-			//<< "i:" << i
-			<< ", n:" << W.size()
-			<< ", Xpcs[-1]:" << Xpcs.back()
-			<< ", Xpcs size:" << Xpcs.size()
-			<< ", mode:" << ma.mode
-			<< ", abdm:" << ma.abdm
-			<< ", min size:" << min_size
-			<< ", max size:" << max_size
-			<< ", E:" << avdv << "\n";
-
 		if (avdv < best_avdv) {
-			std::cout << "^^^^^IMPROVEMENT!^^^^^\n";
 			best_avdv = avdv;
 			best_Xpcs = Xpcs;
 			best_avg = avg;
+
+			std::cout
+				<< "\n"
+				<< "Iteration " << ctr << "\n"
+				<< "Number of samples in the original signal:" << W.size() << "\n"
+				//<< ", Xpcs[-1]:" << best_Xpcs.back()
+				<< "Appr. compressed size:" << best_Xpcs.size() + best_avg.size() << " (" <<  float(best_Xpcs.size() + best_avg.size()) / float(W.size()) << ")\n"
+				<< "Waveform length mode: " << ma.mode << "\n"
+				<< "Waveform length abdm: " << ma.abdm << "\n"
+				<< "Min waveform length:  " << min_size << "\n"
+				<< "Max waveform length:  " << max_size << "\n"
+				<< "Average error:        " << best_avdv << "\n";
 		}
+		ctr++;
 		duration = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start).count();
 	}
 
@@ -226,6 +230,7 @@ inline bool ends_with(std::string const& value, std::string const& ending) {
 	if (ending.size() > value.size()) return false;
 	return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 }
+
 int main(int argc, char** argv) {
 	std::cout << argc << "\n";
 	
