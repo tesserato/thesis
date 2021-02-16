@@ -117,8 +117,6 @@ public:
 };
 
 layer compress(const v_real& W, inte mult=3) {
-
-	Chronograph time;
 	v_pint posX, negX;
 	get_pulses(W, posX, negX);
 
@@ -159,7 +157,9 @@ layer compress(const v_real& W, inte mult=3) {
 	v_inte Xpcs;
 	v_real avg(best_avg);
 
-	for (pint i = 0; i < 50; i++) {
+	const std::chrono::time_point< std::chrono::steady_clock> start = std::chrono::high_resolution_clock::now();
+	real duration = 0.0;
+	while (duration <= 50.0) {
 		Xpcs = refine_Xpcs(W, avg, min_size, max_size);
 		ma = average_pc_waveform(avg, Xpcs, W);
 		inte min_size = std::max(inte(10), inte(ma.mode) - inte(mult * ma.abdm));
@@ -170,7 +170,7 @@ layer compress(const v_real& W, inte mult=3) {
 		avdv = error(Wave_rep.W_reconstructed, W);
 
 		std::cout
-			<< "i:" << i
+			//<< "i:" << i
 			<< ", n:" << W.size()
 			<< ", Xpcs[-1]:" << Xpcs.back()
 			<< ", Xpcs size:" << Xpcs.size()
@@ -186,8 +186,8 @@ layer compress(const v_real& W, inte mult=3) {
 			best_Xpcs = Xpcs;
 			best_avg = avg;
 		}
+		duration = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start).count();
 	}
-
 
 	Wave_rep = Compressed::raw(best_Xpcs, best_avg, W);
 	//Wav Wave = Wav(Wave_rep.W_reconstructed, fps);
@@ -209,7 +209,7 @@ layer compress(const v_real& W, inte mult=3) {
 	//Wave_smooth.write(name + "_rec_smooth.wav");
 	//write_vector(Wave_rep_smooth.Waveform, name + "_avgpcw_best_smooth.csv");
 	//write_vector(Wave_rep_smooth.Envelope, name + "_envelope_smooth.csv");
-	time.stop();
+	//time.stop();
 	
 	return layer(best_Xpcs, Wave_rep.Envelope, best_avg, W.size());
 }
@@ -222,26 +222,52 @@ v_real get_residue(const v_real& W0, const v_real& W1) {
 	return R;
 }
 
-int main() {
+inline bool ends_with(std::string const& value, std::string const& ending) {
+	if (ending.size() > value.size()) return false;
+	return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
+}
+int main(int argc, char** argv) {
+	std::cout << argc << "\n";
 	
-	std::string name = "alto";
-	auto WV = read_wav(name + ".wav");
-	auto W = WV.W;
-	auto fps = WV.fps;
+	if (argc == 1) {
+		for (const auto& entry : std::filesystem::directory_iterator(".")) {
+			std::string path = { entry.path().u8string() };		
+			if (ends_with(path, ".wav")) {
+				std::cout << path << std::endl;
+			}
+		}
+	}
+	else {
+		for (int i = 1; i < argc; ++i) {
+			if (ends_with(argv[i], ".wav")) {
+				std::cout << "Compressing " << argv[i] << std::endl;
+				auto WV = read_wav(argv[i]);
+				auto W = WV.W;
+				auto fps = WV.fps;
+				auto C = compress(W);
+			}
+		}
+	}
+	
+	
+	//std::string name = "alto";
+	//auto WV = read_wav(name + ".wav");
+	//auto W = WV.W;
+	//auto fps = WV.fps;
 
-	auto l1 = compress(W);
-	std::cout << l1.size() << "\n";
+	//auto l1 = compress(W);
+	//std::cout << l1.size() << "\n";
 
-	Wav rec1 = Wav(l1.reconstruct(), fps);
-	rec1.write(name + "_reconstructed_01.wav");
-
-
-	auto r1 = get_residue(W, l1.reconstruct());
+	//Wav rec1 = Wav(l1.reconstruct(), fps);
+	//rec1.write(name + "_reconstructed_01.wav");
 
 
-	auto l2 = compress(r1);
-	Wav rec2 = Wav(l2.reconstruct(), fps);
-	rec2.write(name + "_reconstructed_02.wav");
+	//auto r1 = get_residue(W, l1.reconstruct());
+
+
+	//auto l2 = compress(r1);
+	//Wav rec2 = Wav(l2.reconstruct(), fps);
+	//rec2.write(name + "_reconstructed_02.wav");
 
 
 
