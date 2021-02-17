@@ -118,7 +118,7 @@ public:
 	}
 };
 
-Compressed compress(const v_real& W, inte max_seconds = 100, real max_iterations = std::numeric_limits<double>::infinity(), inte mult = 3) {
+Compressed compress(const v_real& W, inte max_seconds = 100, pint max_iterations = std::numeric_limits<pint>::max(), inte mult = 3) {
 	v_pint posX, negX;
 	get_pulses(W, posX, negX);
 
@@ -259,41 +259,120 @@ layer read_bin(std::string path) {
 	data_file.read((char*)&envelope_buffer[0], (header[2]) * sizeof(real));
 	v_real envelope(envelope_buffer, envelope_buffer + header[2]);
 
-
 	data_file.close();
 
 	return layer(beg_of_pseudo_cycles, envelope, waveform, header[0], header[1]);
 }
 
 int main(int argc, char** argv) {
-
-	std::cout << argc << "\n";
-	
-	if (argc == 1) {
-		for (const auto& entry : std::filesystem::directory_iterator(".")) {
-			std::string path = { entry.path().u8string() };		
+	pint max_secs = 100;
+	pint max_iters = std::numeric_limits<pint>::max();
+	std::vector<std::string> wav_paths;
+	std::vector<std::string> cmp_paths;
+	std::string append = "reconstructed";
+	for (int i = 1; i < argc; ++i) { // parsing args
+		if (std::strcmp(argv[i], "-h") == 0 || std::strcmp(argv[i], "--help") == 0) {
+			std::cout
+				<< " For more info about the author: carlos-tarjano.web.app\n"
+				<< " Usage: \n"
+				<< " [-t x] [-i y] -[a z] [path/to/file1.wav]...[path/to/filen.wav]  [path/to/file1.cmp]...[path/to/filem.cmp]\n"
+				<< " -t or --time: (default " << max_secs <<" s) maximum time in seconds allowed for each compression task\n"
+				<< " -i or --iterations: maximum number of iterations allowed for each compression task\n"
+				<< " -a or --append: (default \"" << append << "\") string to be appended to each reconstructed file name\n"
+				<< " If no path is given the root folder will be scanned for .wav and .cmp files, and those will be processed accordingly\n";
+			return 0;
+		}
+		else if (std::strcmp(argv[i], "-t") == 0 || std::strcmp(argv[i], "--time") == 0) {
+			max_secs = strtol(argv[i + 1], nullptr, 0);
+			std::cout << "Maximum time allowed: "<< max_secs << " seconds\n";
+			i++;
+		}
+		else if (std::strcmp(argv[i], "-i") == 0 || std::strcmp(argv[i], "--iterations") == 0) {
+			max_iters = strtol(argv[i + 1], nullptr, 0);
+			std::cout << "Maximum iterations allowed: " << max_iters << " \n";
+			i++;
+		}
+		else if (std::strcmp(argv[i], "-a") == 0 || std::strcmp(argv[i], "--append") == 0) {
+			append = argv[i + 1];
+			std::cout << "Append \"" << append << "\" to the name of reconstructed files\n";
+			i++;
+		}
+		else if (ends_with(argv[i], ".wav")) {
+			wav_paths.push_back(argv[i]);
+		}
+		else if (ends_with(argv[i], ".cmp")) {
+			cmp_paths.push_back(argv[i]);
+		}
+	}
+	if (wav_paths.empty() && cmp_paths.empty()) { // no files found in args, searching root
+		for (const auto& entry : std::filesystem::directory_iterator("./")) {
+			std::string path = { entry.path().u8string() };
 			if (ends_with(path, ".wav")) {
-				std::cout << path << std::endl;
+				wav_paths.push_back(path);
+			}
+			else if (ends_with(path, ".cmp")) {
+				cmp_paths.push_back(path);
 			}
 		}
 	}
-	else {
-		for (int i = 1; i < argc; ++i) {
-			if (ends_with(argv[i], ".wav")) {
-				std::cout << "Compressing " << argv[i] << std::endl;
-				auto WV = read_wav(argv[i]);
-				auto W = WV.W;
-				auto fps = WV.fps;
-				auto C = compress(W, 5);
 
-				write_bin("t.cmp", W.size(), WV.fps, C.X_PCs, C.Waveform, C.Envelope);
-				auto rec = read_bin("t.cmp");
-				Wav WW = Wav(rec.reconstruct(), rec.fps);
-				WW.write("t.wav");
-			}
-		}
+	for (auto path : wav_paths) {
+		std::cout << "\nCompressing " << path << std::endl;
+		auto WV = read_wav(path);
+		auto W = WV.W;
+		auto fps = WV.fps;
+		auto C = compress(W, max_secs, max_iters);
+
+		path.replace(path.end() - 4, path.end(), ".cmp");
+		write_bin(path, W.size(), WV.fps, C.X_PCs, C.Waveform, C.Envelope);
 	}
-	
+
+	for (auto path : cmp_paths) {
+		std::cout << "\nDecompressing " << path << std::endl;
+
+		auto rec = read_bin(path);
+		Wav WW = Wav(rec.reconstruct(), rec.fps);
+		path.replace(path.end() - 4, path.end(), "_" + append + ".wav");
+		WW.write(path);
+	}
+
+	//std::cout << argc << "\n";
+	//
+	//if (argc == 1) {
+	//	for (const auto& entry : std::filesystem::directory_iterator(".")) {
+	//		std::string path = { entry.path().u8string() };		
+	//		if (ends_with(path, ".wav")) {
+	//			std::cout << path << std::endl;
+	//		}
+	//	}
+	//}
+	//else {
+	//	for (int i = 1; i < argc; ++i) {
+	//		if (ends_with(argv[i], ".wav")) {
+	//			std::cout << "Compressing " << argv[i] << std::endl;
+	//			auto WV = read_wav(argv[i]);
+	//			auto W = WV.W;
+	//			auto fps = WV.fps;
+	//			auto C = compress(W, 5);
+
+	//			std::string path(argv[i]);
+	//			path.replace(path.end() - 4, path.end(), ".cmp");
+	//			write_bin(path, W.size(), WV.fps, C.X_PCs, C.Waveform, C.Envelope);
+	//		}
+
+	//		if (ends_with(argv[i], ".cmp")) {
+	//			std::cout << "Decompressing " << argv[i] << std::endl;
+
+	//			auto rec = read_bin(argv[i]);
+	//			Wav WW = Wav(rec.reconstruct(), rec.fps);
+
+	//			std::string path(argv[i]);
+	//			path.replace(path.end() - 4, path.end(), "_reconstructed.wav");
+	//			WW.write(path);
+	//		}
+	//	}
+	//}
+	//
 
 
 
