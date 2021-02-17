@@ -222,16 +222,19 @@ void write_bin(std::string path, pint orig_n, pint fps, const v_inte& beg_of_pse
 	data_file.write((char*) &pint_data[0], pint_data.size() * sizeof(pint));
 	data_file.close();
 
+	std::vector<int> xp(beg_of_pseudo_cycles.begin(), beg_of_pseudo_cycles.end());
 	data_file.open(path, std::ios::out | std::ios::binary | std::fstream::app);
-	data_file.write((char*)&beg_of_pseudo_cycles[0], beg_of_pseudo_cycles.size() * sizeof(inte));
+	data_file.write((char*)&xp[0], xp.size() * sizeof(int));
 	data_file.close();
 
+	std::vector<float> wv(waveform.begin(), waveform.end());
 	data_file.open(path, std::ios::out | std::ios::binary | std::fstream::app);
-	data_file.write((char*)&waveform[0], waveform.size() * sizeof(real));
+	data_file.write((char*)&wv[0], wv.size() * sizeof(float));
 	data_file.close();
 
+	std::vector<float> en(amp_of_pseudo_cycles.begin(), amp_of_pseudo_cycles.end());
 	data_file.open(path, std::ios::out | std::ios::binary | std::fstream::app);
-	data_file.write((char*)&amp_of_pseudo_cycles[0], amp_of_pseudo_cycles.size() * sizeof(real));
+	data_file.write((char*)&en[0], en.size() * sizeof(float));
 	data_file.close();
 }
 
@@ -245,16 +248,16 @@ layer read_bin(std::string path) {
 		std::cout << header[i] << "\n";
 	}
 
-	inte* beg_of_pseudo_cycles_buffer = new inte[header[2] + 1];
-	data_file.read((char*)&beg_of_pseudo_cycles_buffer[0], (header[2] + 1) * sizeof(inte));
+	int* beg_of_pseudo_cycles_buffer = new int[header[2] + 1];
+	data_file.read((char*)&beg_of_pseudo_cycles_buffer[0], (header[2] + 1) * sizeof(int));
 	v_inte beg_of_pseudo_cycles(beg_of_pseudo_cycles_buffer, beg_of_pseudo_cycles_buffer + header[2] + 1);
 
-	real* waveform_buffer = new real[header[3]];
-	data_file.read((char*)&waveform_buffer[0], (header[3]) * sizeof(real));
+	float* waveform_buffer = new float[header[3]];
+	data_file.read((char*)&waveform_buffer[0], (header[3]) * sizeof(float));
 	v_real waveform(waveform_buffer, waveform_buffer + header[3]);
 
-	real* envelope_buffer = new real[header[2]];
-	data_file.read((char*)&envelope_buffer[0], (header[2]) * sizeof(real));
+	float* envelope_buffer = new float[header[2]];
+	data_file.read((char*)&envelope_buffer[0], (header[2]) * sizeof(float));
 	v_real envelope(envelope_buffer, envelope_buffer + header[2]);
 
 	data_file.close();
