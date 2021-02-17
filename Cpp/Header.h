@@ -13,6 +13,8 @@
 #include <boost/math/interpolators/cardinal_cubic_b_spline.hpp>
 #include <filesystem> // to list all files in a directory
 
+//#define v // for verbose
+
 typedef unsigned long long pint;
 typedef long long          inte;
 typedef double             real;
@@ -108,7 +110,7 @@ public:
 	Wav(v_real W_, pint fps_=44100) {
 		fps = fps_;
 		W = W_;
-		std::cout << " n: " << W.size() << " fps: " << fps << "\n";
+		std::cout << "New wave with n: " << W.size() << " fps: " << fps << "\n";
 	}
 	void write(std::string path = "test.wav") {
 		if (W.size() == 0) {
@@ -124,7 +126,7 @@ public:
 		SNDFILE* outfile = sf_open(fname, SFM_WRITE, &sfinfo);
 		sf_write_double(outfile, &W[0], W.size());
 		sf_close(outfile);
-		std::cout << "file written. path=" << path << ", fps=" << fps << "\n";
+		std::cout << "Wave file written. path=" << path << ", fps=" << fps << "\n";
 	}
 };
 
@@ -320,7 +322,9 @@ public:
 	}
 
 	static Compressed raw(const v_inte Xp, const v_real& W, const v_real& S, pint f = 44100) {
-
+#ifdef v
+		std::cout << "inside Compressed::raw\n";
+#endif
 		boost::math::interpolators::cardinal_cubic_b_spline<real> spline(W.begin(), W.end(), 0.0, 1.0 / real(W.size()));
 		v_real W_reconstructed(S.size(), 0.0);
 		v_real Envelope;
@@ -421,8 +425,8 @@ Wav read_wav(std::string path) {
 		exit(1);
 	}
 
-	int fps = file.samplerate();
-	static int n = file.frames();
+	const int fps = file.samplerate();
+	const int n = file.frames();
 	std::cout << "Successfully opened file at:" << path << "\n";
 
 	v_real W(n);
@@ -516,11 +520,9 @@ void get_pulses(const v_real& W, v_pint& posX, v_pint& negX) {
 				im = argabsmax(W, i0, i);
 				i0 = i;
 				if (sgn(W[im]) >= 0) {
-					//std::cout << "pos " << xp << "\n";
 					posX.push_back(im);
 				}
 				else {
-					//std::cout << "neg " << xp << "\n";
 					negX.push_back(im);
 				}
 			}
@@ -529,12 +531,14 @@ void get_pulses(const v_real& W, v_pint& posX, v_pint& negX) {
 }
 
 v_pint get_frontier(const v_real& W, const v_pint& X) {
+#ifdef v
+	std::cout << "inside get_frontier\n";
+#endif
 	pint n{ X.size() };
 	real sumY{ 0.0 };
 	real sumY_vec{ W[X[n-1]] - W[X[0]] };
 	pint sumX_vec{ X[n-1] - X[0] };
 
-	//std::cout << "HERE 01!\n";
 	for (pint i = 0; i < n; i++) {
 		sumY += W[X[i]];
 	}
@@ -545,14 +549,12 @@ v_pint get_frontier(const v_real& W, const v_pint& X) {
 
 	v_real Y(n);
 	Y[0] = W[X[0]] * scaling;
-	//std::cout << "HERE 02!\n";
 	for (pint i = 1; i < n; i++) {
 		Y[i] = W[X[i]] * scaling;
 		x = X[i] - X[i - 1];
 		y = Y[i] - Y[i - 1];
 		sumk += y / (x * sqrt(x * x + y * y));
 	}
-	//std::cout << "HERE 03!\n";
 	real r{ 1.0 / (sumk / (n - 1)) };
 	real rr{ r * r };
 	pint idx1{ 0 };
@@ -560,7 +562,7 @@ v_pint get_frontier(const v_real& W, const v_pint& X) {
 	v_pint frontierX = { X[0] };
 	point pc;
 	bool empty;
-	//std::cout << "HERE 04!\n";
+
 	while (idx2 < n) {
 		pc = get_circle(X[idx1], Y[idx1], X[idx2], Y[idx2], r);
 		empty = true;
@@ -581,6 +583,9 @@ v_pint get_frontier(const v_real& W, const v_pint& X) {
 }
 
 void refine_frontier(std::vector<pulse>& Pulses, const v_pint& Xp, const v_real& W, inte avgL, real stdL, inte n_stds = 3) {
+#ifdef v
+	std::cout << "inside refine_frontier\n";
+#endif
 	std::vector<pulse> Pulses_to_split;
 	std::vector<pulse> Pulses_to_test;
 	v_pint Xzeroes;
@@ -592,7 +597,9 @@ void refine_frontier(std::vector<pulse>& Pulses, const v_pint& Xp, const v_real&
 		arg = argmin;
 	}
 	inte currsign, x;
+#ifdef v
 	std::cout << "Refining frontier; TH=" << avgL + n_stds * stdL << "\n";
+#endif
 	for (pint i = 1; i < Xp.size(); i++) {
 		if (Xp[i] - Xp[i - 1] >= avgL + n_stds * stdL) {
 			Pulses_to_split.push_back(pulse(Xp[i - 1], Xp[i]));
@@ -681,7 +688,9 @@ void refine_frontier_iter(v_pint& Xp, const v_real& W) {
 	pint psize{ 0 };
 	real std_c{ 0.0 };
 	while (Pulses.size() > psize) {
+#ifdef v
 		std::cout << "Xp size before:" << Xp.size() << "\n";
+#endif
 		psize = Pulses.size();
 		for (pulse p:Pulses)	{
 			Xp.push_back(p.start);
@@ -689,7 +698,9 @@ void refine_frontier_iter(v_pint& Xp, const v_real& W) {
 		}
 		v_pint::iterator it=std::unique(Xp.begin(), Xp.end());
 		Xp.resize(std::distance(Xp.begin(), it));
+#ifdef v
 		std::cout << "Xp size after:" << Xp.size() << "\n";
+#endif
 		T.resize(Xp.size() - 1);
 		for (pint i = 0; i < Xp.size() - 1; i++) {
 			T[i] = Xp[i + 1] - Xp[i];
@@ -704,7 +715,10 @@ void refine_frontier_iter(v_pint& Xp, const v_real& W) {
 			refine_frontier(Pulses, Xp, W, mde, std);
 		}
 		else {
+#ifdef v
 			std::cout << "std0=" << std << " , std1=" << std_c << "\n";
+#endif
+
 			break;
 		}
 	}
@@ -723,6 +737,9 @@ v_inte get_Xpcs(const v_pint& Xpos, const v_pint& Xneg) {
 }
 
 mode_abdm average_pc_waveform(v_real& pcw,  v_inte& Xp, const v_real& W) {
+#ifdef v
+	std::cout << "average_pc_waveform\n";
+#endif
 	v_pint T(Xp.size() - 1);
 	for (pint i = 0; i < Xp.size() - 1; ++i) {
 		T[i] = Xp[i + 1] - Xp[i];
@@ -738,7 +755,10 @@ mode_abdm average_pc_waveform(v_real& pcw,  v_inte& Xp, const v_real& W) {
 	std::fill(pcw.begin(), pcw.end(), 0.0);
 	real amp;
 	for (pint i = 1; i < Xp.size() - 1; i++) {
-		x0 = Xp[i];
+		x0 = 0;
+		if (Xp[i] > 0) {
+			x0 = Xp[i];
+		}
 		x1 = Xp[i + 1];
 		if (x1 - x0 > 5) {
 			amp = std::abs(*std::max_element(W.begin() + x0, W.begin() + x1, abs_compare));
@@ -779,6 +799,9 @@ mode_abdm average_pc_waveform(v_real& pcw,  v_inte& Xp, const v_real& W) {
 }
 
 v_inte refine_Xpcs(const v_real& W, const v_real& avgpc, pint min_size, pint max_size) {
+#ifdef v
+	std::cout << "refine_Xpcs\n";
+#endif
 	if (avgpc.size() <= 5) {
 		std::cout << "Average Pseudo Cycle waveform size <= 5";
 		throw std::invalid_argument("Average Pseudo Cycle waveform size <= 5");
@@ -789,7 +812,7 @@ v_inte refine_Xpcs(const v_real& W, const v_real& avgpc, pint min_size, pint max
 		Wpadded[i] = W[i - min_size];
 	}
 	pint best_size{ 0 };
-	pint best_x0{ 0 };
+	inte best_x0{ 0 };
 	real best_val{ 0.0 };
 	real curr_val{ 0.0 };
 	real step{ 0.0 };
@@ -813,37 +836,35 @@ v_inte refine_Xpcs(const v_real& W, const v_real& avgpc, pint min_size, pint max
 			}
 		}
 	}
-	inte x0{ inte(best_x0) - inte(min_size) };
-	//std::cout << "best c:" << x0 << "\n";
-	//if (x0 > 0) {
-	Xpc.push_back(x0);
-	//}
-	pint curr_x0{ best_x0 + best_size };
+	Xpc.push_back(best_x0 - inte(min_size));
+	inte curr_x0{ best_x0 + inte(best_size) };
+	Xpc.push_back(curr_x0 - inte(min_size));
 
-	x0 = inte(curr_x0) - inte(min_size);
-
-	//if (x0 > 0) {
-	Xpc.push_back(x0);
-	//}
-
+#ifdef v
+	std::cout << "refine_Xpcs: before while loop\n";
+#endif
 	while (curr_x0 + max_size - min_size < W.size()) {
 		best_val = 0.0;
 		for (pint size = min_size; size <= max_size; size++) {
-			step = 1.0 / real(size);
 			curr_val = 0.0;
 			//amp = std::abs(*std::max_element(Wpadded.begin() + curr_x0, Wpadded.begin() + curr_x0 + size, abs_compare));
 			for (pint i = 0; i <= size; i++) {
-				curr_val += Wpadded[curr_x0 + i] * interps[size - min_size][i];// / amp;
+				curr_val += Wpadded[curr_x0 + i] * interps[size - min_size][i];
 			}
-			if (curr_val > best_val) {
+			if (curr_val >= best_val) {
 				best_val = curr_val;
 				best_size = size;
 			}
 		}
 		curr_x0 += best_size;
-		//std::cout << "c:" << curr_x0 << "\n";
-		Xpc.push_back(curr_x0 - min_size);
+#ifdef v
+		std::cout << "c:" << curr_x0 << " ";
+#endif
+		Xpc.push_back(curr_x0 - inte(min_size));
 	}
+#ifdef v
+	assert(Xpc[1] >= 0);
+#endif
 	return Xpc;
 }
 

@@ -133,7 +133,6 @@ Compressed compress(const v_real& W, inte max_seconds = 100, pint max_iterations
 	//write_vector(posF, name + "_pos_refined.csv");
 	//write_vector(negF, name + "_neg_refined.csv");
 
-	//inte mult{ 3 };
 	v_inte best_Xpcs = get_Xpcs(posF, negF);
 	//write_vector(best_Xpcs, name + "_Xpcs.csv");
 	v_real best_avg;
@@ -166,12 +165,14 @@ Compressed compress(const v_real& W, inte max_seconds = 100, pint max_iterations
 	pint ctr = 0;
 	while (duration <= max_seconds && ctr < max_iterations) {
 		Xpcs = refine_Xpcs(W, avg, min_size, max_size);
+		//std::cout << " refine_Xpcs";
 		ma = average_pc_waveform(avg, Xpcs, W);
+		//std::cout << " average_pc_waveform";
 		inte min_size = std::max(inte(10), inte(ma.mode) - inte(mult * ma.abdm));
 		inte max_size = ma.mode + inte(mult * ma.abdm);
 
 		Wave_rep = Compressed::raw(Xpcs, avg, W);
-		//Wave = Wave_rep.reconstruct_full(fps);
+
 		avdv = error(Wave_rep.W_reconstructed, W);
 
 		if (avdv < best_avdv) {
@@ -184,13 +185,15 @@ Compressed compress(const v_real& W, inte max_seconds = 100, pint max_iterations
 				<< "\n"
 				<< "Iteration " << ctr << "\n"
 				<< "Number of samples in the original signal:" << W.size() << "\n"
-				//<< ", Xpcs[-1]:" << best_Xpcs.back()
 				<< "Appr. compressed size:" << cn << " (" <<  float(cn) / float(W.size()) << ")\n"
 				<< "Waveform length mode: " << ma.mode << "\n"
 				<< "Waveform length abdm: " << ma.abdm << "\n"
 				<< "Min waveform length:  " << min_size << "\n"
 				<< "Max waveform length:  " << max_size << "\n"
 				<< "Average error:        " << best_avdv << "\n";
+		}
+		else {
+			std::cout << "Iteration=" << ctr << " time=" << duration << " error=" << avdv << " m=" << min_size << " M=" << max_size << " | ";
 		}
 		ctr++;
 		duration = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start).count();
@@ -217,6 +220,8 @@ void write_bin(std::string path, pint orig_n, pint fps, const v_inte& beg_of_pse
 	std::ofstream data_file;      // pay attention here! ofstream
 
 	v_pint pint_data = { orig_n, fps, amp_of_pseudo_cycles.size(), waveform.size() }; // header
+
+	std::cout << "n=" << orig_n << "\n";
 
 	data_file.open(path, std::ios::out | std::ios::binary | std::fstream::trunc);
 	data_file.write((char*) &pint_data[0], pint_data.size() * sizeof(pint));
@@ -266,7 +271,7 @@ layer read_bin(std::string path) {
 }
 
 int main(int argc, char** argv) {
-	pint max_secs = 100;
+	pint max_secs = 20;
 	pint max_iters = std::numeric_limits<pint>::max();
 	std::vector<std::string> wav_paths;
 	std::vector<std::string> cmp_paths;
@@ -319,13 +324,13 @@ int main(int argc, char** argv) {
 
 	for (auto path : wav_paths) {
 		std::cout << "\nCompressing " << path << std::endl;
-		auto WV = read_wav(path);
-		auto W = WV.W;
-		auto fps = WV.fps;
-		auto C = compress(W, max_secs, max_iters);
+		const Wav WV = read_wav(path);
+		//auto W = WV.W;
+		//auto fps = WV.fps;
+		auto C = compress(WV.W, max_secs, max_iters);
 
 		path.replace(path.end() - 4, path.end(), ".cmp");
-		write_bin(path, W.size(), WV.fps, C.X_PCs, C.Waveform, C.Envelope);
+		write_bin(path, WV.W.size(), WV.fps, C.X_PCs, C.Waveform, C.Envelope);
 	}
 
 	for (auto path : cmp_paths) {
