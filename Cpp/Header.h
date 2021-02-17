@@ -13,10 +13,13 @@
 #include <boost/math/interpolators/cardinal_cubic_b_spline.hpp>
 #include <filesystem> // to list all files in a directory
 
-//typedef int pos_integer;
 typedef unsigned long long pint;
 typedef long long          inte;
 typedef double             real;
+
+//typedef size_t pint;
+//typedef int          inte;
+//typedef double             real;
 
 typedef std::vector<pint> v_pint;
 typedef std::vector<inte> v_inte;

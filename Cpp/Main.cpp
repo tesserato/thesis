@@ -217,8 +217,6 @@ void write_bin(std::string path, pint orig_n, pint fps, const v_inte& beg_of_pse
 	std::ofstream data_file;      // pay attention here! ofstream
 
 	v_pint pint_data = { orig_n, fps, amp_of_pseudo_cycles.size(), waveform.size() }; // header
-	v_real real_data = { 0.1,1.2,2.3,3.4,4.5,5.6,6.7,7.8,8.9,9.0 };
-	//size_t size = inte_data.size();
 
 	data_file.open(path, std::ios::out | std::ios::binary | std::fstream::trunc);
 	data_file.write((char*) &pint_data[0], pint_data.size() * sizeof(pint));
