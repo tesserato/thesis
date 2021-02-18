@@ -30,7 +30,7 @@ typedef std::vector<real> v_real;
 
 const real PI = 3.14159265358979323846;
 
-template <typename T> void write_vector(std::vector<T>& V, std::string path = "teste.csv") {
+template <typename T> void write_vector(const std::vector<T>& V, std::string path = "teste.csv") {
 	std::ofstream out(path);
 	for (pint i = 0; i < V.size() - 1; ++i) {
 		out << V[i] << ",";
@@ -110,7 +110,7 @@ public:
 	Wav(v_real W_, pint fps_=44100) {
 		fps = fps_;
 		W = W_;
-		std::cout << "New wave with n: " << W.size() << " fps: " << fps << "\n";
+		std::cout << "New wave with n=" << W.size() << " and fps=" << fps << "\n";
 	}
 	void write(std::string path = "test.wav") {
 		if (W.size() == 0) {
@@ -250,6 +250,7 @@ public:
 		W_reconstructed = R;
 		fps = f;
 	}
+	
 	static Compressed smooth(v_inte& Xp, v_real& W, v_real& E, pint n, pint f = 44100) {
 		ft_smooth(W, 0.0);
 		pint first{ 0 };
@@ -321,17 +322,17 @@ public:
 		return Compressed(Xp, W, E, Wf, f);
 	}
 
-	static Compressed raw(const v_inte Xp, const v_real& W, const v_real& S, pint f = 44100) {
+	static Compressed raw(const v_inte& Xp, const v_real& W, const v_real& S, pint f = 44100) {
 #ifdef v
 		std::cout << "inside Compressed::raw\n";
 #endif
-		boost::math::interpolators::cardinal_cubic_b_spline<real> spline(W.begin(), W.end(), 0.0, 1.0 / real(W.size()));
+		boost::math::interpolators::cardinal_cubic_b_spline<real> spline(W.begin(), W.end(), 0.0, 1.0 / (real)W.size());
 		v_real W_reconstructed(S.size(), 0.0);
 		v_real Envelope;
 
 		inte x0{ Xp[0] };
 		inte x1{ Xp[1] };
-		real step{ 1.0 / (x1 - x0) };
+		real step{ 1.0 / (real)(x1 - x0) };
 		real e;// { std::abs(*std::max_element(S.begin()), S.begin() + Xp[1], abs_compare)) }
 		for (pint i = 1; i < Xp.size() - 1; i++) {
 			x0 = Xp[i];
@@ -347,9 +348,11 @@ public:
 			}
 		}
 		Envelope.push_back(std::abs(*std::max_element(S.begin() + Xp.back(), S.end(), abs_compare)));
-
-		v_inte Xp_new(Xp);
-		v_real En_new(Envelope);
+#ifdef v
+		std::cout << "inside Compressed::raw-1\n";
+#endif
+		v_inte Xp_new = Xp;
+		v_real En_new = Envelope;
 		pint itens{ 5 };
 		real avg_t{ 0.0 };
 		real avg_e{ 0.0 };
@@ -358,9 +361,12 @@ public:
 				avg_t += Xp_new[i + 1] - Xp_new[i];
 				avg_e += En_new[i];
 			}
-			Xp_new.insert(Xp_new.begin(), Xp_new[0] - std::round(avg_t / itens));
-			En_new.insert(En_new.begin(), avg_e / itens);
+			Xp_new.insert(Xp_new.begin(), Xp_new[0] - (inte)std::round(avg_t / itens));
+			En_new.insert(En_new.begin(), avg_e / (real)itens);
 		}
+#ifdef v
+		std::cout << "inside Compressed::raw-2\n";
+#endif
 		avg_t = 0.0;
 		avg_e = 0.0;
 		while (Xp_new.back() < S.size()) {
@@ -368,9 +374,12 @@ public:
 				avg_t += Xp_new[i + 1] - Xp_new[i];
 				avg_e += En_new[i];
 			}
-			Xp_new.push_back(Xp_new.back() + std::round(avg_t / itens));
-			En_new.push_back(avg_e / itens);
+			Xp_new.push_back(Xp_new.back() + (inte)std::round(avg_t / itens));
+			En_new.push_back(avg_e / (real)itens);
 		}
+#ifdef v
+		std::cout << "inside Compressed::raw-3\n";
+#endif
 		// Filling from 0 to Xp[1]
 		pint ctr = 0;
 		x0 = Xp_new[ctr];
@@ -380,7 +389,7 @@ public:
 				continue;
 			}
 			else {
-				step = 1.0 / real(x1 - x0);
+				step = 1.0 / (real)(x1 - x0);
 				for (inte j = x0; j < x1; j++) {
 					if (j >= 0) {
 					W_reconstructed[j] = spline((j - x0) * step) * En_new[ctr];
@@ -391,15 +400,20 @@ public:
 			x0 = Xp_new[ctr];
 			x1 = Xp_new[ctr + 1];
 		}
-
+#ifdef v
+		std::cout << "inside Compressed::raw-4\n";
+#endif
 		x0 = Xp.back();
 		x1 = Xp_new.back();
-		step = 1.0 / real(x1 - x0);
+		step = 1.0 / (real)(x1 - x0);
 		for (inte j = x0; j < x1; j++) {
 			if (j < S.size()) {
 				W_reconstructed[j] = spline((j - x0) * step) * En_new.back();
 			}
 		}
+#ifdef v
+		std::cout << "inside Compressed::raw-5\n";
+#endif
 		return Compressed(Xp, W, Envelope, W_reconstructed, f);
 	}
 };
@@ -763,7 +777,7 @@ mode_abdm average_pc_waveform(v_real& pcw,  v_inte& Xp, const v_real& W) {
 		x1 = Xp[i + 1];
 
 #ifdef v
-		assert(x1 - x0 > 5)
+		assert(x1 - x0 > 5);
 #endif
 		if (x1 - x0 > 5) {
 			//amp = std::abs(*std::max_element(W.begin() + x0, W.begin() + x1, abs_compare));
@@ -805,7 +819,7 @@ mode_abdm average_pc_waveform(v_real& pcw,  v_inte& Xp, const v_real& W) {
 
 v_inte refine_Xpcs(const v_real& W, const v_real& avgpc, pint min_size, pint max_size) {
 #ifdef v
-	std::cout << "refine_Xpcs\n";
+	std::cout << "refine_Xpcs: min_size=" << min_size << ", max_size" << max_size << "\n";
 #endif
 	if (avgpc.size() <= 5) {
 		std::cout << "Average Pseudo Cycle waveform size <= 5";
@@ -874,6 +888,7 @@ v_inte refine_Xpcs(const v_real& W, const v_real& avgpc, pint min_size, pint max
 }
 
 real error(const v_real& W1, const v_real& W2) {
+
 	real err{ 0.0 };
 	inte n = std::min(W1.size(), W2.size());
 	for (pint i = 0; i < n; i++) {
@@ -882,6 +897,90 @@ real error(const v_real& W1, const v_real& W2) {
 	return err / n;
 }
 
+std::vector<float> fpa_from_FT(std::vector<std::complex<double>>& FT, std::string path = "") {
+	int n = FT.size();
+	int f;
+	float p;
+	float a;
+	float val = 0.0;
+	float max_val = 0.0;
+	if (path == "") {
+		for (std::size_t i = 0; i < n; ++i) {
+			val = std::pow(FT[i].real(), 2.0) + std::pow(FT[i].imag(), 2.0);
+			if (val > max_val) {
+				max_val = val;
+				f = i;
+				p = std::arg(FT[i]);
+				a = std::abs(FT[i]);
+			}
+		}
+	}
+	else {
+		std::ofstream outfile(path);
+		outfile << "Real, Imag\n";
+		for (std::size_t i = 0; i < n; ++i) {
+			outfile << FT[i].real() << "," << FT[i].imag() << "\n";
+			val = std::pow(FT[i].real(), 2.0) + std::pow(FT[i].imag(), 2.0);
+			if (val > max_val) {
+				max_val = val;
+				f = i;
+				p = std::arg(FT[i]);
+				a = std::abs(FT[i]);
+			}
+		}
+		outfile.close();
+		std::cout << "saved FT @" << path << "\n";
+	}
+	std::cout << "f=" << f << ", p=" << p << ", a=" << a << ", n=" << n << "\n";
+	return { float(f), p, a };
+}
+
+std::vector<float> rfft(const v_real& cin) {
+	std::vector<float> in(cin.begin(), cin.end());
+	//std::cout << "rfft";
+	//auto tp = Chronograph();
+	int n = (in.size() + 1) / 2;
+	std::vector<std::complex<float>> out(in.size());
+
+	DFTI_DESCRIPTOR_HANDLE descriptor;
+	MKL_LONG status;
+	// FFT 
+	status = DftiCreateDescriptor(&descriptor, DFTI_SINGLE, DFTI_REAL, 1, in.size());//Specify size and precision
+	status = DftiSetValue(descriptor, DFTI_PLACEMENT, DFTI_NOT_INPLACE);             //Out of place FFT
+	status = DftiCommitDescriptor(descriptor);                                       //Finalize the descriptor
+	status = DftiComputeForward(descriptor, in.data(), out.data());                  //Compute the Forward FFT
+	status = DftiFreeDescriptor(&descriptor);                                        //Free the descriptor
+
+	//for (size_t i = 0; i < n; i++) {
+	//	out[i] = out[i] / double(n);
+	//}
+
+	float val = 0.0;
+	float max_val = 0.0;
+	float f = 0.0;
+	float p = 0.0;
+	float a = 0.0;
+	for (size_t i = 0; i < n; ++i) {
+		out[i] = out[i] / (float)n;
+		val = std::pow(out[i].real(), 2.0) + std::pow(out[i].imag(), 2.0);
+		if (val > max_val) {
+			max_val = val;
+			f = (float)i;
+			p = std::arg(out[i]);
+			a = std::abs(out[i]);
+		}
+	}
+
+	//tp.stop("FFT Time: ");
+	//std::cout << "f=" << f << " p=" << p << " a=" << a <<"\n";
+	//std::cout << "------------";
+	//auto ff = (double)f;
+	std::vector<float> result { f,p,a };
+
+	//std::cout << "f=" << result[0] << " p=" << result[1] << " a=" << result[2] << "\n";
+
+	return result;
+}
 
 
 //void make_seamless(v_real& in) {

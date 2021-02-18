@@ -1,6 +1,7 @@
 ﻿#include "Header.h"
 #include <filesystem>
 
+
 class layer {
 private:
 	v_real W;
@@ -119,6 +120,9 @@ public:
 };
 
 Compressed compress(const v_real& W, inte max_seconds = 100, pint max_iterations = std::numeric_limits<pint>::max(), inte mult = 3) {
+#ifdef v
+	std::cout << "inside compress\n";
+#endif
 	v_pint posX, negX;
 	get_pulses(W, posX, negX);
 
@@ -127,12 +131,10 @@ Compressed compress(const v_real& W, inte max_seconds = 100, pint max_iterations
 		throw "Unable to get pulses";
 	}
 
-
 	auto posF = get_frontier(W, posX);
 	auto negF = get_frontier(W, negX);
 	//write_vector(posF, name + "_pos.csv");
 	//write_vector(negF, name + "_neg.csv");
-
 
 	refine_frontier_iter(posF, W);
 	refine_frontier_iter(negF, W);
@@ -140,20 +142,59 @@ Compressed compress(const v_real& W, inte max_seconds = 100, pint max_iterations
 	//write_vector(negF, name + "_neg_refined.csv");
 
 	v_inte best_Xpcs = get_Xpcs(posF, negF);
-	write_vector(best_Xpcs, "Xpcs.csv");
+	//write_vector(best_Xpcs, "Xpcs.csv");
 
 	v_real best_avg;
 	mode_abdm ma = average_pc_waveform(best_avg, best_Xpcs, W);
-	write_vector(best_avg, "avgpcw.csv");
+	//write_vector(best_avg, "avgpcw.csv");
 
 	Compressed Wave_rep = Compressed::raw(best_Xpcs, best_avg, W);
-	//Wav Wave = Wave_rep.reconstruct_full(fps);
-	real best_avdv = error(Wave_rep.W_reconstructed, W);// average_pc_metric(best_avg, best_Xpcs, W);
+#ifdef v
+	std::cout << "inside compress-1\n";
+#endif
+	real lower_error = error(Wave_rep.W_reconstructed, W);// average_pc_metric(best_avg, best_Xpcs, W);
 	inte min_size = std::max(inte(10), inte(ma.mode) - inte(mult * ma.abdm));
 	inte max_size = ma.mode + inte(mult * ma.abdm);
+#ifdef v
+	std::cout << "inside compress-2\n";
+#endif
+
+	// get sinusoid waveform
+	auto fpa = rfft(W);
+#ifdef v
+	std::cout << "inside compress-3\n";
+	std::cout << "f=" << fpa[0] << " p=" << fpa[1] << " a=" << fpa[2] << "\n";
+#endif
+
+	if (fpa[0] > 0) {
+		pint T = pint(real(W.size()) / fpa[0]);
+		v_real sinusoid(T, 0.0);
+		for (pint i = 0; i < T; i++) {
+			sinusoid[i] = fpa[2] * cos(fpa[1] + 2 * PI * fpa[0] * real(i) / W.size());
+		}
+
+#ifdef v
+		std::cout << "inside compress-4\n";
+		write_vector(W, "W.csv");
+		write_vector(sinusoid, "sinusoid.csv");
+#endif
+
+		v_inte Xpcs_sinusoid = refine_Xpcs(W, sinusoid, T / 2, T * 2);
+		Compressed Wave_rep_sin = Compressed::raw(Xpcs_sinusoid, sinusoid, W);
+
+		auto sinusoid_error = error(Wave_rep_sin.W_reconstructed, W);
+		std::cout << "Sinusoid error= " << sinusoid_error << ", Envelope error=" << lower_error << "\n";
+		if (sinusoid_error < lower_error) {
+			std::cout << "Using sinusoid as initial waveform:\n";
+			std::cout << "f=" << fpa[0] << " p=" << fpa[1] << " a=" << fpa[2] << "\n";
+			best_avg = sinusoid;
+			min_size = T / 2;
+			max_size = 2 * T;
+		}
+	}
 
 	std::cout
-		<< "\n"
+		<< "\nInitial Info:\n"
 		<< "Number of samples in the original signal:" << W.size() << "\n"
 		<< "Appr. compressed size:" << best_Xpcs.size() + best_avg.size() << "\n"
 		<< "Xpcs size:            " << best_Xpcs.size() << "\n"
@@ -161,7 +202,7 @@ Compressed compress(const v_real& W, inte max_seconds = 100, pint max_iterations
 		<< "Waveform length abdm: " << ma.abdm << "\n"
 		<< "Min waveform length:  " << min_size << "\n"
 		<< "Max waveform length:  " << max_size << "\n"
-		<< "Initial average error:" << best_avdv << "\n";
+		<< "Initial average error:" << lower_error << "\n";
 
 	real avdv;
 	v_inte Xpcs;
@@ -182,8 +223,8 @@ Compressed compress(const v_real& W, inte max_seconds = 100, pint max_iterations
 
 		avdv = error(Wave_rep.W_reconstructed, W);
 
-		if (avdv < best_avdv) {
-			best_avdv = avdv;
+		if (avdv < lower_error) {
+			lower_error = avdv;
 			best_Xpcs = Xpcs;
 			best_avg = avg;
 
@@ -197,7 +238,7 @@ Compressed compress(const v_real& W, inte max_seconds = 100, pint max_iterations
 				<< "Waveform length abdm: " << ma.abdm << "\n"
 				<< "Min waveform length:  " << min_size << "\n"
 				<< "Max waveform length:  " << max_size << "\n"
-				<< "Average error:        " << best_avdv << "\n";
+				<< "Average error:        " << lower_error << "\n";
 		}
 		else {
 			std::cout << "Iteration=" << ctr << " time=" << duration << " error=" << avdv << " m=" << min_size << " M=" << max_size << " | ";
@@ -316,6 +357,7 @@ int main(int argc, char** argv) {
 			cmp_paths.push_back(argv[i]);
 		}
 	}
+
 	if (wav_paths.empty() && cmp_paths.empty()) { // no files found in args, searching root
 		for (const auto& entry : std::filesystem::directory_iterator("./")) {
 			std::string path = { entry.path().u8string() };
@@ -330,7 +372,7 @@ int main(int argc, char** argv) {
 
 	for (auto path : wav_paths) {
 		std::cout << "\nCompressing " << path << std::endl;
-		const Wav WV = read_wav(path);
+		Wav WV = read_wav(path);
 		//auto W = WV.W;
 		//auto fps = WV.fps;
 
