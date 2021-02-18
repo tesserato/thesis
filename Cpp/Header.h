@@ -733,6 +733,7 @@ v_inte get_Xpcs(const v_pint& Xpos, const v_pint& Xneg) {
 	v_inte::iterator it = std::unique(Xpcs.begin(), Xpcs.end());
 	Xpcs.resize(std::distance(Xpcs.begin(), it));
 	std::sort(Xpcs.begin(), Xpcs.end());
+	Xpcs.erase(std::unique(Xpcs.begin(), Xpcs.end()), Xpcs.end());
 	return Xpcs;
 }
 
@@ -750,7 +751,7 @@ mode_abdm average_pc_waveform(v_real& pcw,  v_inte& Xp, const v_real& W) {
 
 	inte x0{ 0 };
 	inte x1{ 0 };
-	real step{ 1.0 / mode };
+	real step{ 1.0 / real(mode) };
 	pcw.resize(mode);
 	std::fill(pcw.begin(), pcw.end(), 0.0);
 	real amp;
@@ -760,8 +761,12 @@ mode_abdm average_pc_waveform(v_real& pcw,  v_inte& Xp, const v_real& W) {
 			x0 = Xp[i];
 		}
 		x1 = Xp[i + 1];
+
+#ifdef v
+		assert(x1 - x0 > 5)
+#endif
 		if (x1 - x0 > 5) {
-			amp = std::abs(*std::max_element(W.begin() + x0, W.begin() + x1, abs_compare));
+			//amp = std::abs(*std::max_element(W.begin() + x0, W.begin() + x1, abs_compare));
 			boost::math::interpolators::cardinal_cubic_b_spline<real> spline(W.begin() + x0, W.begin() + x1, 0, 1.0 / real(x1 - x0));
 			for (pint j = 0; j < mode; j++) {
 				pcw[j] += spline(j * step);// *amp* amp;

@@ -122,6 +122,12 @@ Compressed compress(const v_real& W, inte max_seconds = 100, pint max_iterations
 	v_pint posX, negX;
 	get_pulses(W, posX, negX);
 
+	if (posX.empty() || negX.empty()) {
+		std::cout << "Unable to get pulses\n";
+		throw "Unable to get pulses";
+	}
+
+
 	auto posF = get_frontier(W, posX);
 	auto negF = get_frontier(W, negX);
 	//write_vector(posF, name + "_pos.csv");
@@ -134,10 +140,11 @@ Compressed compress(const v_real& W, inte max_seconds = 100, pint max_iterations
 	//write_vector(negF, name + "_neg_refined.csv");
 
 	v_inte best_Xpcs = get_Xpcs(posF, negF);
-	//write_vector(best_Xpcs, name + "_Xpcs.csv");
+	write_vector(best_Xpcs, "Xpcs.csv");
+
 	v_real best_avg;
 	mode_abdm ma = average_pc_waveform(best_avg, best_Xpcs, W);
-	//write_vector(best_avg, name + "_avgpcw.csv");
+	write_vector(best_avg, "avgpcw.csv");
 
 	Compressed Wave_rep = Compressed::raw(best_Xpcs, best_avg, W);
 	//Wav Wave = Wave_rep.reconstruct_full(fps);
@@ -249,10 +256,9 @@ layer read_bin(std::string path) {
 
 	pint* header = new pint[4];
 	data_file.read(reinterpret_cast<char*>(&header[0]), 4 * sizeof(pint));
-	for (int i = 0; i < 4; ++i) {
-		std::cout << header[i] << "\n";
-	}
 
+	std::cout << "Decompressing file with n="<<header[0] << " and fps="<< header[1]<<"\n";
+	
 	int* beg_of_pseudo_cycles_buffer = new int[header[2] + 1];
 	data_file.read((char*)&beg_of_pseudo_cycles_buffer[0], (header[2] + 1) * sizeof(int));
 	v_inte beg_of_pseudo_cycles(beg_of_pseudo_cycles_buffer, beg_of_pseudo_cycles_buffer + header[2] + 1);
@@ -327,10 +333,15 @@ int main(int argc, char** argv) {
 		const Wav WV = read_wav(path);
 		//auto W = WV.W;
 		//auto fps = WV.fps;
-		auto C = compress(WV.W, max_secs, max_iters);
 
+		try {
+		auto C = compress(WV.W, max_secs, max_iters);
 		path.replace(path.end() - 4, path.end(), ".cmp");
 		write_bin(path, WV.W.size(), WV.fps, C.X_PCs, C.Waveform, C.Envelope);
+		}
+		catch (...) {
+			continue;
+		}
 	}
 
 	for (auto path : cmp_paths) {
@@ -341,115 +352,5 @@ int main(int argc, char** argv) {
 		path.replace(path.end() - 4, path.end(), "_" + append + ".wav");
 		WW.write(path);
 	}
-
-	//std::cout << argc << "\n";
-	//
-	//if (argc == 1) {
-	//	for (const auto& entry : std::filesystem::directory_iterator(".")) {
-	//		std::string path = { entry.path().u8string() };		
-	//		if (ends_with(path, ".wav")) {
-	//			std::cout << path << std::endl;
-	//		}
-	//	}
-	//}
-	//else {
-	//	for (int i = 1; i < argc; ++i) {
-	//		if (ends_with(argv[i], ".wav")) {
-	//			std::cout << "Compressing " << argv[i] << std::endl;
-	//			auto WV = read_wav(argv[i]);
-	//			auto W = WV.W;
-	//			auto fps = WV.fps;
-	//			auto C = compress(W, 5);
-
-	//			std::string path(argv[i]);
-	//			path.replace(path.end() - 4, path.end(), ".cmp");
-	//			write_bin(path, W.size(), WV.fps, C.X_PCs, C.Waveform, C.Envelope);
-	//		}
-
-	//		if (ends_with(argv[i], ".cmp")) {
-	//			std::cout << "Decompressing " << argv[i] << std::endl;
-
-	//			auto rec = read_bin(argv[i]);
-	//			Wav WW = Wav(rec.reconstruct(), rec.fps);
-
-	//			std::string path(argv[i]);
-	//			path.replace(path.end() - 4, path.end(), "_reconstructed.wav");
-	//			WW.write(path);
-	//		}
-	//	}
-	//}
-	//
-
-
-
-	
-	//std::string name = "alto";
-	//auto WV = read_wav(name + ".wav");
-	//auto W = WV.W;
-	//auto fps = WV.fps;
-
-	//auto l1 = compress(W);
-	//std::cout << l1.size() << "\n";
-
-	//Wav rec1 = Wav(l1.reconstruct(), fps);
-	//rec1.write(name + "_reconstructed_01.wav");
-
-
-	//auto r1 = get_residue(W, l1.reconstruct());
-
-
-	//auto l2 = compress(r1);
-	//Wav rec2 = Wav(l2.reconstruct(), fps);
-	//rec2.write(name + "_reconstructed_02.wav");
-
-
-
-	//WV.write();
-
 }
-
-//int main() {
-//	std::string name = "amazing";
-//	auto W = read_wav(name + ".wav").W;
-//	//for (pos_integer i = 500; i < 800; i++) {
-//	//	W[i] = 0;
-//	//}
-//
-//	//for (pos_integer i = 1000; i < 1700; i++) {
-//	//	W[i] = 0;
-//	//}
-//
-//	std::vector<pos_integer> Xz = find_zeroes(W);
-//	write_vector(Xz, name + "_zeroes.csv");
-//
-//	Wav wav(W);
-//	wav.write(name + "_alt.csv");
-//}
-
-//int main(int argc, char* argv[]) {
-//	//std::cout << argc << "\n";
-//	if (argc > 1) {
-//		std::cout << "has args\n";
-//		Chronograph time;
-//		for (pos_integer i = 1; i < argc; i++) {
-//			std::cout << i << ": " << argv[i] << "\n";
-//			//frontier_from_wav(argv[i]);
-//		}
-//		time.stop();
-//	}
-//	else {
-//		std::cout << "no args " << argv[0] << "\n";
-//		Chronograph time;
-//		std::string path;
-//		for (auto& p : std::filesystem::recursive_directory_iterator("./")) {
-//			if (p.path().extension() == ".wav") {
-//				path = p.path().stem().string() + ".wav";
-//				std::cout << path << '\n';
-//				//frontier_from_wav(path);
-//			}
-//		}
-//		time.stop();
-//	}
-//	return 0;
-//}
 
