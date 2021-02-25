@@ -43,11 +43,11 @@
 % Present tense to refer to stablished facts
 
 % Background (What is already known about the subject)
-sample based virtual instruments are the de facto standard for the emulation of real instruments. nevertheless little attention is given to the encoding of the samples used in those instruments; in fact, lossless containers like wav or proprietary formats are common, pushing the on disk size of those libraries to sizes exceeding the gigabytes.
+Sample based virtual instruments are the de facto standard for the emulation of real word acoustic instruments. Nevertheless little attention is given to the encoding of the samples used in those instruments; in fact, lossless containers like wav or proprietary formats are common, pushing the on disk size of those libraries to sizes exceeding the gigabytes.
 % Motivation (Why do we care about the problem and the results?) 
-This renders the most realistic digital instruments inacessible in many  but the most high end hardware, controllers, like electronic drumkits and controller keyboards. Even less robust personal computers might encounter problems.
+This renders the most realistic digital instruments inaccessible in many but the most high-end hardware; controllers, like electronic drum kits and controller keyboards and even less robust personal computers might encounter problems implementing those software.
 % Problem | Objectives (What problem is the paper trying to solve?) (Scope)
-We propose a lossy compression algorithm tailored specifically to highly uniform sounds, as those present in this instruments, due to the nature of the sounds, highly redudant, substantial improvements can be obtained, with minimal quality loss.
+We propose a lossy compression algorithm tailored specifically to highly uniform sounds, as those present in these instruments, due to the nature of the sounds, highly redundant, substantial improvements can be obtained, with minimal quality loss.
 
 % Methods | Procedure | Approach (What did you actually do to get your results?)
 
@@ -73,7 +73,9 @@ lends itself well to machine learning, as the sound can be represented by an evo
 % Opener sentence (Question | Assertion | Intriguing Revelations)
 Many of the proposed benefits of an electronic drumkit, like portability and practicity, are compromised when, to obtain a realistic sound on par with the acoustic counterpart, the output of the drumkit has to be processed in another piece of hardware, such as a personal computer.
 
-This transforms the instrument in a mere controller, robbing it of characteristics that provide the personality of the conventional instruments, such as timbre.
+The same is true for digital pianos.
+
+This transforms the instrument in a mere controller, robbing it of characteristics that provide the personality of the conventional instruments, such as a particular timbre.
 
 % Literature review | Brief Context of Prior Research
   % put your research in the context of other research
@@ -103,6 +105,10 @@ This transforms the instrument in a mere controller, robbing it of characteristi
   % Describe the work so as people can reproduce it
 
 % Overview of methods
+We can interpret a continuous or discrete signal, as long as it is at least pseudo periodic, as succession of waveforms, each one representing a (pseudo) cycle of the wave.
+
+
+We start with an estimate of the waveform of the signal being processed.
 
 % Restate the purpose of the work
 

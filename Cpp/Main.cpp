@@ -320,6 +320,7 @@ layer read_bin(std::string path) {
 int main(int argc, char** argv) {
 	pint max_secs = 20;
 	pint max_iters = std::numeric_limits<pint>::max();
+	bool save_csv = false;
 	std::vector<std::string> wav_paths;
 	std::vector<std::string> cmp_paths;
 	std::string append = "reconstructed";
@@ -328,10 +329,11 @@ int main(int argc, char** argv) {
 			std::cout
 				<< " For more info about the author: carlos-tarjano.web.app\n"
 				<< " Usage: \n"
-				<< " [-t x] [-i y] -[a z] [path/to/file1.wav]...[path/to/filen.wav]  [path/to/file1.cmp]...[path/to/filem.cmp]\n"
+				<< " [-t x] [-i y] -[a z] [-csv] [path/to/file1.wav]...[path/to/filen.wav]  [path/to/file1.cmp]...[path/to/filem.cmp]\n"
 				<< " -t or --time: (default " << max_secs <<" s) maximum time in seconds allowed for each compression task\n"
 				<< " -i or --iterations: maximum number of iterations allowed for each compression task\n"
 				<< " -a or --append: (default \"" << append << "\") string to be appended to each reconstructed file name\n"
+				<< " -csv: saves a csv file with the beginning of each pseudo-cycle\n"
 				<< " If no path is given the root folder will be scanned for .wav and .cmp files, and those will be processed accordingly\n";
 			return 0;
 		}
@@ -348,6 +350,11 @@ int main(int argc, char** argv) {
 		else if (std::strcmp(argv[i], "-a") == 0 || std::strcmp(argv[i], "--append") == 0) {
 			append = argv[i + 1];
 			std::cout << "Append \"" << append << "\" to the name of reconstructed files\n";
+			i++;
+		}
+		else if (std::strcmp(argv[i], "-csv") == 0) {
+			save_csv = true;
+			std::cout << "pseudo-cycle info will be saved as csv\n";
 			i++;
 		}
 		else if (ends_with(argv[i], ".wav")) {
@@ -377,9 +384,14 @@ int main(int argc, char** argv) {
 		//auto fps = WV.fps;
 
 		try {
-		auto C = compress(WV.W, max_secs, max_iters);
-		path.replace(path.end() - 4, path.end(), ".cmp");
-		write_bin(path, WV.W.size(), WV.fps, C.X_PCs, C.Waveform, C.Envelope);
+			auto C = compress(WV.W, max_secs, max_iters);
+			path.replace(path.end() - 4, path.end(), ".cmp");
+			write_bin(path, WV.W.size(), WV.fps, C.X_PCs, C.Waveform, C.Envelope);
+
+			if (save_csv) {
+				path.replace(path.end() - 4, path.end(), ".csv");
+				write_vector(C.X_PCs, path);
+			}
 		}
 		catch (...) {
 			continue;

@@ -1,29 +1,71 @@
 from os import linesep
-import wave
+from statistics import mode
 import numpy as np
 import plotly.graph_objects as go
+import signal_envelope as se
+from scipy import interpolate
 
 
-name = "piano33"
+def get_pcs(Xpc, W):
+  Xpc = Xpc.astype(int)
+  # amp = np.max(np.abs(W))
+  # max_T = int(np.max(np.abs(Xpc[1:] - Xpc[:-1])))
+  Xlocal = np.linspace(0, 1, mode(Xpc[1:] - Xpc[:-1]))
 
-Xpc = np.genfromtxt(name + "_Xpcs.csv", delimiter=",").astype(int)
-L = Xpc[1:] - Xpc[:-1]
+  orig_pcs = []
+  norm_pcs = []
+  for i in range(2, Xpc.size):
+    x0 = Xpc[i - 1]
+    x1 = Xpc[i] + 1
+    orig_pcs.append(W[x0 : x1])
+    if x1 - x0 >= 4:
+      yx = interpolate.interp1d(np.linspace(0, 1, x1-x0), W[x0 : x1], "cubic")
+      Ylocal = yx(Xlocal)
+      # Ylocal = Ylocal / np.max(np.abs(Ylocal)) * amp
+      norm_pcs.append(Ylocal)
+  return np.average(np.array(norm_pcs), 0), orig_pcs, norm_pcs
 
-Xpc_2 = np.genfromtxt(name + "_Xpcs_best.csv", delimiter=",").astype(int)
-L_2 = Xpc_2[1:] - Xpc_2[:-1]
+def to_plot(Matrix):
+  X = []
+  Y = []
+  for line in Matrix:
+    for x, y in enumerate(line):
+      X.append(x)
+      Y.append(y)
+    X.append(None)
+    Y.append(None)
+  return X, Y
+
+name = "alto"
+
+'''###### Read wav file ######'''
+W, fps = se.read_wav(f"{name}.wav")
+W = W - np.average(W)
+amp = np.max(np.abs(W))
+W = W / amp
+n = W.size
+
+'''###### Read Pseudo-cycles info ######'''
+Xpc = np.genfromtxt(name + ".csv", delimiter=",")
+
+X_xpcs, Y_xpcs = [], []
+for x in Xpc:
+  X_xpcs.append(x)
+  X_xpcs.append(x)
+  X_xpcs.append(None)
+  Y_xpcs.append(-1)
+  Y_xpcs.append(1)
+  Y_xpcs.append(None)
 
 
-FT = np.fft.rfft(L_2)
-absFT = np.abs(FT)
-avg = np.average(absFT)
-for i in range(0, absFT.size):
-  if np.abs(FT[i]) <= avg:
-    FT[i] = 0 + 0 * 1j
+average_waveform, orig_waveforms, norm_waveforms = get_pcs(Xpc, W)
 
-L_3 = np.fft.irfft(FT)
+# norm_waveforms = norm_waveforms - average_waveform
+
+
 
 '''============================================================================'''
-'''                                    PLOT                                    '''
+'''                                 PLOT SIGNAL                                '''
 '''============================================================================'''
 fig = go.Figure()
 fig.layout.template ="plotly_white"
@@ -32,12 +74,10 @@ fig.update_layout(
   # title = name,
   xaxis_title="x",
   yaxis_title="Amplitude",
-
   # yaxis = dict(        # <|<|<|<|<|<|<|<|<|<|<|<|
   #   scaleanchor = "x", # <|<|<|<|<|<|<|<|<|<|<|<|
   #   scaleratio = 1,    # <|<|<|<|<|<|<|<|<|<|<|<|
   # ),                   # <|<|<|<|<|<|<|<|<|<|<|<|
-
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=5, r=5, b=5, t=5),
   font=dict(
@@ -48,12 +88,12 @@ fig.update_layout(
 )
 
 fig.add_trace(
-  go.Scatter(
-    name="Xpc", # <|<|<|<|<|<|<|<|<|<|<|<|
+  go.Scattergl(
+    name="W", # <|<|<|<|<|<|<|<|<|<|<|<|
     # x=XX,
-    y=Xpc,
+    y=W,
     # fill="toself",
-    mode="lines",
+    mode="lines+markers",
     line=dict(
         width=1,
         color="black",
@@ -64,10 +104,10 @@ fig.add_trace(
 )
 
 fig.add_trace(
-  go.Scatter(
-    name="Xpc_2", # <|<|<|<|<|<|<|<|<|<|<|<|
-    # x=XX,
-    y=Xpc_2,
+  go.Scattergl(
+    name="Pseudo-cycles", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=X_xpcs,
+    y=Y_xpcs,
     # fill="toself",
     mode="lines",
     line=dict(
@@ -79,21 +119,58 @@ fig.add_trace(
   )
 )
 
-Xpc_3 = [Xpc_2[0]]
+fig.show(config=dict({'scrollZoom': True}))
 
-for l in L_3:
-  Xpc_3.append(Xpc_3[-1] + l)
+'''============================================================================'''
+'''                               PLOT WAVEFORM                                '''
+'''============================================================================'''
+fig = go.Figure()
+fig.layout.template ="plotly_white"
+# fig.update_yaxes(zeroline=True, zerolinewidth=2, zerolinecolor="black")
+fig.update_layout(
+  # title = name,
+  xaxis_title="x",
+  yaxis_title="Amplitude",
+  # yaxis = dict(        # <|<|<|<|<|<|<|<|<|<|<|<|
+  #   scaleanchor = "x", # <|<|<|<|<|<|<|<|<|<|<|<|
+  #   scaleratio = 1,    # <|<|<|<|<|<|<|<|<|<|<|<|
+  # ),                   # <|<|<|<|<|<|<|<|<|<|<|<|
+  legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
+  margin=dict(l=5, r=5, b=5, t=5),
+  font=dict(
+  family="Computer Modern",
+  color="black",
+  size=18
+  )
+)
 
+X, Y = to_plot(norm_waveforms)
 fig.add_trace(
-  go.Scatter(
-    name="Xpc_3", # <|<|<|<|<|<|<|<|<|<|<|<|
-    # x=XX,
-    y=Xpc_3,
+  go.Scattergl(
+    name="Normalized", # <|<|<|<|<|<|<|<|<|<|<|<|
+    x=X,
+    y=Y,
     # fill="toself",
     mode="lines",
     line=dict(
         width=1,
-        color="blue",
+        color="rgba(38, 12, 12, 0.2)",
+        # showscale=False
+    ),
+    # visible = "legendonly"
+  )
+)
+
+fig.add_trace(
+  go.Scattergl(
+    name="Average", # <|<|<|<|<|<|<|<|<|<|<|<|
+    # x=XX,
+    y=average_waveform,
+    # fill="toself",
+    mode="lines",
+    line=dict(
+        width=1,
+        color="red",
         # showscale=False
     ),
     # visible = "legendonly"
@@ -101,3 +178,4 @@ fig.add_trace(
 )
 
 fig.show(config=dict({'scrollZoom': True}))
+
