@@ -1,6 +1,7 @@
 ﻿#include "Header.h"
 #include <filesystem>
 
+#define t // for time
 
 class layer {
 private:
@@ -402,7 +403,13 @@ int main(int argc, char** argv) {
 		std::cout << "\nDecompressing " << path << std::endl;
 
 		auto rec = read_bin(path);
+#ifdef t
+		auto time = Chronograph();
+#endif
 		Wav WW = Wav(rec.reconstruct(), rec.fps);
+#ifdef t
+		time.stop("Decompressed " + path + " in ");
+#endif
 		path.replace(path.end() - 4, path.end(), "_" + append + ".wav");
 		WW.write(path);
 	}
