@@ -77,6 +77,8 @@ The same is true for digital pianos.
 
 This transforms the instrument in a mere controller, robbing it of characteristics that provide the personality of the conventional instruments, such as a particular timbre.
 
+While domain specific compression algorithms and codecs exist in many areas, to the best of the authors' knowledge, that is not the case for sample based digital musical instruments. Those signals, being highly uniform, offer an opportunity for compression that is not presente in most general sounds
+
 % Literature review | Brief Context of Prior Research
   % put your research in the context of other research
   % Nature and scope of the problem investigated
@@ -105,10 +107,10 @@ This transforms the instrument in a mere controller, robbing it of characteristi
   % Describe the work so as people can reproduce it
 
 % Overview of methods
-We can interpret a continuous or discrete signal, as long as it is at least pseudo periodic, as succession of waveforms, each one representing a (pseudo) cycle of the wave.
+A continuous or discrete signal, as long as it is at least pseudo periodic, can be interpreted as succession of consecutive waveforms, each one representing a (pseudo) cycle of the wave. In the case of perfectly periodic signals, those waveforms are identical and we need only the definition of one waveform to characterise the whole signal.in pseudo periodic waves, On the other hand there are potentially variations between pseudo cycles, that must be accounted for. If the wave is sufficiently well behaved, as is the case with most sound arising from accoustic phenomenons, these changes can be attributed to variations in both the amplitude of the waveform and its length
 
 
-We start with an estimate of the waveform of the signal being processed.
+Starting with an initial estimate of the waveform of the signal being processed, one can identify the pseudo cycles of a signal by convolving the estimated waveform with the signal. The process can be made computationally efficient by considering some characteristics of the wave.
 
 % Restate the purpose of the work
 
@@ -137,11 +139,18 @@ We start with an estimate of the waveform of the signal being processed.
 
 % Problems with results
 
+Since the average waveform is used to encode the specificities of the wave, signals where there are signficant variations in the sape of the waveform are naturally ill suited for compression with the presented algorithm. This limitation can be mitigated with a pre processing step where the waveform is segmented based on the overal shape of the waveform
+
+noise
+
 % Possible implications
 
 \section{Discussion} % ≅ 2000 words
 
 % Put results into a broader context.
+While presenting an efficient algorithm to compress sufficiently well behaved signals, with immediate applications in the digital musical instrument industry, this work presents a new framework for representing pseudo periodic waves that can be extended in inumerous ways, with the help of both traditional and experimental methods.
+
+While we simply consider the average waveform when encoding the compressed wave, more sofisticated representations can be used. The average waveform can be further compressed via a parametric representation.
 
 % specific to broad
 

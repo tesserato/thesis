@@ -1,0 +1,4 @@
+A continuous or discrete signal, as long as it is at least pseudo periodic, can be interpreted as succession of consecutive waveforms, each one representing a (pseudo) cycle of the wave. In the case of perfectly periodic signals, those waveforms are identical and we need only the definition of one waveform to characterise the whole signal.in pseudo periodic waves, On the other hand there are potentially variations between pseudo cycles, that must be accounted for. If the wave is sufficiently well behaved, as is the case with most sound arising from accoustic phenomenons, these changes can be attributed to variations in both the amplitude of the waveform and its length
+
+
+Starting with an initial estimate of the waveform of the signal being processed, one can identify the pseudo cycles of a signal by convolving the estimated waveform with the signal. The process can be made computationally efficient by considering some characteristics of the wave.
