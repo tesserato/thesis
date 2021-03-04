@@ -265,20 +265,34 @@ inline bool ends_with(std::string const& value, std::string const& ending) {
 }
 
 void write_bin(std::string path, pint orig_n, pint fps, const v_inte& beg_of_pseudo_cycles, const v_real& waveform, const v_real& amp_of_pseudo_cycles) {
+	std::cout << "n=" << orig_n << "\n";
 
 	std::ofstream data_file;      // pay attention here! ofstream
 
-	v_pint pint_data = { orig_n, fps, amp_of_pseudo_cycles.size(), waveform.size() }; // header
+	pint max_t = 0;
+	v_pint T_pint(beg_of_pseudo_cycles.size());
+	for (size_t i = 1; i < beg_of_pseudo_cycles.size(); i++) {
+		T_pint[i] = beg_of_pseudo_cycles[i] - beg_of_pseudo_cycles[i - 1];
+		if (T_pint[i] > max_t) {
+			max_t = T_pint[i];
+		}
+	}
 
-	std::cout << "n=" << orig_n << "\n";
 
+	v_pint pint_data = { orig_n, fps, amp_of_pseudo_cycles.size(), waveform.size(), max_t }; // header
 	data_file.open(path, std::ios::out | std::ios::binary | std::fstream::trunc);
 	data_file.write((char*) &pint_data[0], pint_data.size() * sizeof(pint));
 	data_file.close();
 
-	std::vector<int> xp(beg_of_pseudo_cycles.begin(), beg_of_pseudo_cycles.end());
+	
+	std::vector<char> T(beg_of_pseudo_cycles.size());
+	T[0] = beg_of_pseudo_cycles[0];
+	for (size_t i = 1; i < beg_of_pseudo_cycles.size(); i++) {
+		T[i] = 127.0 * (real)T_pint[i] / (real)max_t;
+	}
+
 	data_file.open(path, std::ios::out | std::ios::binary | std::fstream::app);
-	data_file.write((char*)&xp[0], xp.size() * sizeof(int));
+	data_file.write((char*)&T[0], T.size() * sizeof(char));
 	data_file.close();
 
 
@@ -303,14 +317,19 @@ layer read_bin(std::string path) {
 	std::ifstream  data_file;
 	data_file.open(path, std::ios::in | std::ios::binary);
 
-	pint* header = new pint[4];
-	data_file.read(reinterpret_cast<char*>(&header[0]), 4 * sizeof(pint));
+	pint* header = new pint[5];
+	data_file.read(reinterpret_cast<char*>(&header[0]), 5 * sizeof(pint));
 
 	std::cout << "Decompressing file with n="<<header[0] << " and fps="<< header[1]<<"\n";
 	
-	int* beg_of_pseudo_cycles_buffer = new int[header[2] + 1];
-	data_file.read((char*)&beg_of_pseudo_cycles_buffer[0], (header[2] + 1) * sizeof(int));
-	v_inte beg_of_pseudo_cycles(beg_of_pseudo_cycles_buffer, beg_of_pseudo_cycles_buffer + header[2] + 1);
+	char* beg_of_pseudo_cycles_buffer = new char[header[2] + 1];
+	data_file.read((char*)&beg_of_pseudo_cycles_buffer[0], (header[2] + 1) * sizeof(char));
+	v_inte beg_of_pseudo_cycles(header[2] + 1);
+
+	beg_of_pseudo_cycles[0] = beg_of_pseudo_cycles_buffer[0];
+	for (size_t i = 1; i < beg_of_pseudo_cycles.size(); i++) {
+		beg_of_pseudo_cycles[i] = beg_of_pseudo_cycles[i - 1] + header[4] * (real)beg_of_pseudo_cycles_buffer[i] / 127.0;
+	}
 
 	char* waveform_buffer = new char[header[3]];
 	data_file.read((char*)&waveform_buffer[0], (header[3]) * sizeof(char));
