@@ -3,22 +3,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerWorkingDirectory>..\Execs</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>alto.cmp</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-h</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerWorkingDirectory>..\Execs</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>alto.cmp</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-h</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LocalDebuggerWorkingDirectory>..\Execs</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>alto.cmp</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-h</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerWorkingDirectory>..\Execs</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>alto.cmp</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-h</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup>
     <ShowAllFiles>true</ShowAllFiles>
