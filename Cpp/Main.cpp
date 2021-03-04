@@ -328,6 +328,7 @@ int main(int argc, char** argv) {
 	for (int i = 1; i < argc; ++i) { // parsing args
 		if (std::strcmp(argv[i], "-h") == 0 || std::strcmp(argv[i], "--help") == 0) {
 			std::cout << "Size of char: " << sizeof(char) << " byte\n";
+			std::cout << "Size of short: " << sizeof(short) << " byte\n";
 			std::cout << "Size of int: " << sizeof(int) << " bytes\n";
 			std::cout << "Size of float: " << sizeof(float) << " bytes\n";
 			std::cout << "Size of double: " << sizeof(double) << " bytes\n\n";
