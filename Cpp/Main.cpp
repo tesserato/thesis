@@ -281,14 +281,21 @@ void write_bin(std::string path, pint orig_n, pint fps, const v_inte& beg_of_pse
 	data_file.write((char*)&xp[0], xp.size() * sizeof(int));
 	data_file.close();
 
-	std::vector<float> wv(waveform.begin(), waveform.end());
+
+	std::vector<char> wv(waveform.size());
+	for (size_t i = 0; i < waveform.size(); i++) {
+		wv[i] = waveform[i] * 127.0;
+	}
 	data_file.open(path, std::ios::out | std::ios::binary | std::fstream::app);
-	data_file.write((char*)&wv[0], wv.size() * sizeof(float));
+	data_file.write((char*)&wv[0], wv.size() * sizeof(char));
 	data_file.close();
 
-	std::vector<float> en(amp_of_pseudo_cycles.begin(), amp_of_pseudo_cycles.end());
+	std::vector<char> en(amp_of_pseudo_cycles.size());
+	for (size_t i = 0; i < amp_of_pseudo_cycles.size(); i++) {
+		en[i] = amp_of_pseudo_cycles[i] * 127.0;
+	}
 	data_file.open(path, std::ios::out | std::ios::binary | std::fstream::app);
-	data_file.write((char*)&en[0], en.size() * sizeof(float));
+	data_file.write((char*)&en[0], en.size() * sizeof(char));
 	data_file.close();
 }
 
@@ -305,13 +312,19 @@ layer read_bin(std::string path) {
 	data_file.read((char*)&beg_of_pseudo_cycles_buffer[0], (header[2] + 1) * sizeof(int));
 	v_inte beg_of_pseudo_cycles(beg_of_pseudo_cycles_buffer, beg_of_pseudo_cycles_buffer + header[2] + 1);
 
-	float* waveform_buffer = new float[header[3]];
-	data_file.read((char*)&waveform_buffer[0], (header[3]) * sizeof(float));
-	v_real waveform(waveform_buffer, waveform_buffer + header[3]);
+	char* waveform_buffer = new char[header[3]];
+	data_file.read((char*)&waveform_buffer[0], (header[3]) * sizeof(char));
+	v_real waveform(header[3]);
+	for (size_t i = 0; i < header[3]; i++)	{
+		waveform[i] = (real)waveform_buffer[i] / 127.0;
+	}
 
-	float* envelope_buffer = new float[header[2]];
-	data_file.read((char*)&envelope_buffer[0], (header[2]) * sizeof(float));
-	v_real envelope(envelope_buffer, envelope_buffer + header[2]);
+	char* envelope_buffer = new char[header[2]];
+	data_file.read((char*)&envelope_buffer[0], (header[2]) * sizeof(char));
+	v_real envelope(header[2]);
+	for (size_t i = 0; i < header[2]; i++) {
+		envelope[i] = (real)envelope_buffer[i] / 127.0;
+	}
 
 	data_file.close();
 
