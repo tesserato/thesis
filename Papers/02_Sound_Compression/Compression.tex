@@ -62,7 +62,7 @@ lends itself well to machine learning, as the sound can be represented by an evo
 {\bf Keywords:} 
 
 
-\section{Introduction} % ≅ 500 words
+\section{Introduction} % ≅ 500 to 1000 words
 % ≅ 10\% of the text
 % broad to specific
 % show that the research question is clear, concise, and worthy of study.
@@ -77,11 +77,11 @@ The same is true for digital pianos, where models providing realistic sounds are
 
 This transforms the instrument in a mere controller or practice aid, robbing it of characteristics that provide the personality of the conventional instruments, such as a particular timbre.
 
-Domain specific compression algorithms and codecs exist in many areas. \textcite{2016ChenCompressing} for example, presents a scheme for compressing convolutional neural networks, while \textcite{2014CanovasLossy}, besides revising existing methods, proposes two lossy schemes for the compression of quality score data of genomic sequencing. 
+Domain specific compression algorithms and codecs exist in many areas. \textcite{2016ChenCompressing} for example, presents a scheme for compressing convolutional neural networks, while \textcite{2014CanovasLossy}, besides revising existing methods, proposes two lossy schemes for the compression of quality score data of genomic sequencing. The use of lossy compression for wireless networks of sensors is studied in \textcite{2014ZordanPerformance}.
 
-More recently, the work of \textcite{2019CalhounExploring}, explores the benefits of specific lossy compression algorithms in the context of checkpoints of computational simulations that are stored between simulation sessions.
+More recently the work of \textcite{2019CalhounExploring} explores the benefits of specific lossy compression algorithms in the context of checkpoints of computational simulations that are stored between simulation sessions.
 
-Regarding sample based digital musical instruments, to the best of the authors' knowledge, no such specialized algorithms exist. Those signals, being highly uniform, offer an opportunity for compression that is not present in most general sounds and remain largely unexplored.
+Regarding sample based digital musical instruments, however, to the best of the authors' knowledge, no such specialized algorithms exist. Those signals, being highly uniform, offer an opportunity for compression that is not present in most general sounds and remain largely unexplored.
 
 This tendency arises in part from the marketing strategy of the vast majority of those products, where the sheer size of the library is advertised and seems to be sold as an equivalent of quality and versatility. An overall prejudice against compressed formats in general from the part of the music productions community supports this distorted view.
 
@@ -97,7 +97,7 @@ Nevertheless, research in data compression in general continues with recent effo
 
 Concerning sound lossless audio compression research seems to be lagging when compared to lossy approaches; \textcite{2001HansLossless} suggested that a limit was about to be reached.
 
-New technologies such as 3D, immersive audio has propelled specific compression algorithms, such as the one presented in \textcite{2021HuAudio}. The renaissance of neural networks led to interesting results, such as the use of GANs as presented in \textcite{2018HuangBandwidth}.
+New technologies such as 3D immersive audio has propelled specific compression algorithms, such as the one presented in \textcite{2021HuAudio}. The renaissance of neural networks led to interesting results, such as the use of GANs as presented in \textcite{2018HuangBandwidth}.
 
 
 The ACER codec, as presented in \textcite{2014CunninghamData} offers an unconventional approach to compression, in that it identifies redundant pieces in a signal that are indexed in a dictionary. The results seems to be satisfactory from a perceptual standpoint, in comparison to MP3 and AAC codecs \parencite{2019CunninghamSubjective}. 
@@ -129,16 +129,27 @@ The ACER codec, as presented in \textcite{2014CunninghamData} offers an unconven
   % Describe the work so as people can reproduce it
 
 % Overview of methods
-A continuous or discrete signal, as long as it is at least pseudo periodic, can be interpreted as succession of consecutive waveforms, each one representing a (pseudo) cycle of the wave. In the case of perfectly periodic signals, those waveforms are identical and we need only the definition of one waveform to characterise the whole signal.in pseudo periodic waves, On the other hand there are potentially variations between pseudo cycles, that must be accounted for. If the wave is sufficiently well behaved, as is the case with most sound arising from accoustic phenomenons, these changes can be attributed to variations in both the amplitude of the waveform and its length
+A continuous or discrete signal, as long as it is at least pseudo periodic, can be interpreted as succession of consecutive waveforms, each one representing a (pseudo) cycle of the wave. In the case of perfectly periodic signals, those waveforms are identical and we need only the definition of one waveform to characterise the whole signal. While in pseudo periodic waves, On the other hand, there are potentially variations between pseudo cycles, that must be accounted for.
+% Relate to other studies
+
+This rationale of defining a signal as a series of a modified basis function is presented more formally, in the context of wavelets, in \textcite{1993SinhaLow}; in that work, however, the bases are wavelets that are obtained via filter banks applied using a pyramid algorithm. A similar approach can be found in \textcite{1998SrinivasanHigh}, where a perceptual metric is used, however.
+
+In both works the wavelets coefficients are encoded in a dinamic dicinary. The present work adopts a more direct approach, obtaining a more accurate unique discrete basis.
+
+If the wave is sufficiently well behaved, as is the case with most sound arising from accoustic phenomenons, the bulk of those changes can be attributed to variations in both the amplitude of the waveform and its length; One hence needs to identify an embrionary waveform, and register how it changes during the course of the pseudo cycles that comprise the whole signal.
+
+We accomplish that via an iterative algorithm, that refines this waveform in each iteration
 
 
-Starting with an initial estimate of the waveform of the signal being processed, one can identify the pseudo cycles of a signal by convolving the estimated waveform with the signal. The process can be made computationally efficient by considering some characteristics of the wave.
+Starting with an initial estimate of the waveform of the signal being processed, one can identify the pseudo cycles of a signal by convolving the estimated waveform with the signal. The process can be made more efficient by considering some characteristics of the wave. For the initial waveform, for example, the algorithm presented in \textcite{2020TarjanoDigital} is used in cases where a simple sinusoid is less accurate. 
+
+
+
 
 % Restate the purpose of the work
 
 % Essential background information
 
-% Relate to other studies
 
 % Indicate where problems occurred
 
@@ -149,20 +160,55 @@ Starting with an initial estimate of the waveform of the signal being processed,
   % Use figures, tables, etc.
   % Clearly and simply stated.
 
-We compare the results of the algorithm here presented with some of the most popular codecs.
+% Revisit purpose and methods
+
+% Overview of results
+We compare the results of the algorithm here presented with some of the most widespread lossy codecs, using a variety of sound signals. The samples chosen reflect the proposed immeadiate application of the algorithm to sample based digital musical instruments, and thus consist of excerpts from notes from various instruments, as well as singing voice.
+
+Overview of the samples 44100 etc
 
 The first format we compare to is the popular MP3, the third layer of MPEG-1/2 specification, proposed in 1992 \parencite{2018BritanakAudio}. Despite being technically superseded by the newer MPEG-2 AAC \parencite{1999BrandenburgMP3}, finalized five years later, with which we also compare, its ubiquity makes the comparison crucial.
 
 besides
 
-The opus format was chosen, as, with the ACC and MP3, those are considered the most advanced \parencite{2019LaudeComprehensive} and popular \parencite{2018KwanObjective}
+The opus format was chosen, as, with the ACC and MP3, those are considered the most advanced \parencite{2019LaudeComprehensive} and popular \parencite{2018KwanObjective}.
 
-% Revisit purpose and methods
-
-% Overview of results
 
 % Key results in details
+\subsection{Compressed file size}
 
+\begin{table}[H]
+\centering
+\begin{tabular}{lcccc}
+\hline
+\multicolumn{5}{c}{\textbf{Compressed size (bytes)}} \\
+Sample        & Present Work & MP3   & ACC   & Opus \\
+\hline
+cello         & 1159         & 3357  & 3066  & 2021 \\
+doublebass    & 1471         & 1845  & 1915  & 1339 \\
+flute         & 16678        & 11565 & 8988  & 9342 \\
+frenchhorn    & 4783         & 9189  & 7572  & 6219 \\
+mezzosoprano  & 4669         & 3717  & 3237  & 2997 \\
+saxophone     & 19260        & 20277 & 16307 & 12954 \\
+singerbass    & 1989         & 3069  & 2747  & 2302 \\
+singerfemaleA & 9125         & 8325  & 6593  & 6121 \\
+singerfemaleB & 4470         & 6021  & 4773  & 4395 \\
+singermale    & 694          & 1629  & 1777  & 977 \\
+sopranoA      & 3747         & 3069  & 2656  & 2294 \\
+sopranoB      & 2535         & 2709  & 2568  & 2021 \\
+violin        & 1575         & 2709  & 2514  & 1754 \\
+\hline
+Average       & 5550.38	     & 5960.08	&4977.92	&4210.46
+ 
+\end{tabular}
+\caption{Comparison of the average errors of the algorithm presented in this work with the most common methods of digital envelope identification. The discrete waves used were normalized between -1 and 1. The average is between the absolute value of those waves and the envelope divided by two.}
+\label{table:Error_comparison}
+\end{table}
+
+
+\subsection{Encoding and decoding time}
+
+While part of the discrepancy in encoding times can be attributed to the immaturity of the implementation when compared to well stablished ones like lame for mp3, the majority of the difference is generated by the wildly different approach used by the algorithm presented in this work, since it engages in a semi exaustive search of the best basis, or paseudo cycle waveform via a series of dilated convolutions.
 % Comparison with results in other works
 
 % Comparison with predictions
@@ -171,7 +217,9 @@ The opus format was chosen, as, with the ACC and MP3, those are considered the m
 
 Since the average waveform is used to encode the specificities of the wave, signals where there are signficant variations in the sape of the waveform are naturally ill suited for compression with the presented algorithm. This limitation can be mitigated with a pre processing step where the waveform is segmented based on the overal shape of the waveform
 
-noise
+The algorithm, seeking the most accurate basis, has a tendency of filtering out noise from the compressed signal. This is not always welcome in the context of sound, since, as is the case of sounds with a percussive component, noise plays an integral part in the psychoacoustics characterization of the sound.
+
+One solution would be to parametrically reintroduce the needed noise, with an approach similar to the presented in \textcite{1998LevineSinesTransientsNoise}, for example.
 
 % Possible implications
 

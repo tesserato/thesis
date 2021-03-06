@@ -1,6 +1,6 @@
 # latexmk -lualatex -f -interaction=nonstopmode THESIS.tex
 
-$name = "SoundRepresentation"
+$name = "Compression"
 lualatex --shell-escape $name -f -interaction=nonstopmode -file-line-error
 biber $name
 # makeglossaries $name
