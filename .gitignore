@@ -14,3 +14,4 @@
 *.glsdefs
 images/*.pdf
 images/*.svg
+*.pyc

@@ -202,7 +202,7 @@ def draw_circle(xc, yc, r, fig, n=100, color="silver"):
     Y.append(yc + r * np.sin(t))
   fig.add_trace(
     go.Scatter(
-      name=None,
+      name="",
       # legendgroup="Circles",
       x=X,
       y=Y,
@@ -974,7 +974,7 @@ def get_discrete_curvature_old(X, Y, segments=5):
       
   return XX, f(XX), XCC, 1 / np.abs(YCC), f
 
-def get_curvature_function(X, Y):
+def get_curvature_function_(X, Y):
   X = np.array(X, dtype=np.float64)
   Y = np.array(Y, dtype=np.float64)
 
