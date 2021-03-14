@@ -1,0 +1,16 @@
+﻿*.bak
+*.aux
+*.toc
+*.blg
+*.bbl
+*.bcf
+*.glg
+*.glo
+*.gls
+*.ist
+*.log
+*.out
+*.run.xml
+*.glsdefs
+images/*.pdf
+images/*.svg

@@ -1,0 +1,1 @@
+pandoc THESIS.tex --bibliography=00_BIBLI.bib -o THESIS.docx
