@@ -1,1 +1,0 @@
-Remove-Item *.bcf, *.xml, *.aux, *.fls, *.log, *.fdb_latexmk, *.glsdefs, *.bak, *.sav, *.ist, *.bbl, *.blg, *.glo, *.out, *.glg, *.gls, *.toc, *.lof, *.lot
