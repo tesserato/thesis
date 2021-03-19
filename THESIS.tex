@@ -53,7 +53,7 @@
   pdftitle={Robust Digital Envelope Estimation Via Geometric Properties of an Arbitrary Real Signal}
 }
 
-\bibliography{00_BIBLI}
+\bibliography{00_BIBLI,Compression}
   
 \title{Sound Synthesis}
 \author{Carlos Tarjano}
@@ -268,7 +268,7 @@ Once a radius $ \alpha $ is defined, alpha shapes conserve the uniqueness proper
 
 \begin{figure}[H]
   \centering
-    \includegraphics{images/00ConvexHull.pdf}
+    \includegraphics{images/envelope/00ConvexHull.pdf}
   \caption{A discrete signal interpreted as a set of points in the Cartesian plane, and the convex and concave hull at $ \alpha=300 $ defined by it.}
   \label{fig:Hulls}
 \end{figure}
@@ -310,7 +310,7 @@ Figure \ref{fig:AnalyticSignal} exemplifies the Hilbert envelope, for a pure sin
 
 \begin{figure}[H]
   \centering
-    \includegraphics{images/01AnalyticSignal.pdf}
+    \includegraphics{images/envelope/01AnalyticSignal.pdf}
   \caption{Envelope of a pure sinusoid with a local frequency of 20 cycles modulated by a polynomial of degree 3, as obtained by the Hilbert Transform approach. In the first half, the sinusoid is free of noise, while in the second half Gaussian noise with a standard deviation of $ 1/10 $ of the maximum amplitude of the wave was added to the base signal.}
   \label{fig:AnalyticSignal}
 \end{figure}
@@ -351,7 +351,7 @@ In the next section, a compatible geometric representation will be formulated, a
 
 \begin{figure}[H]
   \centering
-    \includegraphics{images/02Envelope.pdf}
+    \includegraphics{images/envelope/02Envelope.pdf}
   \caption{Example of a discrete wave \textbf{w} composed by the element-wise multiplication of an envelope \textbf{e} and a carrier \textbf{c}. The local extrema of \textbf{w} are highlighted with a circle.}
   \label{fig:Envelope}
 \end{figure}
@@ -368,7 +368,7 @@ This relation is illustrated in figure \ref{fig:Pulses}. We call it P to emphasi
 
 \begin{figure}[H]
   \centering
-    \includegraphics{images/03Pulses.pdf}
+    \includegraphics{images/envelope/03Pulses.pdf}
   \caption{Example of a discrete wave \textbf{w} divided into pulses, of which the extrema are highlighted with a circle. P is the set of the points $ P_j = (i_j, \lvert w_j \lvert) $ representing the absolute value of those extrema.}
   \label{fig:Pulses}
 \end{figure}
@@ -400,7 +400,7 @@ The effect of this normalization can be seen in the points shown in figure \ref{
 
 \begin{figure}[H]
   \centering
-    \includegraphics{images/04Vectors.pdf}
+    \includegraphics{images/envelope/04Vectors.pdf}
   \caption{The set of points P and the set V of vectors between two adjacent points of P, in both the original and normalized coordinate systems, shown in scale.}
   \label{fig:Vectors}
 \end{figure}
@@ -428,7 +428,7 @@ From figure \ref{fig:DiscreteCurvature} is easy to see that $ r_k = v_{k,x} \sin
 
 \begin{figure}[H]
   \centering
-    \includegraphics{images/05DiscreteCurvature.pdf}
+    \includegraphics{images/envelope/05DiscreteCurvature.pdf}
   \caption{The tangent unit vector of the circle changes from the horizontal direction in $ \hat{u}_0 $ to an inclination of $ \theta_k $ in $ \hat{u}_1 $, $ \theta_k $ being the angle that the vector $ v_k $ makes with the horizontal direction.}
   \label{fig:DiscreteCurvature}
 \end{figure}
@@ -510,21 +510,21 @@ These characteristics are in stark contrast with those of the sang voice in figu
 
 \begin{figure}[H]
   \centering
-    \includegraphics{images/06Graph_bend.pdf}
+    \includegraphics{images/envelope/06Graph_bend.pdf}
   \caption{Signal, envelope and carrier for a record of a bend performed on an electric guitar.}
   \label{fig:Bend}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-    \includegraphics{images/06Graph_spoken_voice.pdf}
+    \includegraphics{images/envelope/06Graph_spoken_voice.pdf}
   \caption{Signal, envelope and carrier for a record of male voice uttering the word “amazing”.}
   \label{fig:spoken_voice}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-    \includegraphics{images/06Graph_alto.pdf}
+    \includegraphics{images/envelope/06Graph_alto.pdf}
   \caption{Signal, envelope and carrier for a record of an alto singer.}
   \label{fig:singer_voice}
 \end{figure}
@@ -559,7 +559,7 @@ In \ref{fig:Comparison_sinusoid} we illustrate the envelope extracted by the con
 
 \begin{figure}[H]
   \centering
-    \includegraphics{images/07Comparison_sinusoid.pdf}
+    \includegraphics{images/envelope/07Comparison_sinusoid.pdf}
   \caption{Comparison of envelope detection algorithms for a simple sinusoid}
   \label{fig:Comparison_sinusoid}
 \end{figure}
@@ -568,7 +568,7 @@ For a recording of the key 33 of a grand piano, where parts of the sound are hig
 
 \begin{figure}[H]
   \centering
-    \includegraphics{images/07Comparison_piano.pdf}
+    \includegraphics{images/envelope/07Comparison_piano.pdf}
   \caption{Comparison of envelope detection algorithms for the recording of the key 33 of a grand piano}
   \label{fig:Comparison_piano}
 \end{figure}
@@ -577,7 +577,7 @@ In figure \ref{fig:Comparison_soprano} all envelopes exhibit a similar movement 
 
 \begin{figure}[H]
   \centering
-    \includegraphics{images/07Comparison_soprano.pdf}
+    \includegraphics{images/envelope/07Comparison_soprano.pdf}
   \caption{Comparison of envelope detection algorithms for the recording of the vocalization of a soprano singer}
   \label{fig:Comparison_soprano}
 \end{figure}
@@ -644,7 +644,7 @@ Figure \ref{fig:FullFrontiers} illustrates the frontiers of six diverse discrete
 
 \begin{figure}[H]
   \centering
-    \includegraphics{images/08FullFrontiers.pdf}
+    \includegraphics{images/envelope/08FullFrontiers.pdf}
   \caption{Positive and negative frontiers of six digital waves, as extracted by the algorithm here presented. For each wave, the region highlighted in black is shown in detail besides the whole wave. For each wave, the horizontal axis is the sample number $ i $, while the vertical axis is the normalized amplitude. All 6 waves were recorded at 44100 fps.}
   \label{fig:FullFrontiers}
 \end{figure}
@@ -658,7 +658,7 @@ The envelope is shown to add complexity to the spectral representation of a wave
 
 \begin{figure}[H]
   \centering
-    \includegraphics{images/11Fourier.pdf}
+    \includegraphics{images/envelope/11Fourier.pdf}
   \caption{Fourier power spectrum for the wave and carrier shown in \ref{fig:Envelope}.}
   \label{fig:Fourier}
 \end{figure}
@@ -667,7 +667,7 @@ Moreover, the algorithm developed in this work naturally divides a signal into i
 
 \begin{figure}[H]
   \centering
-    \includegraphics{images/09PCs.pdf}
+    \includegraphics{images/envelope/09PCs.pdf}
   \caption{Section of the lines formed by the positions of the positive and negative frontiers of the digital wave illustrated in \ref{fig:singer_voice}, as extracted by the algorithm presented, and their average.}
   \label{fig:PCs}
 \end{figure}
@@ -676,7 +676,7 @@ One can see in figure \ref{fig:PCs} a section of the plot of where the local max
 
 \begin{figure}[H]
   \centering
-    \includegraphics{images/10AvgPc.pdf}
+    \includegraphics{images/envelope/10AvgPc.pdf}
   \caption{Pseudo-cycles of the wave illustrated in \ref{fig:singer_voice}, segmented and superposed, and their average. The average is also shown shifted by one average period, to illustrate the average continuity.}
   \label{fig:AvgPc}
 \end{figure}
@@ -705,8 +705,204 @@ By illustrating how this information can be used to obtain the average waveform 
 
 % one hot
 
+\section{Pseudo cycles based representation}
 
+Sample-based virtual instruments are the de facto standard for the emulation of real-world acoustic instruments. Nevertheless, little attention is given to the encoding of the samples used in those instruments; lossless formats like WAV or proprietary codecs are common, pushing the on-disk size of those libraries to sizes exceeding the gigabytes. This renders the most realistic digital instruments inaccessible in many but the most high-end hardware; controllers, like electronic drum kits and keyboards and even less robust personal computers are often unable to take advantage of those libraries. We propose a lossy compression algorithm tailored specifically to compress pseudo periodic signals, as those comprising these instruments; due to the highly redundant nature of these sounds, improvements in relation to traditional codecs can be obtained. The algorithm operates entirely in the time domain, avoiding domain conversions common in lossy compression algorithms, thus exhibiting low latency in the decoding phase. It operates iteratively, dividing a signal into its pseudo cycles according to an estimate of the average waveform of those pseudo cycles, which is thus updated, and the process is repeated. We provide C++ source code and implementation of the algorithm, that was used to compare its performance against the MP3, AAC, and Opus codecs, finding the proposed method to be at last 13 times faster in decoding tasks, while maintaining comparable compression rate and quality, as measured by MSE and the ViSQOL library. A website and a GitHub repository with complementary material, where results can be heard, are also available.
 
+Domain specific compression algorithms and codecs exist in many areas. \cite{2016ChenCompressing}, for example, presents a scheme for compressing convolutional neural networks, while \cite{2014CanovasLossy}, besides revising existing methods, proposes two lossy schemes for the compression of quality score data of genomic sequencing. The use of lossy compression for wireless networks of sensors is studied in \cite{2014ZordanPerformance}.
+
+More recently, the work of \cite{2019CalhounExploring} explores the benefits of specific lossy compression algorithms in the context of checkpoints of computational simulations that are stored between simulation sessions; New technologies, such as 3D immersive audio, have propelled specific compression algorithms, such as the one presented in \cite{2021HuAudio}. 
+
+Regarding sample-based digital musical instruments, however, no such specialized algorithms exist despite those signals, being highly uniform, offering a potential for compression that is not present in most general sounds and remains largely unexplored.
+
+This overlook arises in part from the marketing strategy of the majority of those products, where the sheer size of the library is advertised as an equivalent of quality and versatility. An overall prejudice against compressed formats in general from the part of the music production community supports this biased view.
+
+At last some of the criticism directed to the MP3 standard, and lossy codecs in general, is meant to establish a symbolic capital in the face of the crescent struggle between established recording labels and alternative channels of music diffusion, such as streaming services \cite{2020OGradyRethinking}.
+
+The adoption of special compressed formats would enable state-of-the-art digital instruments to be implemented in a wider range of hardware, where the storage costs now make the cost prohibitive, such as electronic drum kits, digital pianos, and even cell phones and tablets, democratizing those tools.
+
+A recent review of the advancements in data compression in general can be found in \cite{2021Jayasankarsurvey}. Accounts of the research in more specific areas, such as video \cite{2019LaudeComprehensive} and image \cite{2014RehmanImage} were also produced recently.
+
+Concerning lossless audio compression, research seems to be lagging when compared to lossy approaches; \cite{2001HansLossless} suggested that a limit was about to be reached at the beginning of the 2000s.
+
+The renaissance of neural networks led to interesting results, for example the use of Generative adversarial networks for audio compression presented in \cite{2018HuangBandwidth}.
+
+The ACER codec, as presented in \cite{2014CunninghamData}, offers an unconventional approach to compression, in that it identifies redundant pieces in a signal that are indexed in a dictionary. The results seem to be satisfactory, from a perceptual standpoint, when compared with MP3 and AAC codecs \cite{2019CunninghamSubjective}.
+
+None of those approaches, however, are designed to take advantage of the redundancies present in harmonic sounds, nor were designed with the low latency requirements imposed by digital musical instruments, especially when operating in real-time; to fill that gap, we propose the method presented in this letter.
+
+\subsection{Methodology} 
+
+A continuous or discrete signal can be interpreted as a succession of consecutive waveforms, each one representing a (pseudo) cycle of the wave. In the case of perfectly periodic signals, those waveforms are identical, and we need only the definition of one waveform to characterize the whole signal. In pseudo periodic waves, on the other hand, there are variations between pseudo cycles, that must be accounted for.
+
+Figure \ref{fig:pseudocycles} illustrates a possible division in pseudo cycles of a segment of the discrete representation of the sound of a bowed cello. It can be seen that the waveform variation between pseudo cycles is very small, on account of the sound being harmonic.
+
+\begin{figure}%[H]
+\centerline{\includegraphics[width=\columnwidth]{images/compression/01_pseudocycles.pdf}}
+\caption{A discrete wave representing the sound of a bowed cello. The red lines represent the frontiers between successive pseudo cycles, as divided using the presented algorithm.}
+\label{fig:pseudocycles}
+\end{figure}
+
+This rationale of defining a signal as a series of a modified basis function is presented more formally in \cite{1993SinhaLow}; in that work, however, the bases are wavelets obtained via filter banks applied to the original signal using a pyramid algorithm. A similar approach can be found in \cite{1998SrinivasanHigh}, where a perceptual metric is used. In the presented work this basis is derived directly from the division in pseudo cycles of the underlying signal.
+
+If the wave is sufficiently well-behaved, as is the case with the harmonic sounds used in sample-based digital musical instruments, the bulk of those changes can be attributed to variations in both the amplitude and length of the base waveform; The present algorithm is based on identifying the best basis waveform and registering how it changes over time.
+
+We accomplish that encoding via an iterative algorithm, that divides the signal of interest using a waveform estimate. An updated basis waveform can then be obtained, and the process repeats while improvement in the mean squared error between the initial uncompressed and the compressed signal is being made.
+
+Figure \ref{fig:averagewaveformcello} shows how the base waveform, shown in red, for the cello sample; the base waveform is the average of each individual waveform, after being scaled to the same length. To ensure the continuity of the final wave, the average waveform is rotated between each iteration of the algorithm, so that the absolute vertical distance to zero of its first and last elements is the smallest possible.
+
+\begin{figure}%[H]
+\centerline{\includegraphics[width=\columnwidth]{images/compression/02_averagewaveformcello.pdf}}
+\caption{The various pseudo cycles in which the signal is divided are shown superimposed, after being scaled to the same length. The average of those individual waveforms is shown in red.}
+\label{fig:averagewaveformcello}
+\end{figure}
+
+For some signals, the average waveform resembles very closely a sinusoid, as can be seen in Fig. \ref{fig:averagewaveformpiano} that illustrates the average waveform in the case of the sound of a piano key. From a physical perspective, the strings in a piano are excited with an initial impulse left to vibrate undisturbed. After an initial transient period, it is natural that a harmonic mode becomes predominant.
+
+\begin{figure}%[H]
+\centerline{\includegraphics[width=\columnwidth]{images/compression/02_averagewaveformpiano.pdf}}
+\caption{The various pseudo cycles in which the signal is divided are shown superimposed, after being scaled to the same length. The average of those waveforms is shown in red.}
+\label{fig:averagewaveformpiano}
+\end{figure}
+
+In figure \ref{fig:periodsenvelope} the envelope and the normalized periods of the wave are shown. Using this data to modulate both the amplitude and the length of the average waveform presented in Fig. \ref{fig:averagewaveformcello} above, one can approximate the original signal, as will be shown in the rest of this chapter.
+
+\begin{figure}%[H]
+\centerline{\includegraphics[width=\columnwidth]{images/compression/03_periodsenvelope.pdf}}
+\caption{The envelope and the normalized length of each pseudo cycle.}
+\label{fig:periodsenvelope}
+\end{figure}
+
+While the raw representation of the original cello signal can be viewed as an array with 129867 individual entries, for the compact representation we have 396 pairs of numbers representing the amplitude and length of each pseudo cycle, and the average waveform represented by an array of size 326. The length of the array storing the encoded representation, in the particular case of the cello sample, would be 1118, or approximately 0.86\% of the original, uncompressed representation.
+
+Starting with an initial estimate of the waveform of the signal being processed, one can identify the pseudo cycles of a signal by gradually multiplying, element-wise, different lengths of this estimated waveform with the signal, and observing the highest average value.
+
+For the placement of the initial waveform, one has also to account for the potential phase shift in the signal. This is accomplished by convolving the different lengths of the waveform starting from different positions. For the subsequent placements, the initial position will be already fixed at the end of the preceding pseudo cycle, the length being the only quantity to be estimated.
+
+Figure \ref{fig:tdists} shows how many times a period with a specific length occurs, for 4 different sound samples illustrating different settings. The first two samples are from instruments, a cello, and a piano, and the last two are voices, from a female soprano and a male bass.
+
+The data in blue refers to the initial division of the waves, as obtained by the algorithm presented in \cite{2020TarjanoDigital}. Since the algorithm was primarily designed to identify the envelope of a wave, the variation in the lengths of the pseudo cycles is naturally greater than the red data, where the final result after the application of the current method is shown. 
+
+The distribution of the periods' length tends to present a smaller variance, concentrating around the mode, as the algorithm progresses, and better basis waveforms are found. None of these distributions, as per the Shapiro test, are significantly close to a normal distribution, as can be observed comparing the distributions with the equivalent normal distributions plotted in the figure. 
+
+The normal distributions, as constructed with mean equal to the mode of the periods distribution and standard deviation equal to the standard variation around the mode tend to have a greater spread. Investigating the range between 3 standard deviations around the mode is a very conservative assumption, then, that we can afford to make without compromising the efficiency of the algorithm.
+
+\begin{figure}%[H]
+\centerline{\includegraphics[width=\columnwidth]{images/compression/04_Tdist.pdf}}
+\caption{Distribution of the number of occurrences of periods lengths for 4 samples, both for the initial waveform in blue and the final waveform in black.}
+\label{fig:tdists}
+\end{figure}
+
+Fig. \ref{fig:convolution} illustrates, for the cello wave, the procedure for the identification of the first pseudo cycle of the wave, for a particular period. Although only one example is shown in the picture, the various lengths of the waveform are convolved with the beginning of the original signal, and the optimum chosen.
+
+\begin{figure}%[H]
+\centerline{\includegraphics[width=\columnwidth]{images/compression/05_convolution.pdf}}
+\caption{Identification of the first pseudo cycle. The intensity of the color is proportional to the average of the multiplication between the basis waveform and the underlying original signal. Only one waveform length is shown, translated in intervals of 10 frames.}
+\label{fig:convolution}
+\end{figure}
+
+For the subsequent periods, the procedure is as illustrated in Fig. \ref{fig:scaling}, as taking the original cello wave as an example: only the length of the basis waveform is changed, using cubic interpolation. At the first iteration, the steps illustrated in both Fig. \ref{fig:convolution} and Fig. \ref{fig:scaling} are performed with the use of a sinusoid, to ensure the best initial division and faster convergence of the algorithm.
+
+\begin{figure}%[H]
+\centerline{\includegraphics[width=\columnwidth]{images/compression/06_scaling.pdf}}
+\caption{Identification of the second pseudo cycle, by multiplying different lengths of the basis waveform with the underlying original signal. The intensity of the color is proportional to the average of the multiplication.}
+\label{fig:scaling}
+\end{figure}
+
+\subsection{Results}
+In this section, we compare the algorithm here presented with the most common lossy codecs in a variety of sound samples chosen to reflect the proposed immediate application of the algorithm, and thus consist of excerpts from notes from various instruments, as well as singing voice, as would be encountered in the libraries of sample-based instruments. Results can be heard on the website prepared for this letter \cite{2021TarjanoCompression}.
+
+The samples from soprano, mezzo-soprano, and bass singers were obtained by processing sounds from the Vocalset library\cite{2018WilkinsVocalset}, and are licensed under the Creative Commons Attribution 4.0 International. The male singer sample was based on a sample from the Human Voice Dataset \cite{2015Vocoboxvocobox}, available under the MIT License.
+
+The double bass, french horn, flute, and saxophone samples were based on samples freely available at the resources page of the Phillarmonia symphony orchestra website \cite{Philharmonia}, while the piano, cello, and violin samples were processed from the basis samples offered in the University of Iowa Musical Instrument Samples (MIS) \cite{FrittsUniversity}, and are also freely available.
+
+All original samples are uncompressed audio encoded in the WAV format, at a standard frame rate of 44100 fps and a bit rate of 705 kbps, mono that were normalized with long silences manually removed. The format was chosen for its popularity both in general \cite{2014LuoIdentifying} and in sample-based digital instruments.
+
+For the compressed formats, three lossy codecs were chosen. The first format we compare to is the popular MP3, the third layer of the MPEG-1/2 specification, proposed in 1992 \cite{2018BritanakAudio} by the Moving Picture Experts Group. 
+
+The AAC format, in addition to being the formal mp3 successor, is used in services like Apple iTunes and YouTube \cite{2016SeichterAAC}. It was developed by a joint effort between industry representatives such as Dolby and Sony and academic representation through Bell Labs and the University of Hannover, for example \cite{2018BritanakAudio}.
+
+Outside the MPEG committee, the open-source Opus format, standardized by the Internet Engineering Task Force (IETF) in 2012, was chosen. Besides being considered superior to its predecessor Vorbis and the AAC format \cite{2018GunawanPerformance}, the codec supports both speech and music, has very low delay \cite{2013Valinhigh}, being used in real-time audio applications such as WhatsApp \cite{2019SrivastavaSmartphone}.
+
+The Opus codec, along with ACC and MP3, forms the set of the most advanced \cite{2019LaudeComprehensive} and popular \cite{2018KwanObjective} lossy compression formats; Readily available implementations of more experimental algorithms, such as the aforementioned ACER codec \cite{2014CunninghamData}, or the wavelet-based approaches presented in \cite{1993SinhaLow} and \cite{1998SrinivasanHigh} couldn't be found.
+
+All conversions, except for the MP3 encoding done with the Lame library, were made with the FFmpeg library. The PowerShell scripts used are available in the letter's repository \cite{2021TarjanoCompression}. The encoding configurations were chosen in order to generate files with sizes compatible with the present algorithm: for the MP3 format, a bit rate of 8 kb/s and a frame rate of 8000 frames/s was chosen. For the other two formats, no frame rate reduction was needed, and the bit rates were 4 kb/s for the ACC format and 6 kb/s for the Opus format.
+
+As can be seen in the accompanying website, the present work exhibits an average compression rate of 1.09\%, slightly larger than the 0.92\% obtained with the Opus codec, and better than the AAC (1.19\%) and MP3 (1.20\%) codecs.
+
+\subsection{Decoding times}
+Encoding times, as can be seen in the accompanying website, are around two times the duration of the original signal, and thus considerably higher than conventional codecs: While part of this discrepancy can be attributed to the immaturity of the implementation when compared to well-established ones, like lame for mp3, with decades of refinement, the majority of the difference can be attributed to the different approach used by the presented algorithm, engaging in a semi exhaustive search for the best basis purely in the time domain.
+
+This approach pays off during the decoding phase, however, since the representation doesn't need to be translated from the frequency domain, for example. In the context of sample-based digital musical instruments, the encoding occurs only once, and takes place in more robust hardware; it is more important to alleviate as much as possible the decoding effort, since, besides enabling the use of more affordable hardware, this task will be performed a far greater number of times.
+
+For digital musical instruments, it is important to maintain latency below 10 milliseconds, since that is the limit above which users start to experiment performance degradation \cite{2002WesselProblems,2016JackEffect}. Table \ref{tab:decoding} compares the absolute decoding times, in milliseconds; it can be seen that the proposed algorithm presents the lowest decoding times, with an average of 12 ms against an average of 163.5 ms of the Opus codec, the second-lowest. Besides, as the reconstruction of the sound is made linearly, pseudo cycle by pseudo cycle, entirely in the time domain, it would be possible to alternate between decoding and reproduction tasks, keeping the latency below the acceptable limit for samples of arbitrary length.
+
+\begin{table}
+\centering
+\caption{Original Duration and Decoding Times (milliseconds) for the Present Work and the MP3, ACC, and Opus lossy formats.}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lccccc}
+\hline
+Sample & Duration & P.W. & MP3 & ACC & Opus \\ 
+\hline
+cello & 2945 & 11 & 105 & 111 & 136 \\
+doublebass & 1388 & 4 & 103 & 201 & 108 \\
+flute & 11115 & 17 & 110 & 125 & 117 \\
+frenchhorn & 8713 & 21 & 211 & 226 & 223 \\
+mezzosoprano & 3259 & 9 & 163 & 147 & 116 \\
+piano & 4729 & 19 & 728 & 506 & 520 \\
+saxophone & 19825 & 33 & 109 & 115 & 119 \\
+singerbass & 2624 & 8 & 123 & 198 & 197 \\
+singermale & 1214 & 3 & 104 & 199 & 106 \\
+sopranoA & 2598 & 8 & 104 & 120 & 106 \\
+sopranoB & 2299 & 5 & 115 & 106 & 106 \\
+violin & 2271 & 6 & 111 & 105 & 108 \\ 
+% \hline
+% Average & 5248.35 & 12.00 & 173.83 & 179.92 & 163.50 \\
+% SD & 5486.06 & 8.88 & 177.45 & 111.73 & 118.70 \\
+\hline
+\end{tabular}
+\label{tab:decoding}
+\end{table}
+
+\subsection{Quality}
+
+To assess the overall quality of the proposed algorithm, in addition to the computation of the mean square error in relation to the original signal, we made use of the ViSQOL \cite{2020ChinenViSQOL} open-source library developed by Google, designed to substitute subjective listening tests when those are unpractical. According to \cite{2017SloanObjective}, ViSQOL is a more accurate alternative to well-known methods, like PEAQ and POLQA.
+
+Table \ref{tab:quality} shows the ranking of the compressed formats in those metrics: the MP3 codec performed best in all of them; to reach the compatible size with the other codecs, however, it was the only one that needed to be downsampled.
+
+\begin{table}
+\centering
+\caption{Ranking of the codecs compared under different quality metrics.}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcccc}
+\hline
+Method & Present Work & MP3 & ACC & Opus \\
+\hline
+MSE & 3 & 1 & 4 & 2 \\
+ViSQOL audio & 4 & 1 & 2 & 3 \\
+ViSQOL speech & 2 & 1 & 4 & 3 \\
+\hline
+\end{tabular}
+\label{tab:quality}
+\end{table}
+
+Although the ViSQOL is designed as a cost-efficient alternative to subjective listening tests, it by any means claims to be a perfect replacement; The reader is strongly encouraged to hear the results in the samples section of the accompanying website  \cite{2021TarjanoCompression}.
+
+Despite performing better than the AAC codec in the objective measures, files compressed with the Opus codec present artifacts, in the majority of the samples, that renders them almost unintelligible. To a lesser extent, that is also the case of the AAC codec.
+
+While presenting an efficient algorithm to compress harmonic signals, with quality on par with the MP3, AAC, and Opus codecs and faster decoding times, immediately applicable to digital musical instruments, this work introduces a new framework for representing pseudo periodic waves, that can serve as a basis for future research. Fig. \ref{fig:waveforms} illustrates this representation, in the case of the cello sample.
+
+Starting from the representation in Fig. \ref{fig:waveforms}, the surface can be approximated by parametric surfaces, or machine learning approaches, providing more robustness in relation to the average waveform approach, for example.
+
+\begin{figure}%[H]
+\centerline{\includegraphics[width=1 \columnwidth]{images/compression/07_heatmap.pdf}}
+\caption{The evolution of the cello sample waveform over time.}
+\label{fig:waveforms}
+\end{figure}
+  
 
 
 

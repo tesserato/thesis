@@ -12,6 +12,6 @@
 *.out
 *.run.xml
 *.glsdefs
-images/*.pdf
-images/*.svg
+images/**/*.pdf
+images/**/*.svg
 *.pyc
