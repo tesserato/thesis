@@ -4,16 +4,19 @@
 % \usepackage[T1]{fontenc}
 % \usepackage{authblk}
 
-\usepackage[backend=biber]{biblatex}
+\usepackage[backend=biber,style=authoryear]{biblatex}
+\renewcommand*{\nameyeardelim}{\addcomma\space}
 %\usepackage{biblatex}
 
 \usepackage[a4paper, top=3cm, left=3cm, bottom=2cm, right=2cm]{geometry}
 \usepackage{indentfirst}
 \setlength{\parindent}{1.25cm}
 
-\usepackage[no-math]{fontspec}
-\defaultfontfeatures{Ligatures=TeX}
-\setmainfont{Tex Gyre Termes}
+% \usepackage[no-math]{fontspec}
+% \defaultfontfeatures{Ligatures=TeX}
+% \setmainfont{Tex Gyre Termes}
+
+\usepackage{lmodern} % Latin Modern Font
 
 \usepackage[nodisplayskipstretch]{setspace}
 \setstretch{1.427465}
@@ -53,10 +56,10 @@
   pdftitle={Robust Digital Envelope Estimation Via Geometric Properties of an Arbitrary Real Signal}
 }
 
-\bibliography{00_BIBLI,Compression}
+\bibliography{Envelope,Compression}
   
 \title{Sound Synthesis}
-\author{Carlos Tarjano}
+\author{Carlos Henrique Tarjano Santos}
 
 \newacronym{FPS}{FPS}{frames per second}
 \newacronym{LMS}{LMS}{Least Mean Squares}
@@ -161,6 +164,8 @@ It comes as no surprise, then, that bibliographic software, being in general gea
 The field explored in this work, besides being extensive and fragmented, is largely interdisciplinar, with terminology strong influenced by widespread usage in the community rather than academic tradition. To maintain coherence thougout the text, it is convenient to stablish some definitions, as some of the terms here applyed may deviate from their usage in particular fields.
 
 Effort was made to comply with the most commom nomenclature when terms are encountered frequently in literature.
+
+This work will make extensive use of the term sample, that, even in the context of digital signal processing, can be ambiguous. It can refer to a, usually short, sound file, as when refering to sample based instruments, or it can sometimes mean a unique point of a discrete sound wave, as when used in sample rate. We will adopt the first meaning, and prefer frame for the second; altough the usage is more comum when referring to videos, it is used in terms such as frames per second.
 
 \section{Theory}
 
@@ -293,7 +298,7 @@ Generalizing that definition, \textcite{1983Edelsbrunnershape} introduced the co
 
 The intuition behind the alpha shapes algorithm is that only points that can be touched by a circle of radius $ \alpha $ coming from an infinite distance towards the set of points of interest are part of the frontier, that is, of the concave hull of this set.
 
-Once a radius $ \alpha $ is defined, alpha shapes conserve the uniqueness property, in fact tending to the convex hull when $ \alpha \to \infty $. Consider, for example, the artificially generated discrete wave in figure \ref{fig:Hulls} below, where the links between consecutive samples were deemphasized to highlight the “set of points” nature of a signal: The convex hull and a concave hull, in the form of an alpha shape with a particular value of $ \alpha $ are illustrated.
+Once a radius $ \alpha $ is defined, alpha shapes conserve the uniqueness property, in fact tending to the convex hull when $ \alpha \to \infty $. Consider, for example, the artificially generated discrete wave in figure \ref{fig:Hulls} below, where the links between consecutive samples were deemphasized to highlight the “set of points” nature of a signal: The convex hull and a concave hull, in the form of an alpha shape with a particular value of $ \alpha $ are illustrated. The successive points can be interpreted as a wave, in which case the vertical axis represents its instantaneous amplitude at each frame, the meaning of the horizontal axis. If we disconsider the lines linking each consecute point it is easy to see the image as a cloud of points in a cartesian plane, however.
 
 \begin{figure}[H]
   \centering

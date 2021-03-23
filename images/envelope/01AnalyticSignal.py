@@ -41,7 +41,7 @@ hilbert_envelope = np.abs(analytic_signal)
 FONT = dict(
     family="Latin Modern Roman",
     color="black",
-    size=13.3333
+    size=16
   )
 
   
@@ -50,7 +50,7 @@ FONT = dict(
 fig = go.Figure()
 fig.layout.template ="plotly_white" 
 fig.update_layout(
-  xaxis_title="<b><i>i</i></b>",
+  xaxis_title="<b>Frame <i>i</i></b>",
   yaxis_title="<b>Amplitude</b>",
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=0, r=0, b=0, t=0),
@@ -104,6 +104,6 @@ fig.add_trace(
 )
 
 # fig.show(config=dict({'scrollZoom': True}))
-save_name = "./images/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
-fig.write_image(save_name, width=650, height=200, engine="kaleido", format="svg")
+save_name = "./images/envelope/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
+fig.write_image(save_name, width=605, height=300, format="svg")
 print("saved:", save_name)

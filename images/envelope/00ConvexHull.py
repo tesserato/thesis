@@ -1,7 +1,7 @@
 import sys
-print(sys.version)
+# print(sys.version)
 import plotly.graph_objects as go
-sys.path.append("c:/Users/tesse/Desktop/Files/Dropbox/0_Thesis/Python/01_Envelope")
+# sys.path.append("c:/Users/tesse/Desktop/Files/Dropbox/0_Thesis/Python/01_Envelope")
 import numpy as np
 from scipy.spatial import ConvexHull
 from Helper import signal_to_pulses, get_pulses_area, alpha_shape
@@ -49,15 +49,15 @@ for e in alpha_edges:
 FONT = dict(
     family="Latin Modern Roman",
     color="black",
-    size=13.3333
+    size=16
   )
 
 '''Plotting'''
 fig = go.Figure()
 fig.layout.template ="plotly_white" 
 fig.update_layout(
-  xaxis_title="<b><i>x</i></b>",
-  yaxis_title="<b><i>y</i></b>",
+  xaxis_title="<b>Frame <i>i</i> | Axis <i>x</i></b>",
+  yaxis_title="<b>Amplitude | Axis <i>y</i></b>",
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=0, r=0, b=0, t=0),
   font=FONT,
@@ -72,12 +72,12 @@ fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=1, zerolinecolor=
 '''Samples'''
 fig.add_trace(
   go.Scatter(
-    name="Samples      ",
+    name="Samples",
     # showlegend=False,
     x=X,
     y=W,
     mode='lines+markers',
-    line=dict(color="silver", width=.5),
+    line=dict(color="silver", width=1),
     marker=dict(size=5, color="black")
   )
 )
@@ -85,7 +85,7 @@ fig.add_trace(
 I = [v for v in hull.vertices] + [hull.vertices[0]]
 fig.add_trace(
   go.Scatter(
-    name="Convex Hull      ",
+    name="Convex Hull",
     # showlegend=False,
     x=X[I],
     y=W[I],
@@ -100,7 +100,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name=f"Concave Hull (Alpha-Shape, \u03B1={alpha})      ",
+    name=f"Concave Hull (Alpha-Shape, \u03B1={alpha})",
     # showlegend=False,
     x=XX,
     y=YY,
@@ -113,6 +113,6 @@ fig.add_trace(
 )
 
 # fig.show(config=dict({'scrollZoom': True}))
-save_name = "./images/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
+save_name = "./images/envelope/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
 fig.write_image(save_name, width=605, height=300, engine="kaleido", format="svg")
 print("saved:", save_name)
