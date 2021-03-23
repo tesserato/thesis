@@ -114,5 +114,5 @@ fig.add_trace(
 
 # fig.show(config=dict({'scrollZoom': True}))
 save_name = "./images/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
-fig.write_image(save_name, width=650, height=300, engine="kaleido", format="svg")
+fig.write_image(save_name, width=605, height=300, engine="kaleido", format="svg")
 print("saved:", save_name)

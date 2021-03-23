@@ -92,8 +92,23 @@
 
 \section{Introduction}
 % Tell the reader the problem you are tackling in this project.
+The area of artificial intelligence and, more specifically, neural networks, is interdisciplinar since its conception, being born from biological inspirations. Implementation wise, connections with fields like programming, computing and mathematics imposed themselves since the begining.
 
-Humans are a creative bunch. Since the beginning of computing, even when mainframes were the only available medium, restricted to organizations with considerable budgets, people found ways and motivation to overcome the technical limitations and develop artistic applications, like video games, in their (and the machine's) spare time. 
+Attention, however, seems to revolver around the use of advancements in related disciplines to the betterment of neural networks theory in general, be it in the form of convolutional networks, better hyperparameter search, parallel implementations, etc.
+Generally, neural networks are applyied to some problem, with little concern about transforming the problem in order to make it optimally suited to work in a neural networks approach, outside of necessary adaptations, such as normalization.
+
+This lack is in part justified by the recent progress exhibted in the field, where impressive results are abundant; a word of caution is needed here, however, as this is a field that experimented its fair share of hype cycles, followed by winters.
+neural networks faced many winters since its introduction. The pattern seems to repeat itself: hardware improvements enable attractive new results, the interest rises, and some technical advancements are made. 
+Although, in its current renaissance, the field is still blooming, there are some that are already pointing to a decrease in the research output.
+
+We feel that this tool still offers a great potential in its current state of development; a potential thtat will only be fully explored once it is realised that workflows and auxiliary theories are needed, to be used in conjunctions with neural networks.
+
+In this sense, we introduce a novel representation for pseudo periodic time series, of which sound representation are our primary interest. Although much of the theory is drawn from conventional areas related to digital signal processing, image processing, etc, the representation was formulated from the beginning having in mind the strengths and limitations of neural networks in general.
+% State clearly how you aim to deal with this problem. 
+
+In this context, the primary objective of this work is to illustrate how such integration can be done, by developing a new sound representation designed specifically to be used by neural networks in sound synthesis tasks.
+
+Since the beginning of computing, even when mainframes were the only available medium, restricted to organizations with considerable budgets, people found ways and motivation to overcome the technical limitations and develop artistic applications, like video games, in their (and the machine's) spare time. 
 
 
 On a parallel note, also relevant to this thesis, those first machines, like the \gls{ENIAC} in 1946, brought with then the promise of the artificial intelligence as their ultimate goal \parencite{2010DonovanReplay}.
@@ -101,30 +116,42 @@ On a parallel note, also relevant to this thesis, those first machines, like the
 Music, on the other hand, is another staple of humanity's creativity. % TODO first musical instruments
  Is only natural that, as soon as this technology became reasonably stable, musical applications started to emerge.
 
-% State clearly how you aim to deal with this problem. 
-% Limit the scope of your study. 
-% Sketch out how the thesis is structured to achieve your aim. 
-% objective
 Ambitious as it may seem, it is the goal of this monograph to motivate a change of approach in domains that, despite their modest intersections, share more attributes than is apparent at a superficial glance: Both machine learning and digital musical acoustics are areas that, despite their current relevance, are fresh out of their respective infancies, and a scrutiny of both promptly reveals the difficulties that arise from this state of affairs. A lack of their own terminology, with frequent borrows from other, more established areas, can be readily cited, as the pronounced prominence of few individual contributions.
 
 Those shortcomings have, however, a bright side to them, in that they still expose those areas to reinterpretation, rendering them somewhat open to the influence of outside ideas.
 
 Digital musical acoustics borrows heavily from the digital signal processing terminology, the last having its roots in the analogic world. Many algorithms are conceived in terms of filters, circuits and other similar legacy constructs, a fact that burdens the conceptual, theoretical framework of the area. Besides the introduction of a noveau envelope extraction method, we find that his formulation in terms of (differential) geometric concepts is, perhaps, as great a contribution as the algorithm per se.
 
-% Perhaps less daring, and owing more to the advanced age of the author than to his research prowess, is the presentation of this monograph in a format more akin to a book; In addition to turning this somewhat dense tome into a more palatable experience. 
+% Limit the scope of your study. 
+
+% Sketch out how the thesis is structured to achieve your aim. 
+
+
+% objective
+
 
 \section{Bibliographic Approach}
 
-with the advance of technology, some classic problems of bibliographic research were mitigates, while new ones were introduced. a modern problem encontered by the author during the development of this work is the fragmentation of data. In the bygone days of physical research, a paper existed in primarily  physical location.
+With the advance of technology, some classic problems of bibliographic research were mitigated, while new ones were introduced. Fe
+w would argue that the ability to carry thousands of books in a handheld device wasn't an improvement, with accessibility improvements such as the possibility of hearing text, instead of reading it, distribution, etc revolutionizing the consumption, creation of knoledge. This revolution was not without its drawbacks, however.
+
+A modern problem encountered by the author during the development of this work is the fragmentation of data. In the bygone days of physical research, a paper existed, in the researcher files, in one physical location. All the metadata available, perhaps even notes, where in a single logic object, such as a book or a photocopy. 
+
+When access to the original document was limited, such as a piece of literature residing in a library, nevertheless the approach could be the same, the logical object now being a card sumarizing the metadata and relevant content. This approach is, of course, translatable to the digital world, where one could maintain a folder where digital files, such as pdfs, reside, with notes and the relevant metadata embedded in the file, its filename of even in the metadata section.
+
+This approach quickly becomes problematic, however, for scientific writting, specially in the context of bigger productions such as books and, as is the present case, a thesis, for a number of reasons. Digital documents, especially the most common ones, are designed to be as generic as possible, serving variated purposes, as are their metadata systems, if present.
+
+The management of metadata is best acomplished with the used of dedicated software, of which zotero and mendeley are some examples, Being specifically designed to this task, facilities such as metadata retrieval and validation are often available. If on intends to make use of a typesetting system, such as Latex, avoiding bibliographic management software is virtually impossible.
+
+Another problem in bibliography management in the digital era is to maintain syncronized the original files, most commonly available in pdf or epub format, and generally trated as general files by most file brownsing interfaces, and its metadata, that must exhib a more sophisticated and uniform structure.
+pdf, despite its ubiquity, is a tricky format, being somewhat opaque. Besides, multiple ways exist to encode a similar document. Fortunately, we don't need to extract correct or even meaninful text from it, the only thing we need is a way tu uniquely identify each file, impevious to file changes such as the addition of comments, changes in location in the filesystem or renaming.
+
+bibtex uses keys. as tempting as it might sound to use those keys as identifiers fro the files, that approach presents problems.
+
 we adress the meta problem of organizing the bibliography introducing a piece of bibliographic software based on an novel paradigm.
 
 
-neural networks faced many winters since its introduction. The pattern seems to repeat itself: hardware improvements enable attractive new results, the interest rises, and some technical advancements are made. 
-Although, in its current renaissance, the field is still blooming, there are some that are already pointing to a decrease in the research output.
 
-We feel that this tool still offers a great potential in its current state of development; a potential thtat will only be fully explored once it is realised that workflows and auxiliary theories are needed, to be used in conjunctions with neural networks.
-
-In this sense, we introduce a novel representation for pseudo periodic time series, of which sound representation are our primary interest. Although much of the theory is drawn from conventional areas related to digital signal processing, image processing, etc, the representation was formulated from the beginning having in mind the strengths and limitations of neural networks in general.
 
 writing a phd thesis is a peculiar endeavour in the academic world, in the sense that it is a requirement that must be fullfilled only once: while a thriving academic carreer pressuposes a constant output of papers, and possibly books, or book chapters, the closest contact an academic has with the format of a thesis is probably during the development of his masters dissertation; that one endeavour being, all in all, substantially different.
 
@@ -136,6 +163,8 @@ The field explored in this work, besides being extensive and fragmented, is larg
 Effort was made to comply with the most commom nomenclature when terms are encountered frequently in literature.
 
 \section{Theory}
+
+In this sections we present some topics that will serve as basis for later chapters, from a purely theoretical point of view. This is specially important in this work, since many different, seemingly disconnected areas are brought togheter.
 
 \subsection{Waves}
 
