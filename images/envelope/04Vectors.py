@@ -1,7 +1,7 @@
 import sys
-print(sys.version)
+# print(sys.version)
 import plotly.graph_objects as go
-sys.path.append("c:/Users/tesse/Desktop/Files/Dropbox/0_Thesis/Python/01_Envelope")
+# sys.path.append("c:/Users/tesse/Desktop/Files/Dropbox/0_Thesis/Python/01_Envelope")
 import numpy as np
 from scipy.interpolate import interp1d
 from Helper import signal_to_pulses, get_pulses_area
@@ -56,7 +56,7 @@ fig = make_subplots(
 FONT = dict(
     family="Latin Modern Roman",
     color="black",
-    size=13.3333
+    size=16
   )
 
 for i in fig['layout']['annotations']:
@@ -141,7 +141,7 @@ for i in range(1, len(Xp)):
 
 fig.add_trace(
   go.Scatter(
-    name="<i>P</i>      ",
+    name="<i>P</i>",
     # showlegend=False,
     x=Xp,
     y=Yp,
@@ -155,7 +155,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="<i>P</i>      ",
+    name="<i>P</i>",
     showlegend=False,
     x=Xp,
     y=Y,
@@ -169,7 +169,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="<i>V</i>      ",
+    name="<i>V</i>",
     # showlegend=False,
     x=[None],
     y=[None],
@@ -249,7 +249,7 @@ fig.add_annotation(
   arrowcolor='black'
 )
 
-fig.show(config=dict({'scrollZoom': True}))
+# fig.show(config=dict({'scrollZoom': True}))
 save_name = "./images/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
-fig.write_image(save_name, width=650, height=300, engine="kaleido", format="svg")
+fig.write_image(save_name, width=605, height=300, engine="kaleido", format="svg")
 print("saved:", save_name)

@@ -1,7 +1,7 @@
 import sys
-print(sys.version)
+# print(sys.version)
 import plotly.graph_objects as go
-sys.path.append("c:/Users/tesse/Desktop/Files/Dropbox/0_Thesis/Python/01_Envelope")
+# sys.path.append("c:/Users/tesse/Desktop/Files/Dropbox/0_Thesis/Python/01_Envelope")
 import numpy as np
 from scipy.interpolate import interp1d
 from Helper import signal_to_pulses, get_pulses_area
@@ -50,14 +50,14 @@ for p in pulses[1:-1]:
 FONT = dict(
     family="Latin Modern Roman",
     color="black",
-    size=13.3333
+    size=16
   )
 
 '''Plotting'''
 fig = go.Figure()
 fig.layout.template ="plotly_white" 
 fig.update_layout(
-  xaxis_title="<b><i>i</i></b>",
+  xaxis_title="<b>Frame <i>i</i></b>",
   yaxis_title="<b>Amplitude</b>",
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=0, r=0, b=0, t=0),
@@ -88,7 +88,7 @@ fig.add_trace(
 ''' Samples Legend'''
 fig.add_trace(
   go.Scatter(
-    name="Samples      ",
+    name="Samples",
     x=[None],#pulses_X,
     y=[None],#pulses_Y,
     mode="markers",
@@ -100,7 +100,7 @@ fig.add_trace(
 ''' Pulses Legend'''
 fig.add_trace(
   go.Scatter(
-    name="Pulses      ",
+    name="Pulses",
     x=[None],#pulses_X,
     y=[None],#pulses_Y,
     fill="tozeroy",
@@ -116,7 +116,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Local Extrema      ",
+    name="Local Extrema",
     # showlegend=False,
     x=Xp,
     y=Yp,
@@ -131,7 +131,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Absolute Local Extrema (<i>P</i>)      ",
+    name="Absolute Local Extrema (<i>P</i>)",
     # showlegend=False,
     x=Xp,
     y=np.abs(Yp),
@@ -165,7 +165,7 @@ fig.add_trace(
   )
 )
 
-fig.show(config=dict({'scrollZoom': True}))
-save_name = "./images/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
-fig.write_image(save_name, width=650, height=300, engine="kaleido", format="svg")
+# fig.show(config=dict({'scrollZoom': True}))
+save_name = "./images/envelope/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
+fig.write_image(save_name, width=605, height=300, format="svg")
 print("saved:", save_name)
