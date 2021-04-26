@@ -57,25 +57,35 @@ Besides the most direct applications of this work to audio classification and sy
 
 {\bf Keywords:} DSP; alpha shapes; envelope detection; discrete curvature estimation; demodulation
 
+% TODO only samples already present are part of the envelope; no overshooting
+% TODO Frontiers are also provided
 
 \section{Introduction}
-Envelope detection, also known as demodulation, is ubiquitous in both analogue and digital signal processing \parencite{2011CaetanoImproved}. Nevertheless, the literature in this area is fragmented \parencite{2017LyonsDigital}. Besides, most envelope detection techniques are designed to account for very specific settings, like pure sinusoids with moderate noise content, a limitation that excludes most physical signals, as is the case of recorded sound, for example; that limitation arises in part due to the lack of a strict mathematical definition of a temporal envelope \parencite{2013Mengempirical}.
+Envelope detection, also known as demodulation, is ubiquitous in both analogue and digital signal processing (DSP) \parencite{2011CaetanoImproved}. Nevertheless, the literature in this area is fragmented \parencite{2017LyonsDigital}, with most envelope detection techniques being designed to account for very specific settings, like pure sinusoids with moderate noise content, for example.
+
+Those constraints exclude most physical signals, as is the case of recorded sound, for example; this problem arises in part due to the lack of a strict mathematical definition of a temporal envelope \parencite{2013Mengempirical}.
 
 In many contexts, however, the temporal amplitude envelope of a signal plays a prominent role: according to \textcite{2017QiRelative}, for example, the envelope is at least as important as the fine structure of a sound wave in the context of the intelligibility of Mandarin tones. This is also the case for the English language \parencite{1995ShannonSpeech}, where even envelopes modulating mostly noise are still capable of conveying meaning. 
 
-The envelope also helps to impart emotion and identity to the human voice \parencite{2018ZhuContributions} and music: Concert halls with envelope preserving characteristics are deemed more pleasant \parencite{2011LokkiEngaging}, for example.
+The temporal envelope also helps to impart emotion and identity to the human voice \parencite{2018ZhuContributions} and music: Concert halls with envelope preserving characteristics are deemed more pleasant \parencite{2011LokkiEngaging}, for example.
 
-When dealing with broadband signals, approaches tailored to specific applications are prevalent, such as the one presented by \textcite{2014YangFast} for the distributed monitoring of fibre optic or the one formulated by \textcite{2018AssefModeling} in the context of medical ultrasound imaging.
+Specially when dealing with broadband signals, approaches tailored to specific applications, exploiting a priori knowledge of the waves, are prevalent, such as the one presented by \textcite{2014YangFast} for the distributed monitoring of fibre optic or the one formulated by \textcite{2018AssefModeling} in the context of medical ultrasound imaging.
 
-The problem of envelope detection, normally associated with the field of digital signal processing, can be made equivalent to the geometric problem of defining the (outer) shape of a set of points in $ \mathbb{R}^2 $, provided a method for addressing the difference of units in the horizontal, time related, and vertical, amplitude related, axes of a digital signal is available, rendering the original DSP problem readily approachable via geometric techniques.
+The problem of envelope detection of a discrete signal, normally associated with the field of digital signal processing, can be made equivalent to the geometric problem of defining the shape of a set of points in $ \mathbb{R}^2 $.
 
-One direct way of defining the shape of a set of points in $ \mathbb{R}^2 $ is using the concept of a convex hull: as defined in \textcite{2008BergComputational}, the convex hull of a set of points $ S $ in two-dimensional space is the smallest convex subset of the plane that contains all the points in $ S $. Convex hulls are unique, in the sense that a set of points define one and only one convex hull.
+Considering the standard 2d representation of a discrete wave, where the horizontal axis represents time and the vertical axis represents the amplitude, one can think of an individual sample as a point. Provided a coherent mapping from this space to the standard cartesian plane is available, the original DSP problem can be transformed into a geometric one.
 
-Generalizing that definition, \textcite{1983Edelsbrunnershape} introduced the concept of alpha shapes, that can be seen as a concave hull; a mathematically well-defined generalization of the convex hull of a finite set of points, closely related to the Delaunay triangulation and Voronoi diagrams of those points. 
+% TODO
 
-The intuition behind the alpha shapes algorithm is that only points that can be touched by a circle of radius $ \alpha $ coming from an infinite distance towards the set of points of interest are part of the frontier, that is, of the concave hull of this set.
+One direct way of defining the shape of a set of points in $ \mathbb{R}^2 $ is using the concept of a convex hull, as defined in \textcite{2008BergComputational}. The convex hull of a set of points $ S $ in two-dimensional space is the smallest convex subset of the plane that contains all the points in $ S $. Convex hulls are unique, in the sense that a given set of points define one and only one convex hull.
 
-Once a radius $ \alpha $ is defined, alpha shapes conserve the uniqueness property, in fact tending to the convex hull when $ \alpha \to \infty $. Consider, for example, the artificially generated discrete wave in figure \ref{fig:Hulls} below, where the links between consecutive samples were deemphasized to highlight the “set of points” nature of a signal: The convex hull and a concave hull, in the form of an alpha shape with a particular value of $ \alpha $ are illustrated.
+When the general shape of a set of points present prominent concavities, the convex hull overestimates the boundaries. To address this limitation \textcite{1983Edelsbrunnershape} introduced the concept of alpha shapes, that became known as the concave hull: a mathematically well-defined generalization of the convex hull of a finite set of points, closely related to the Delaunay triangulation and Voronoi diagrams of those points. 
+
+The intuition behind the alpha shapes algorithm is that only points that can be touched by a circle of radius $ \alpha $ coming from an infinite distance towards the baricenter of the set of points are part of the frontier. The polygon obtained linking those points forms the concave hull of this set.
+
+Once a radius $ \alpha $ is defined, alpha shapes exhibit the uniqueness property meaning that, for a given set of points and a given radius, only one concave hull exists. When the radius of the circle $ \alpha \to \infty $, concave hulls tend to the convex hulls.
+
+Consider, for example, the artificially generated discrete wave in Fig. \ref{fig:Hulls} below, where the links between consecutive samples were deemphasized to highlight the "set of points" nature of a signal: The convex hull and a concave hull, in the form of an alpha shape with a particular value of $ \alpha $ are illustrated.
 
 \begin{figure}[H]
   \centering
@@ -90,7 +100,12 @@ This last work, which involves the estimation and removal of the Blaze function 
 
 Other steps in the direction of translating geometric algorithms to the context of envelope detection were made by \textcite{2015YangSkeleton} via an algorithm based on the construction of a skeleton underlying the digital wave of interest, and also via the direct translation of computer vision methods to the task of envelope detection \parencite{2015YangRepresenting}.
 
-Following this path, we present a general approach to envelope detection, exploiting the intrinsic characteristics of a generic, spectrally complex wave, in order to completely avoid the need for manual intervention or parameter tuning.
+Following this path, we present a general approach to envelope detection, exploiting the intrinsic characteristics of a spectrally complex wave, in order to completely avoid the need for manual intervention or parameter tuning.
+
+% TODO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+After defining what will be considered an envelope in the context of this work, in this section we explore some simplifications that can be applied to a discrete wave, defining the representation that will be used in the subsequent part of the work. 
+
+We next explore the concept of discrete curvature, putting forth our own method, tailored to the definition of the equivalent circle of a wave; we end this section by showing how this circle can be used to identify the envelope of a discrete wave, in a similar approach to that of the alpha shapes theory, but taking advantage of some unique structure present in discrete waves.
 
 The rest of this paper is divided as follows: We start by defining as specifically as possible what a temporal envelope is, especially in the context of this work and providing a mathematical definition, in terms of the Hilbert transform, for the case of a narrowband signal.
 
@@ -101,23 +116,21 @@ Next, we review methods for the estimation of the curvature of a discrete wave, 
 In the results section, we present some illustrations of the envelopes obtained with our method, comparing both accuracy and running time with the most common algorithms encountered in the literature. We also suggest an alternative use of the algorithm to identify the negative and positive frontiers of a wave, that can be seen as partial envelopes considering only the positive and negative pulses of a wave, respectively.
 
 We follow with suggestions about how the approach here presented can be useful beyond envelope detection, exemplifying with some applications, such as the extractions of the average waveform of a digital wave, and concluding with commentary on potential future developments of the method.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\section{Methods}
-After defining what will be considered an envelope in the context of this work, in this section we explore some simplifications that can be applied to a discrete wave, defining the representation that will be used in the subsequent part of the work. 
+\section{Temporal envelope}\label{sec:Characterization of a temporal envelope}
+The interest in the theory of envelope detection arose in the analog domain, with the widespread adoption of radio communications, where the problem is typically restricted to artificial waves, often with well-defined frequencies \parencite{2011TurnerDemodulation}.
 
-We next explore the concept of discrete curvature, putting forth our own method, tailored to the definition of the equivalent circle of a wave; we end this section by showing how this circle can be used to identify the envelope of a discrete wave, in a similar approach to that of the alpha shapes theory, but taking advantage of some unique structure present in discrete waves.
-
-\subsection{Characterization of a temporal envelope}
-
-The interest in the theory of envelope detection arose in the analog domain, with the widespread adoption of radio communications, where the problem is typically restricted to simple sinusoids, often with well-defined frequencies \parencite{2011TurnerDemodulation}.
+% TODO vague definition of envelope - smoothness and slow varying
 
 In this context, the most mathematically sound definition of an envelope involves the representation of its underlying wave as an analytic signal, as introduced by Gabor in 1946 \parencite{2007HahnHistory}. In his work, \textcite{1946GaborTheory} applies the then relatively new mathematical machinery of the quantum mechanics to unify the time and frequency-domain representations of a wave, showing how the Hilbert transform could be applied to a real signal in order to obtain an equivalent complex signal, later known as the analytic signal.
+
 This analytic signal has the form $ A(t) = S(t) + \mathbb{H}(S(t)) \ \text{i} $ \parencite{2016HePraat} where $ S(t) $ is the original real signal. $ \mathbb{H}(S(t)) $, the Hilbert transform of the original signal, becomes the imaginary part of the analytic signal; the envelope of a signal thus represented can be straightforwardly obtained by the computation of the complex modulus of $ \mathbb{H}(S(t)) $.
 
 Despite its widespread use, and effectiveness in the context of narrowband signals, envelope detection techniques based on the Hilbert transform don't behave well for broadband signals \parencite{2012DauSpeech}, being even physically paradoxical in some cases \parencite{1996Loughlinamplitude}.
 
-Figure \ref{fig:AnalyticSignal} exemplifies the Hilbert envelope, for a pure sinusoid modulated by a polynomial, illustrating the difference in the shape of the envelope in the presence and absence of Gaussian white noise. It is readily noticeable from the figure that, as soon as noise is introduced in the original signal, it is reflected in the envelope.
+Fig. \ref{fig:AnalyticSignal} exemplifies the Hilbert envelope, for a pure sinusoid modulated by a polynomial, illustrating the difference in the smoothness of the envelope in the presence and absence of Gaussian white noise. It is readily noticeable from the Fig. \ref{fig:AnalyticSignal} that, as soon as noise is introduced in the original signal, it is directly reflected in the envelope.
 
 \begin{figure}[H]
   \centering
@@ -136,7 +149,7 @@ We address this problem by assuming $ C(t) $ normalized between $ \{-1, 1\}$. Th
 
 In this work we are concerned with the discrete version of this problem: given a finite digital wave represented by the vector $ \textbf{w} \in \mathbb{R}^n $, instead of the continuous function $ W(t) $, obtaining the temporal envelope of $ \textbf{w} $. 
 
-The preceding definitions can be translated to this discrete scenario assuming that the discrete quantities arise from observing the continuous ones at regular time intervals. In that case, the equality $ i = t \ \text{fps} $ can be used to link both settings, where $ i $ is the index of each observation, $ t $ stands for the time in seconds, and fps is the frame rate, or the number of observations made in the period of a second. We can thus define:
+The preceding definitions can be translated to this discrete scenario assuming that the discrete quantities arise from observing the continuous ones at regular time intervals. In that case, the equality $ i = t \ \text{fps} $ can be used to link both settings, where $ i $ is the index of each observation, $ t $ stands for the time in seconds, and fps is the frame rate, or the number of observations made in one second. We can thus define:
 
 \begin{subequations}\label{eq:Envelope}
 \begin{align}
@@ -148,17 +161,9 @@ The preceding definitions can be translated to this discrete scenario assuming t
 \end{align}
 \end{subequations}
 
-The $ \odot $ operator in \ref{eq:Envelope} stands for the Hadamard product, denoting element-wise multiplication of two vectors. Figure \ref{fig:Envelope} provides an example of the vectors just defined: \textbf{w} is obtained by modulating the normalized carrier wave \textbf{c} using the envelope \textbf{e}.
+The $ \odot $ operator in \ref{eq:Envelope} stands for the Hadamard product, denoting element-wise multiplication of two vectors. Fig. \ref{fig:Envelope} provides an example of the vectors just defined: \textbf{w} is obtained by modulating the normalized carrier wave \textbf{c} using the envelope \textbf{e}.
 
-Note from Figure \ref{fig:Envelope} that, at some local maxima, the envelope is well-defined, being in fact equal to the value of the wave $ w_i $, since $ c_i = 1 $ at those points, rendering $ e_i = 1 w_i $. 
-
-The carrier wave \textbf{c} in the figure is periodic, and normalized between $ \{-1, 1\}$. Each cycle of the wave, then, reaches the value 1 only at its maximum making $ w_i $ equal to the value of the envelope at one point in each cycle.
-
-Image \ref{fig:Envelope}, along with the concave hull illustrated in figure \ref{fig:Hulls}, helps forming the intuition behind the method developed in this work: the idea is to identify the local extrema that touch the envelope, those being also the extrema of each (pseudo-)cycle.
-
-This is accomplished with the use of a circle with a defined radius, large enough to prevent it from reaching the smallest local extrema when "rolled" around the (geometric) representation of the wave. Only the extrema touched by the circle will be marked as part of the envelope.
-
-In the next section, a compatible geometric representation will be formulated, along with the necessary tools to estimate the average curvature of the wave and, consequently, the appropriate radius of the circle.
+Note from Fig. \ref{fig:Envelope} that, at some local maxima, the envelope is well-defined, being in fact equal to the value of the wave $ w_i $. $ c_i = 1 $ at those points, rendering $ e_i = 1 w_i $. 
 
 \begin{figure}[H]
   \centering
@@ -167,15 +172,19 @@ In the next section, a compatible geometric representation will be formulated, a
   \label{fig:Envelope}
 \end{figure}
 
-\subsection{Simplified Representation}
+% TODO
+This realization that the envelope of a wave is defined only at some of the wave's local extrema is crucial, as we can use it to generate a simplified representation of a signal that will make the algorithm more efficient by considering only the local extrema of a given signal.
 
-Instrumental to the method here presented is the definition of a pulse: each time the value of \textbf{w} changes sign, that is, every time the discrete wave \textbf{w} crosses the horizontal axis, the beginning of a pulse is defined, with the next crossing defining its end. This definition is in line with the one presented in \textcite{national1996telecommunications}, where a pulse is defined as a rapid change in the amplitude of a signal, followed by a fast return to the baseline value; zero, in our case.
+\section{Simplified Representation}
 
-From \ref{fig:Envelope} and the discussion in the preceding chapter, we can see that only the maximum point of a positive pulse or the minimum point of a negative one can potentially be equal to the envelope and are, thus, our only points of interest. We can then proceed, for the rest of the method, considering only those points, to great computational economy.
+We start with the definition of a pulse: each time the value of $ w_i$ changes sign, that is, every time the amplitude of the discrete wave \textbf{w} crosses the horizontal axis, the beginning of a pulse is defined, with the next crossing defining its end. This definition is in line with the one presented in \textcite{national1996telecommunications}, where a pulse is defined as a rapid change in the amplitude of a signal, followed by a fast return to the baseline value; zero, in our case.
+
+From \ref{fig:Envelope} and the discussion in Section \ref{sec:Characterization of a temporal envelope}, we can see that only the maximum point of a positive pulse or the minimum point of a negative pulse can potentially be equal to the envelope and are, thus, our only points of interest. We can then proceed, for the rest of the method, considering only those points, to great computational economy.
 
 For this reason we define P as the set of the points $ \{P_0, P_1, \cdots, P_{m-1}\} $ where $ P_j = (i_j, \lvert w_j \lvert) $, that is, $ \lvert w_j \lvert $, the absolute value of the extrema of each pulse, becomes the ordinate of each point and $ i_j $, its original index, becomes the abscissa.
 
-This relation is illustrated in figure \ref{fig:Pulses}. We call it P to emphasize the connection with the pulses of \textbf{w}.
+This relation is illustrated in Fig. \ref{fig:Pulses}. We call it P to emphasize the connection with the pulses of \textbf{w}.
+While the exact relation between $ n $, the size of the original signal, and $ m $, the size of the set of points, is dependent on factors such as the frequency and sampling rate of the original wave, the inequality $ m \le n $ holds for all discrete signals. In practice, $ m \ll n $ for most real world discrete signals.
 
 \begin{figure}[H]
   \centering
@@ -184,26 +193,40 @@ This relation is illustrated in figure \ref{fig:Pulses}. We call it P to emphasi
   \label{fig:Pulses}
 \end{figure}
 
-The points in P are not fit for geometric interpretation yet, since the abscissa and ordinate of their orthogonal coordinate system have different units: in the vertical axis, we have a unit related to the instantaneous intensity of the wave, while in the horizontal axis we have the index at which each extremum occurs, ultimately a time-related unit. 
 
-Specifically, this coordinate system has a basis vector $ \mathbf{b} = \{ \mathbf{b}_x, \mathbf{b}_y \}$ with $ \mathbf{b}_x = (a, 0), \mathbf{b}_y = (0, i) $ where $ a $ is an amplitude unit such as decibel, a measure of the instantaneous sound pressure, volt or even a fraction of a fixed maximum value. $ i $ represents the index of the sample, and is linked to time by the aforementioned relation $ i = t \ \text{fps} $.
+\section{Mapping to Cartesian coordinates}
 
-We are interested in finding a coordinate system where a pulse's amplitude $ \lvert w_j \lvert $ and length would define, on average, a square. 
+The points in P are not fit for geometric interpretation yet, since the abscissa and ordinate of their orthogonal coordinate system have different units: in the vertical axis, we have a unit related to the instantaneous amplitude of the wave, while in the horizontal axis we have the index at which each extremum occurs, ultimately a time-related unit. 
 
-To achieve that, we divide the basis vector of the original vertical axis by the average of all ordinates, effectively cancelling the unit of the vertical components of the points. We could divide the basis vector of the horizontal axis by the average of the difference between the abscissa of a point and the abscissa of the immediately posterior, likewise eliminating the axis' unit. 
+Geometrically, this coordinate system has a basis vector $ \mathbf{b} = \{ \mathbf{b}_x, \mathbf{b}_y \}$ with $ \mathbf{b}_x = (a, 0), \mathbf{b}_y = (0, i) $ where $ a $ is an amplitude unit such as decibel, a measure of the instantaneous sound pressure, volt or even a fraction of a fixed maximum value. $ i $ represents the index of the sample, and is linked to time by the aforementioned relation $ i = t \ \text{fps} $.
+
+We are interested in finding a new basis vector that would make the geometric representation consistent, in the sense that pulse's amplitude $ \lvert w_j \lvert $, now mapped to the ordinates of a point, and a pulse's length, approximately equivalent to the horizontal distance between two consecutive points in the geometrical interpretation would define, on average, a square.
+
+To achieve that, we divide the basis vector of the original vertical axis by the average of all ordinates, effectively cancelling the unit of the vertical components of the points. We could divide the basis vector of the horizontal axis by the average of the difference between the abscissa of a point and the abscissa of the immediately posterior, likewise eliminating the axis' unit.
 
 The drawback is that we would lose the direct link between P and \textbf{w} that arises from the fact that the abscissas of the points in P are indices $ i $ of \textbf{w}: we choose instead to leave the abscissa intact and multiply the now unitless vertical basis axis by the average of the difference between the abscissa of a point and the abscissa of the immediately posterior. In this way, both axes will have unit $ i $, and the relationship is preserved, making it easier to recover the envelope points later.
 
-In this new coordinate system we have a basis vector $ \mathbf{b}^\prime = \{ \mathbf{b}^\prime_x, \mathbf{b}^\prime_y \}$ where $ \mathbf{b}^\prime_x = (i, 0) $ and $\mathbf{b}^\prime_y = (0, i) $, related to the original basis vector by equation \ref{eq:Basis}:
+In this new coordinate system we have a basis vector $ \mathbf{b}^\prime = \{ \mathbf{b}^\prime_x, \mathbf{b}^\prime_y \}$ where $ \mathbf{b}^\prime_x = (i, 0) $ and $\mathbf{b}^\prime_y = (0, i) $, related to the original basis vector by Eq. \ref{eq:Basis}:
 
-\begin{subequations}  \label{eq:Basis}
+\begin{subequations}  \label{eq:Basis} % TODO
 \begin{align}
 \mathbf{b}^\prime_x &= \mathbf{b}_x  \\
 \mathbf{b}^\prime_y &= \frac{\left( \frac{i_{m-1} - i_0}{m-1} \right)}{\left( \frac{\sum_{j=0}^{m-1} \lvert w_j \lvert}{m} \right)} \mathbf{b}_y 
 \end{align}
 \end{subequations}
 
-The effect of this normalization can be seen in the points shown in figure \ref{fig:Vectors}, shown in scale in both coordinate systems. The set V of the vectors from each point of P to the next is also shown in the picture, and it will be used to estimate the average curvature of P. We define this set in equation \ref{eq:Vectors} below.
+The effect of this normalization can be seen in the points shown in Fig.\ref{fig:Vectors}, shown in scale in both coordinate systems. 
+
+
+\section{Discrete Curvature Estimation}
+
+We have now a map from the original space of the two-dimensional representation of a discrete wave to the Cartesian coordinate system and thus a way to consistently transform a discrete signal into a set of points in the plane.
+
+Translating the explanation of the alpha shapes algorithm presented in \textcite{1994EdelsbrunnerThree} to our context, we can say that the points that are part of the envelope are those touched by a circle of a given radius $ r $, coming from $ y \to \infty $ towards the Cartesian representation of the signal, that is not allowed to contain any point of the signal; Intuitively, one can picture a circle being rolled above the signal, and marking the points it touches as envelope points.
+
+To employ the alpha shapes algorithm in this set of points, however, the radius $ r $ of such circle must be estimated, and for that a measure of discrete curvature is needed.
+
+The set V of the vectors from each point of P to the next is also shown in the picture, and it will be used to estimate the average curvature of P. We define this set in Eq. \ref{eq:Vectors} below. % TODO
 
 \begin{equation} \label{eq:Vectors}
 \text{V} = \{ v_0, v_1, v_{m-2} \} \quad \text{where} \quad v_k = P_{j+1} - P_j \quad \forall \quad 0 \le k \le m-2
@@ -216,26 +239,22 @@ The effect of this normalization can be seen in the points shown in figure \ref{
   \label{fig:Vectors}
 \end{figure}
 
-\subsection{Discrete Curvature Estimation}
+Discrete curvature estimation is an important task in image processing \parencite{2010FleischmannNovel} for which no default definition exists. 
 
-Translating the explanation of alpha shapes in \textcite{1994EdelsbrunnerThree} to our context, we can say that the points that are part of the envelope are those touched by a circle of a given radius $ r $, coming from $ y \to \infty $ towards the signal, that is not allowed to contain any point of the signal; Intuitively, one can picture a circle being rolled above the signal, and marking the points it touches as envelope points.
-
-To infer the appropriate radius $ r $ of such circle a measure of discrete curvature is needed. Discrete curvature estimation is an important task in image processing \parencite{2010FleischmannNovel} for which no default definition exists. 
-
-The two possible general approaches are the derivation of direct methods, that use characteristics of the discrete wave to calculate the curvature, or the use of the curvature of a smooth, continuous curve fitted to the discrete wave \parencite{2001CoeurjollyDiscrete}.
+The two general approaches are the derivation of direct methods that use characteristics of the discrete curve to calculate the curvature, or the use of the curvature of a smooth, continuous curve fitted to the original discrete curve \parencite{2001CoeurjollyDiscrete}.
 
 Concerning direct methods \textcite{2014CarrollSurvey}, for example, derive three such definitions based on the approximation of a circle by an inscribed, centered and circumscribed polygon. In the context of three-dimensional meshes, \textcite{2016VasaMultivariate} evaluate a range of existing estimators from a multivariate point of view.
 
-Those approaches define the discrete curvature in relation to the vertices of a wave (or mesh, in the three-dimensional case). In our particular case, it wouldn't make sense to talk about the curvature of a single pulse, since it is what our points ultimately represent. Instead, we are interested in the change of direction, what the term curvature ultimately means, between two adjacent pulses, as the vectors in the set V suggests.
+Those approaches define the discrete curvature in relation to the vertices of a discrete curve (or mesh, in the three-dimensional case). In our particular case, it wouldn't make sense to talk about the curvature of a single pulse, since it is what our points ultimately represent. Instead, we are interested in the change of direction, what the term curvature ultimately means, between two adjacent pulses, as the vectors in the set V suggests.
 
-We thus proceed to define a discrete curvature measure over the edges of a discrete wave. To that end we are going to apply the definition of smooth curvature as the rate of change of the unit tangent to a curve, noting that this is equivalent to that of the osculating circle \parencite{2016VasaMesh}.
+We thus proceed to define a discrete curvature measure over the edges of a discrete curve. To that end we are going to apply the definition of smooth curvature as the rate of change of the unit tangent to a curve, noting that this is equivalent to that of the osculating circle \parencite{2016VasaMesh}.
 
 
-\subsubsection{The Equivalent Circle Approach}
+\subsection{The Equivalent Circle Approach}
 
-The rationale is to find, for each vector $ v_k \in \text{V} $, the radius $ r_k $ of the equivalent circle whose tangent has the same change in direction, in the same horizontal distance, as the vector of interest, as shown in figure \ref{fig:DiscreteCurvature}. The average curvature of P will then be obtained by the average of all radii $ r_k $.
+The rationale is to find, for each vector $ v_k \in \text{V} $, the radius $ r_k $ of the equivalent circle whose tangent has the same change in direction, in the same horizontal distance, as the vector of interest, as shown in Fig. \ref{fig:DiscreteCurvature}. The average curvature of P will then be obtained by the average of all radii $ r_k $.
 
-From figure \ref{fig:DiscreteCurvature} is easy to see that $ r_k = v_{k,x} \sin(\theta_k)$ where $ v_{k,x} $ is the component of $ v_k $ in the horizontal direction; $ \theta_k $ itself can be obtained using the slope $ m_0 = 0 $ of a line in the horizontal direction and the slope $ m_k = v_{k,y} / v_{k,x} $ defined by $ v_k $ via the equality $ \theta_k = \arctan \big( (m_k - m_0) / (1 + m_k m_0) \big) $.
+From Fig. \ref{fig:DiscreteCurvature} is easy to see that $ r_k = v_{k,x} / \sin(\theta_k) $ where $ v_{k,x} $ is the component of $ v_k $ in the horizontal direction; $ \theta_k $ itself can be obtained using the slope $ m_0 = 0 $ of a line in the horizontal direction and the slope $ m_k = v_{k,y} / v_{k,x} $ defined by $ v_k $ via the equality $ \theta_k = \arctan \big( (m_k - m_0) / (1 + m_k m_0) \big) $.
 
 \begin{figure}[H]
   \centering
@@ -244,20 +263,19 @@ From figure \ref{fig:DiscreteCurvature} is easy to see that $ r_k = v_{k,x} \sin
   \label{fig:DiscreteCurvature}
 \end{figure}
 
-
-The radius of the circle that represents the average curvature of V (and P), and will be used to obtain the envelope of the discrete wave \textbf{w} can be obtained via equation \ref{eq:Radius}:
+The radius of the circle that represents the average curvature of V (and, consequently, of P), and will be used to obtain the envelope of the discrete wave \textbf{w} can be obtained via Eq. \ref{eq:Radius}:
 
 \begin{equation} \label{eq:Radius}
 r = \frac{\sum\limits_{k=0}^{m-2} \left( \frac{v_{k,x} \sqrt{v_{k,x}^2 + v_{k,y}^2}}{ v_{k,y}} \right)}{m-2}
 \end{equation}
 
-We need now to construct an algorithm, using the radius just obtained, to identify the points that belong to the envelope. Generally, the algorithm for the alpha shapes approach resorts to the construction of the Delaunay triangulation of the set of points, that is latter filtered to contain only the outer edges. We can adopt a more straightforward method, as our points have a defined structure:
+We need now to construct an algorithm, using the radius just obtained, to identify the points that belong to the envelope. Generally, alpha shapes based algorithms resort to the construction of the Delaunay triangulation of the set of points, that is latter filtered to contain only the outer edges. We can adopt a more straightforward method, as our points have a sequential structure. Although that is the case throughout this work, the original signal doesn't need to be sampled in equal spaces.
 
 Let $ x_o, y_o \in \mathbb{R}, \quad 0 \le y_o < +\infty $ be the coordinates of the center of a circle with radius $ r $, that can be placed anywhere in the upper plane of the coordinate system;
 
 Let $ P_a, P_b, P_c \in \text{P}, \quad P_a \ne P_b \ne P_c $ be three different points of the set P;
 
-For all circles of center $ x_o, y_o $ and radius $ r $ that can be constructed to pass through any two different points of P, that is, $ \forall \quad P_b, P_c $ such that $ (P_{b,x} - x_o)^2 + (P_{b,y} - y_o)^2 = (P_{c,x} - x_o)^2 + (P_{c,y} - y_o)^2 = r^2 $, $ P_a $ will be part of the set $ E $ of the points belonging to the envelope if and only if none of those circles contain $ P_a $, or $ P_a \in \text{E} \leftrightarrow (P_{b,x} - x_o)^2 + (P_{b,y} - y_o)^2 > r^2 $. Summarizing this, we have equation \ref{eq:InEnvelope}:
+For all circles of center $ x_o, y_o $ and radius $ r $ that can be constructed to pass through any two different points of P, that is, $ \forall \quad P_b, P_c $ such that $ (P_{b,x} - x_o)^2 + (P_{b,y} - y_o)^2 = (P_{c,x} - x_o)^2 + (P_{c,y} - y_o)^2 = r^2 $, $ P_a $ will be part of the set $ E $ of the points belonging to the envelope if and only if none of those circles contain $ P_a $, or $ P_a \in \text{E} \leftrightarrow (P_{b,x} - x_o)^2 + (P_{b,y} - y_o)^2 > r^2 $. Summarizing this, we have Eq. \ref{eq:InEnvelope}:
 
 \begin{subequations} \label{eq:InEnvelope}
 \begin{align}
@@ -299,7 +317,7 @@ The procedure is formalized in the algorithm \ref{FindEnvelope}. We don't provid
 The set E obtained via algorithm \ref{FindEnvelope} is a set of points. The most straightforward way to transform those points into the vector $ \textbf{e} \in \mathbb{R}^n $ is via linear interpolation, the approach used in this work. 
 It is worth noting, however, that many other procedures are available, both for the interpolation and the smooth approximation of points.
 
-\section{Results and Discussion}
+\section{Quality of an envelope}
 Given the lack of a precise definition of what an envelope should be, we begin this section suggesting an empirical metric, based on the behaviour of the carrier wave \textbf{c}. We also comment on some metrics presented in the literature, and compare our algorithm with traditional demodulation approaches, both in relation to execution time and accuracy; to this last end, a numerical indicator is also introduced.
 
 We also illustrate how the method here presented can be used to isolate not only a single envelope of the wave, but the superior and inferior envelopes as well, that we call frontiers, ending the section with a suggestion on how the proposed algorithm can be useful beyond envelope detection, by identifying the approximate locations of the pseudo-cycles in a quasi-periodic wave.
@@ -308,23 +326,13 @@ Due to an assortment of factors, such as the unconventional approach presented i
 
 An implementation of the method in pure Python, fully functional, can also be found at the repository dedicated to this work as well as a Python module available at the Python Package Index (PyPI) and conveniently installable via the command `pip install signal-envelope`. Besides, those working under Windows 64-bit can benefit from a specialized dynamic library coded in C++ that is automatically used within this module.
 
-
-\subsection{Quality of an envelope}
-
-There are no agreed-upon objective metrics to assess the quality of an envelope. Recalling figure \ref{fig:Envelope}, however, and the accompanying discussion, an intuitive way is to consider the carrier wave \textbf{c}, and how well it seems to be bounded by the interval $ \{-1, 1\} $. 
+There are no agreed-upon objective metrics to assess the quality of an envelope. Recalling Fig. \ref{fig:Envelope}, however, and the accompanying discussion, an intuitive way is to consider the carrier wave \textbf{c}, and how well it is bounded by the interval $ \{-1, 1\} $.
 
 To illustrate how the algorithm performs on such metric, we provide the following figures of original discrete waves \textbf{w}, their extracted envelope \textbf{e}, and the inferred carrier, obtained after dividing, element-wise, the original wave by its envelope.
 
-From figure \ref{fig:spoken_voice} it can be seen that the algorithm performs well under the carrier metric. This is especially remarkable for the case of spoken voice, a notorious complex wave with fast changes in pitch and high noise content.
+From Fig. \ref{fig:spoken_voice} it can be seen that the algorithm performs well under the carrier metric. This is especially remarkable for the case of spoken voice, a notorious complex wave with fast changes in pitch and high noise content.
 
-These characteristics are in stark contrast with those of the sang voice in figure \ref{fig:singer_voice}, where a recording of an alto singer is shown; there, the wave is almost periodic, with a stable waveform.
-
-\begin{figure}[H]
-  \centering
-    \includegraphics{images/06Graph_bend.pdf}
-  \caption{Signal, envelope and carrier for a record of a bend performed on an electric guitar.}
-  \label{fig:Bend}
-\end{figure}
+These characteristics are in stark contrast with those of the sang voice in Fig. \ref{fig:singer_voice}, where a recording of an alto singer is shown; there, the wave is almost periodic, with a stable waveform.
 
 \begin{figure}[H]
   \centering
@@ -340,21 +348,31 @@ These characteristics are in stark contrast with those of the sang voice in figu
   \label{fig:singer_voice}
 \end{figure}
 
+Fig. \ref{fig:Bend} shows the envelope in the case of a bend performed in an eletric guitar. The variations in frequency in the signal didn't affect the envelope extracted.
+
+\begin{figure}[H]
+  \centering
+    \includegraphics{images/06Graph_bend.pdf}
+  \caption{Signal, envelope and carrier for a record of a bend performed on an electric guitar.}
+  \label{fig:Bend}
+\end{figure}
+
+
 In an effort to formalize the assessment of the quality of temporal envelopes, \textcite{1996Loughlinamplitude} proposed some conditions necessary, but not sufficient, to ensure the physical plausibility of an envelope. We comment briefly below that the algorithm here presented satisfies the four conditions presented.
 
 The first one states that, if a signal is bounded in magnitude, then its envelope should be, as well. Our algorithm complies with this requisite, as the envelope is composed of selected samples from the original signal itself.
 
 The second statement is that if the signal has a finite frequency range, that frequency range must not be exceeded by the envelope. This is only directly applicable in the continuous case, where this condition was proposed.
 
-Nevertheless, if we picture both the wave and the envelope as samples from continuous functions, is easy to see that this is the case for our algorithm; since the envelope is composed by some samples of the digital wave, in the limit where all the samples of the wave are also part of the envelope, we have that the maximum frequency for both is the same. 
+Nevertheless, if we picture both the wave and the envelope as samples from continuous functions, is easy to see that this is the case for our algorithm; since the envelope is composed by a subset of the samples of the original digital signal, in the limit where all the samples of the wave are also part of the envelope, we have that the maximum frequency for both is the same. 
 
 In all other cases, the maximum frequency of the envelope will be smaller than that of the original wave. The range of frequencies of the envelope, then, will always lie between zero and the maximum frequency of the original wave.
 
-The third condition states what, for a periodic signal, the envelope should be a straight line with the intercept equal to the amplitude of this signal. Since all the local maxima have the same amplitude in the case of a periodic wave, our envelope will indeed be a straight line, with the same amplitude as the original wave. An example of such behaviour can be observed in figure \ref{fig:Comparison_sinusoid}.
+The third condition states what, for a periodic signal, the envelope should be a straight line with the intercept equal to the amplitude of this signal. Since all the local maxima have the same amplitude in the case of a periodic wave, our envelope will indeed be a straight line, with the same amplitude as the original wave. An example of such behaviour can be observed in Fig. \ref{fig:Comparison_sinusoid}.
 
 The fourth and last condition states that if a wave is multiplied by a constant, the envelope should also be multiplied by the same constant. That is also the case, again because the points that form the envelope are points of the original wave itself.
 
-\subsection{Comparison with traditional algorithms}
+\section{Comparison with traditional algorithms} 
 
 Direct comparison with many of the more recent algorithms is made difficult by the unavailability of digital implementations of such works, many designed to process analog signals \parencite[e.g.,][]{2018AssefModeling}.
 
@@ -375,7 +393,7 @@ In \ref{fig:Comparison_sinusoid} we illustrate the envelope extracted by the con
   \label{fig:Comparison_sinusoid}
 \end{figure}
 
-For a recording of the key 33 of a grand piano, where parts of the sound are highly percussive and noisy, the Hilbert approach presents considerable oscillations, as can be seen in figure \ref{fig:Comparison_piano}.
+For a recording of the key 33 of a grand piano, where parts of the sound are highly percussive and noisy, the Hilbert approach presents considerable oscillations, as can be seen in Fig. \ref{fig:Comparison_piano}.
 
 \begin{figure}[H]
   \centering
@@ -384,7 +402,7 @@ For a recording of the key 33 of a grand piano, where parts of the sound are hig
   \label{fig:Comparison_piano}
 \end{figure}
 
-In figure \ref{fig:Comparison_soprano} all envelopes exhibit a similar movement along the samples, but the ones generated by traditional algorithms are undershooting the original wave.
+In Fig. \ref{fig:Comparison_soprano} all envelopes exhibit a similar movement along the samples, but the ones generated by traditional algorithms are undershooting the original wave.
 
 \begin{figure}[H]
   \centering
@@ -447,11 +465,11 @@ Average       & 0.039        & 0.252     & 0.012   & 0.109
 \end{table}
 
 
-\subsection{Frontiers}
+\section{Superior and inferior envelopes - Frontiers} 
 
-In practice, is not uncommon for a discrete wave, especially in the case of sound, to present somewhat different positive and negative contours; in those cases, the algorithm here presented can be used independently in the positive and negative pulses of the wave to define two “envelopes”, that we are going to call superior and inferior frontiers.
+In practice, is not uncommon for a discrete wave, especially in the case of sound, to present somewhat different superior and inferior contours; in those cases, the algorithm here presented can be used independently in the positive and negative pulses defined by the original wave to define two “envelopes”, that we are going to call superior and inferior frontiers.
 
-Figure \ref{fig:FullFrontiers} illustrates the frontiers of six diverse discrete sound waves, as well as an in-detail view of the highlighted segment for each signal. All waves are records of physical sounds, chosen to represent the applicability of the algorithm in real-world scenarios.
+Fig. \ref{fig:FullFrontiers} illustrates the frontiers of six diverse discrete sound waves, as well as an in-detail view of the highlighted segment for each signal. All waves are records of physical sounds, chosen to represent the applicability of the algorithm in real-world scenarios.
 
 \begin{figure}[H]
   \centering
@@ -463,9 +481,11 @@ Figure \ref{fig:FullFrontiers} illustrates the frontiers of six diverse discrete
 The frontiers are satisfactorily detected in the case of harmonic and inharmonic sounds, and are robust in relation to the number of samples and the frequencies of the waves. That is a peculiarity of our algorithm: the traditional algorithms are unable to generate two distinct envelopes for the same wave.
 
 
-\subsection{Approximated location of pseudo-cycles}
+\section{Approximated location of pseudo-cycles} 
 
-The envelope is shown to add complexity to the spectral representation of a wave \parencite{2019TarjanoNeuro}, and an accurate description of the envelope, while describing the evolution of the instantaneous amplitude of a signal in time, would also simplify further spectral analysis. Figure \ref{fig:Fourier} shows the frequency-domain power spectrum for the wave and the carrier presented in \ref{fig:Envelope}. For the carrier, the power spectrum presents two nonzero values, while the power spectrum for the wave composed of the carrier modulated by the envelope is more complex.
+% TODO
+
+The temporal envelope adds complexity to the spectral representation of a wave \parencite{2019TarjanoNeuro}, and an accurate description of the envelope, while describing the evolution of the instantaneous amplitude of a signal in time, would also simplify further spectral analysis. Fig. \ref{fig:Fourier} shows the frequency-domain power spectrum for the wave and the carrier presented in \ref{fig:Envelope}. For the carrier, the power spectrum presents two nonzero values, while the power spectrum for the wave composed of the carrier modulated by the envelope is more complex.
 
 \begin{figure}[H]
   \centering
@@ -483,7 +503,7 @@ Moreover, the algorithm developed in this work naturally divides a signal into i
   \label{fig:PCs}
 \end{figure}
 
-One can see in figure \ref{fig:PCs} a section of the plot of where the local maxima and minima occurs in the recording of an alto singer show in \ref{fig:singer_voice}. The average between the two is also shown. With this information, one can split a discrete wave into its pseudo-cycles, as is illustrated in Figure \ref{fig:AvgPc}: It shows the superposition of this extracted pseudo-cycles, after being normalized by length, and their average. This same average is shown shifted, to exemplify that approximate $C^0$ and $C^1$ continuity is achieved. 
+One can see in Fig. \ref{fig:PCs} a section of the plot of where the local maxima and minima occurs in the recording of an alto singer show in \ref{fig:singer_voice}. The average between the two is also shown. With this information, one can split a discrete wave into its pseudo-cycles, as is illustrated in Fig. \ref{fig:AvgPc}: It shows the superposition of this extracted pseudo-cycles, after being normalized by length, and their average. This same average is shown shifted, to exemplify that approximate $C^0$ and $C^1$ continuity is achieved. 
 
 \begin{figure}[H]
   \centering
