@@ -1,50 +1,86 @@
-This paper proposes a new method for envelope estimation by using the
-geometric properties of a discrete real signal. Using discrete curvatures to
-determine the envelope of a discrete signal is an interesting idea and results
-obtained by this proposed method seem to be acceptable. However, the
-reviewer cannot recommend the publication of the paper in its current form.
-The authors need to address the reviewers below and revise the paper
-accordingly:
-
-# 1. The description of the key concepts is not clear. The paragraphs of the current paper were poorly written and readers cannot follow them easily. The authors are suggested to revise the paper extensively to improve its readability.
+"Response to Reviewers"
+Mention the page, paragraph, and line number of any revisions that are made.
 
 
-# 2. The authors describe basic concepts of convex and concave hulls in an intuitive manner and show that “the idea is to identify the local extrema that tough the envelope”. But the reviewer cannot fully understand the logical connection between them. The authors are suggested to explain their idea in a more explicit manner.
+# Reviewer #2: This is an interesting research. It seems that the authors have already put this article publicly accessible at arXiv.org. The authors are suggested to consider and address the following issues:
+
+## Writing needs to be refined.
+
+## Issues with the Highlights: maximum 85 characters, including spaces, per bullet point
+
+## Abstract looks too long. Should be presented in a more concise way.
+
+We revised the abstract, removing superfluous information and phrasing in order to make it more succinct, resulting in reduction from the original 349 words to 248 words in the revised version.
+
+## Citation of references should be in order and no jump of reference numbers.
+
+Alphabetically ordering citations seems to be the default behaviour of biblatex, and we are sorry for the overlook. The issue was fixed by adding `sorting=none` to the biblatex import in the tex source.
+
+## What's the Abscissa in the highlights (50k, 100k, etc.) and some figures?
+
+## Legends in some figures are confusing and hard to distinguish, such as in Fig 2: signal and Hilbert Envelope.
+
+## Figure 3: the illustration of the carrier c and wave w does not comply with the common sense of envelope and modulation?
+
+## Definition of the envelope is very vague and controversial. What's the relationship with the conventional amplitude modulation?
+
+## For the proposed "Equivalent Circle Approach", an acceptable mathematical background and justification is missing.
+
+## It's quite doubtful about the assumption of w = e ⊙ c?
+
+## P8: the authors claimed that "the algorithm here presented satisfies the four conditions presented", however, no convincing evidence is provided. Please prove it mathematically.
+
+## How was the benchmarking carried out? Details on the implementation should be provided.
 
 
-# 3. The reviewer cannot understand why filtering is needed in the pre-processing of Hilbert transform. Clarify the reasoning and necessity.
+
+# Reviewer #4: This paper proposes a new method for envelope estimation by using the geometric properties of a discrete real signal. Using discrete curvatures to determine the envelope of a discrete signal is an interesting idea and results obtained by this proposed method seem to be acceptable. However, the reviewer cannot recommend the publication of the paper in its current form.The authors need to address the reviewers below and revise the paper accordingly:
+
+## 1. The description of the key concepts is not clear. The paragraphs of the current paper were poorly written and readers cannot follow them easily. The authors are suggested to revise the paper extensively to improve its readability.
 
 
-# 4. Envelopes obtained by the proposed method seem to be good, but those obtained by other comparable methods, such as Hilbert transform, are not reasonable. The reviewer believes that results obtained by Hilbert transform should not be bad as shown by the authors. Besides, its end effects are serious. Is it caused by the filtering, which is mentioned by the reviewer in comment #3? Provide an explanation for the results in Figures 10, 11, and 12.
+## 2. The authors describe basic concepts of convex and concave hulls in an intuitive manner and show that “the idea is to identify the local extrema that tough the envelope”. But the reviewer cannot fully understand the logical connection between them. The authors are suggested to explain their idea in a more explicit manner.
 
 
-# 5. There are a lot of mistakes in the texts, please proofread the paper carefully. Some of them listed in the following:
+## 3. The reviewer cannot understand why filtering is needed in the pre-processing of Hilbert transform. Clarify the reasoning and necessity.
 
 
-## a. Full name at the first time for the abbreviate: being particularly illustrative of the potential synergy between geometric and DSP approaches.
+## 4. Envelopes obtained by the proposed method seem to be good, but those obtained by other comparable methods, such as Hilbert transform, are not reasonable. The reviewer believes that results obtained by Hilbert transform should not be bad as shown by the authors. Besides, its end effects are serious. Is it caused by the filtering, which is mentioned by the reviewer in comment #3? Provide an explanation for the results in Figures 10, 11, and 12.
 
-inserted in the first paragraph
 
-## b. Figure or table or equation should be illustrated:
+## 5. There are a lot of mistakes in the texts, please proofread the paper carefully. Some of them listed in the following:
 
-### From 3 and the discussion in the preceding chapter; 
 
-### The algorithm follows directly from the definition in 5 after noting; 
+### a. Full name at the first time for the abbreviate: being particularly illustrative of the potential synergy between geometric and DSP approaches.
 
-### In 10 we illustrate the envelope extracted by the conventional algorithms;
+We inserted the full name and abbreviation for DSP in its first use in the first paragraph of the revised version, and took steps to do the same with other abbreviations.
 
-### The times taken for the algorithms compared here to process each wave are shown in 2;
+### b. Figure or table or equation should be illustrated:
+#### From 3 and the discussion in the preceding chapter; 
+#### The algorithm follows directly from the definition in 5 after noting; 
+#### In 10 we illustrate the envelope extracted by the conventional algorithms;
+#### The times taken for the algorithms compared here to process each wave are shown in 2;
+#### Figure 14 shows the frequency-domain power spectrum for the wave and the carrier presented in 3…..
 
-### Figure 14 shows the frequency-domain power spectrum for the wave and the carrier presented in 3…..
-
-This problem was inserted when 
+This issue arose from a misconception that those terms would be added during the latex compilation, discovered late in the process of elaborating the manuscript that caused and many of the faulty references to remained unnoticed. We took steps to ensure proper indication of figures, tables and algorithms in the revised version.
 
 ### c. Wrong equation, should be 𝑟 : From figure 6 is easy to
   𝑘 = 𝑣𝑘,𝑥/ 𝑠𝑖𝑛(θ𝑘)
   see that 𝑟 .
   𝑘 = 𝑣𝑘,𝑥 𝑠𝑖𝑛(θ𝑘)
 
-# 6. Figure 7 is shown in the manuscript, but there is no explanation on the main body for it. Please add an explanation in the revised paper.
+We thank the reviewer for pointing out this error. This mistake was fixed in the revised version. It turned out to be a typo, in the sense that the following equation, derived in part from this one, was correct. We seized the opportunity to also double check all other equations in the revised version.
+
+## 6. Figure 7 is shown in the manuscript, but there is no explanation on the main body for it. Please add an explanation in the revised paper.
+
+We added an explanation to the figure 7 in the original paper, the envelope of a guitar bend, as suggested.
+
+
+# Reviewer #5: Once the carrier frequency is known the technique presented in this paper is a special kind of limited curvature interpolation technique. 
+
+## The author should improve the citation by referencing corresponding techniques, such as K-curve, and bounded curvature interpolation methods. It is interesting to investigate the application of such technique to signal envelope extraction.
+
+
 
 
 -----
@@ -110,32 +146,6 @@ E-mail: dsp@elsevier.com
 
 Note: While submitting the revised manuscript, please double check the author names provided in the submission so that authorship related changes are made in the revision stage. If your manuscript is accepted, any authorship change will involve approval from co-authors and respective editor handling the submission and this may cause a significant delay in publishing your manuscript.
 
-Reviewers' comments:
-
-
-
-Reviewer #2: This is an interesting research. It seems that the authors have already put this article publicly accessible at arXiv.org. The authors are suggested to consider and address the following issues:
-Writing needs to be refined.
-Issues with the Highlights: maximum 85 characters, including spaces, per bullet point
-Abstract looks too long. Should be presented in a more concise way.
-Citation of references should be in order and no jump of reference numbers.
-What's the Abscissa in the highlights (50k, 100k, etc.) and some figures?
-Legends in some figures are confusing and hard to distinguish, such as in Fig 2: signal and Hilbert Envelope.
-Figure 3: the illustration of the carrier c and wave w does not comply with the common sense of envelope and modulation?
-Definition of the envelope is very vague and controversial. What's the relationship with the conventional amplitude modulation?
-For the proposed "Equivalent Circle Approach", an acceptable mathematical background and justification is missing. 
-It's quite doubtful about the assumption of w = e ⊙ c?
-P8: the authors claimed that "the algorithm here presented satisfies the four conditions presented", however, no convincing evidence is provided. Please prove it mathematically.
-How was the benchmarking carried out? Details on the implementation should be provided.
-
-
-
-Reviewer #4: Please see the attached for the comments.
-
-
-Reviewer #5: Once the carrier frequency is known the technique presented in this paper is a special kind of limited curvature interpolation technique. The author should improve the citation by referencing corresponding techniques, such as K-curve, and bounded curvature interpolation methods. It is interesting to investigate the application of such technique to signal envelope extraction.
-
-
 Data in Brief (optional):
 We invite you to convert your supplementary data (or a part of it) into an additional journal publication in Data in Brief, a multi-disciplinary open access journal. Data in Brief articles are a fantastic way to describe supplementary data and associated metadata, or full raw datasets deposited in an external repository, which are otherwise unnoticed. A Data in Brief article (which will be reviewed, formatted, indexed, and given a DOI) will make your data easier to find, reproduce, and cite.
  
@@ -149,3 +159,12 @@ Please contact the Data in Brief editorial office at dib-me@elsevier.com or visi
 
 
 For further assistance, please visit our customer support site at http://help.elsevier.com/app/answers/list/p/7923. Here you can search for solutions on a range of topics, find answers to frequently asked questions and learn more about EM via interactive tutorials. You will also find our 24/7 support contact details should you need any further assistance from one of our customer support representatives.
+
+
+
+---------------------------
+
+Intuitively, the temporal envelope can be understood as a slowly varying function that multiplies the signal, being responsible for its outer shape.
+
+
+Besides the most direct applications of this work to audio classification and synthesis, we foresee impact in compression techniques and machine learning approaches to audio. We briefly discuss some potential paths in this direction. The discrete curvature definition presented could also be extended to three-dimensional settings, to improve shape detection algorithms based on alpha shapes.

@@ -9,7 +9,7 @@
 \usepackage[margin=0.5in]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
-\usepackage[backend=biber]{biblatex}
+\usepackage[backend=biber, sorting=none]{biblatex}
 
 
 \usepackage{algorithm}
@@ -37,28 +37,24 @@
 
 \maketitle
 
-
 \begin{abstract}
 % Background
-Despite being an elusive concept, the temporal amplitude envelope of a signal is essential for its complete characterization, being the primary information-carrying medium in spoken voice and telecommunications, for example. Intuitively, the temporal envelope can be understood as a slowly varying function that multiplies the signal, being responsible for its outer shape. 
+Despite being an elusive concept, the temporal amplitude envelope of a signal is essential for its complete characterization, being the primary information-carrying medium in spoken voice and telecommunications, for example.  
 Envelope detection techniques have applications in areas like medicine, sound classification and synthesis, seismology and speech recognition.
 % Problem | Objectives
-Nevertheless, a general approach to digital envelope detection of signals with rich spectral content doesn't exist, as most methods involve manual intervention, in the form of filter design, smoothing, and other specific design choices, based on prior knowledge of the signals under investigation.
-To address this problem, we propose an algorithm that uses intrinsic characteristics of a signal to estimate its envelope, eliminating the necessity of parameter tuning.
+Nevertheless, a general approach to envelope detection doesn't exist, as most methods involve manual intervention, in the form of filter design, smoothing, and other specific design choices based on prior knowledge of the signals under investigation.
+To address this problem, we propose an algorithm that uses characteristics of a signal to estimate its envelope, eliminating the necessity of parameter tuning.
 % Methods | Procedure | Approach
-The approach here described draws inspiration from geometric concepts to estimate the temporal envelope of an arbitrary signal; specifically, a new measure of discrete curvature is used to obtain the average radius of curvature of a discrete wave, that will serve as a threshold to identify the wave's samples that are part of the envelope. 
+The method draws inspiration from geometric concepts; the discrete signal is mapped to a set of points in the Cartesian plane, were a new measure of discrete curvature is used to identify the samples that are part of the envelope.
+Due to its geometric nature, the method can optionally generate the superior and inferior envelopes of a given wave.
 % Results | Findings | Product
 The algorithm compares favourably with classic envelope detection techniques based on smoothing, filtering and the Hilbert Transform, besides being physically plausible.
-We provide visualizations of the envelope extracted via the algorithm for various real-world signals, with very diverse characteristics, such as voice, spoken and sang, and pitched and non-pitched musical instruments, and discuss some approaches to assess the quality of the obtained envelopes.
-A Python module implementing the algorithm was made available via the Python Package Index (PyPI); interactive visualizations of envelopes for a diverse range of digital waves, as well as the source code for the Python implementation, are available online at \textcite{2020TarjanoEnvelope}.
-% Conclusions | Implications
-Besides the most direct applications of this work to audio classification and synthesis, we foresee impact in compression techniques and machine learning approaches to audio. We briefly discuss some potential paths in this direction. The discrete curvature definition presented could also be extended to three-dimensional settings, to improve shape detection algorithms based on alpha shapes.
+We provide visualizations of the envelope extracted for various real-world signals, with very diverse characteristics, such as voice, spoken and sang, and pitched and non-pitched musical instruments, and discuss some approaches to assess the quality of the obtained envelopes.
+An optimized implementation is available via the Python Package Index (PyPI); interactive visualizations and source code are available at the accompanying repository.
 \end{abstract}
 
-{\bf Keywords:} DSP; alpha shapes; envelope detection; discrete curvature estimation; demodulation
+{\bf Keywords:} alpha shapes; envelope detection; discrete curvature estimation; demodulation
 
-% TODO only samples already present are part of the envelope; no overshooting
-% TODO Frontiers are also provided
 
 \section{Introduction}
 Envelope detection, also known as demodulation, is ubiquitous in both analogue and digital signal processing (DSP) \parencite{2011CaetanoImproved}. Nevertheless, the literature in this area is fragmented \parencite{2017LyonsDigital}, with most envelope detection techniques being designed to account for very specific settings, like pure sinusoids with moderate noise content, for example.
@@ -287,7 +283,8 @@ For all circles of center $ x_o, y_o $ and radius $ r $ that can be constructed 
 
 The algorithm follows directly from the definition in \ref{eq:InEnvelope} after noting that the first and last members of P will always be part of the envelope, since they are reachable by a circle of any radius $ r $. From $ P_0 $, our first pivot point, we construct circles passing through $ P_1, P_2, \cdots, P_d $ until a circle that doesn't contain any point in P is found; $ P_d $ then becomes the new pivot point and is included in E, and this procedure continues until $ P_{m-1} $ is reached.
 
-The procedure is formalized in the algorithm \ref{FindEnvelope}. We don't provide similar algorithmic descriptions of the preceding steps since the Python implementation can easily serve as pseudocode.
+The procedure is formalized in the algorithm \ref{FindEnvelope}. We don't provide similar algorithmic descriptions of the preceding steps since the Python implementation available at % TODO
+ can easily serve as pseudocode.
 
 \begin{algorithm}[H]
 \caption{Retrieve Envelope} \label{FindEnvelope}
@@ -314,11 +311,11 @@ The procedure is formalized in the algorithm \ref{FindEnvelope}. We don't provid
 \end{algorithmic}
 \end{algorithm}
 
-The set E obtained via algorithm \ref{FindEnvelope} is a set of points. The most straightforward way to transform those points into the vector $ \textbf{e} \in \mathbb{R}^n $ is via linear interpolation, the approach used in this work. 
+The set E obtained via algorithm \ref{FindEnvelope} is a subset of P, and thus also a set of points. The most straightforward way to transform those points into the vector $ \textbf{e} \in \mathbb{R}^n $ is via linear interpolation, the approach used in this work.
 It is worth noting, however, that many other procedures are available, both for the interpolation and the smooth approximation of points.
 
 \section{Quality of an envelope}
-Given the lack of a precise definition of what an envelope should be, we begin this section suggesting an empirical metric, based on the behaviour of the carrier wave \textbf{c}. We also comment on some metrics presented in the literature, and compare our algorithm with traditional demodulation approaches, both in relation to execution time and accuracy; to this last end, a numerical indicator is also introduced.
+Given the lack of a precise definition of what an envelope is, we begin this section suggesting an empirical metric, based on the behaviour of the carrier wave \textbf{c}. We also comment on some metrics presented in the literature, and compare our algorithm with traditional demodulation approaches, both in relation to execution time and accuracy; to this last end, a numerical indicator is also introduced.
 
 We also illustrate how the method here presented can be used to isolate not only a single envelope of the wave, but the superior and inferior envelopes as well, that we call frontiers, ending the section with a suggestion on how the proposed algorithm can be useful beyond envelope detection, by identifying the approximate locations of the pseudo-cycles in a quasi-periodic wave.
 
