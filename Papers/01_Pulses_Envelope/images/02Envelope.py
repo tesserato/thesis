@@ -47,7 +47,7 @@ FONT = dict(
 fig = go.Figure()
 fig.layout.template ="plotly_white" 
 fig.update_layout(
-  xaxis_title="<b><i>i</i></b>",
+  xaxis_title="<b>Sample <i>i</i></b>",
   yaxis_title="<b>Amplitude</b>",
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=0, r=0, b=0, t=0),
@@ -66,8 +66,8 @@ fig.add_trace(
     x=X,#pulses_X,
     y=E,#pulses_Y,
     mode="lines",
-    line=dict(width=2, color="gray", shape = 'spline'),
-    marker=dict(size=3, color="gray")
+    line=dict(width=2, color="red", shape = 'spline'),
+    marker=dict(size=3, color="red")
     # visible = "legendonly"
   )
 )
@@ -79,21 +79,21 @@ fig.add_trace(
     x=X,
     y=C,
     mode='lines+markers',
-    fill="tozeroy",
-    fillcolor="silver",
-    line=dict(width=1, color="gray"),
-    marker=dict(size=4, color="gray")
+    # fill="tozeroy",
+    # fillcolor="silver",
+    line=dict(width=1, color="blue"),
+    marker=dict(size=4, color="blue")
   )
 )
 
 fig.add_trace(
   go.Scatter(
-    name="Wave <b>w = e</b> ⊙ <b>c</b>      ",
+    name="Signal <b>w = e</b> ⊙ <b>c</b>      ",
     x=X,#pulses_X,
     y=W,#pulses_Y,
     mode="lines+markers",
-    line=dict(width=1, color="black"),
-    marker=dict(size=4, color="black")
+    line=dict(width=1, color="gray"),
+    marker=dict(size=4, color="gray")
     # visible = "legendonly"
   )
 )

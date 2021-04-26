@@ -35,7 +35,7 @@ W = E * C
 pulses = signal_to_pulses(W)
 Xp = []
 Yp = []
-for p in pulses[1:-1]:
+for p in pulses[1:]:
   Xp.append(p.x)
   Yp.append(np.abs(p.y))
 
@@ -45,13 +45,12 @@ Yp = np.array(Yp)
 
 scaling = (np.sum(Xp[1:] - Xp[:-1])) / np.sum(Yp)
 Y = Yp * scaling
+
+
 '''============================================================================'''
 '''                              PLOT LINES                                    '''
 '''============================================================================'''
-fig = make_subplots(
-    rows=2, cols=1, shared_xaxes=False, vertical_spacing=0.01,
-    subplot_titles=("<b>Original coordinate system</b>", "<b>Normalized coordinate system</b>")
-    )
+fig = go.Figure()
 
 FONT = dict(
     family="Latin Modern Roman",
@@ -66,32 +65,20 @@ for i in fig['layout']['annotations']:
 
 fig.layout.template ="plotly_white" 
 fig.update_layout(
-  # xaxis_title="<b><i>x</i></b>", # ( <b><i>i</i></b> ) ",
-  # yaxis_title="<b><i>y</i></b>", # ( <b><i>i</i></b> ) ",
+  xaxis_title="<b><i>x</i></b>", # ( <b><i>i</i></b> ) ",
+  yaxis_title="<b><i>y</i></b>", # ( <b><i>i</i></b> ) ",
   yaxis = dict(scaleanchor = "x", scaleratio = 1),
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=0, r=0, b=0, t=0),
   font=FONT,
   titlefont=FONT
 )
-# fig.layout.xaxis.title.font=FONT
-# fig.layout.yaxis.title.font=FONT
+fig.layout.xaxis.title.font=FONT
+fig.layout.yaxis.title.font=FONT
 
-fig.update_xaxes(showline=False, showgrid=False, zeroline=False, showticklabels=False, title=dict(font=FONT), row=1, col=1)
-fig.update_xaxes(showline=False, showgrid=False, zeroline=False, showticklabels=True, title=dict(text="<b><i>x</i></b>",font=FONT), row=2, col=1)
-fig.update_yaxes(showline=False, showgrid=False, zeroline=False, title=dict(text="<b><i>y</i></b>",font=FONT), row=1, col=1, tickvals=[i for i in range(0, 3, 2)])
-fig.update_yaxes(showline=False, showgrid=False, zeroline=False, title=dict(text="<b><i>y</i></b>",font=FONT), row=2, col=1, tickvals=[i for i in range(0, 11, 2)])
+fig.update_xaxes(showline=False, showgrid=False, zeroline=False)
+fig.update_yaxes(showline=False, showgrid=False, zeroline=False)
 
-fig.add_trace(
-  go.Scatter(
-    name= "Stem",
-    showlegend=False,
-    x=[i for x in Xp for i in (x, x, None)],
-    y=[i for y in Yp for i in (0, y, None)],
-    mode='lines',
-    line=dict(color="silver", width=1)
-  ), row=1, col=1
-)
 
 fig.add_trace(
   go.Scatter(
@@ -100,16 +87,27 @@ fig.add_trace(
     x=[i for x in Xp for i in (x, x, None)],
     y=[i for y in Y for i in (0, y, None)],
     mode='lines',
-    line=dict(color="silver", width=1)
-  ), row=2, col=1
+    line=dict(color="silver", width=2)
+  )
 )
 
-for i in range(1, len(Xp)):  
+fig.add_trace(
+  go.Scatter(
+    name="P      ",
+    # showlegend=False,
+    x=Xp,
+    y=Y,
+    mode='markers',
+    marker=dict(size=7, color="black")
+  )
+)
+
+for i in range(1, len(Xp)):    
   fig.add_annotation(
     x=Xp[i],  # arrows' head
-    y=Yp[i],  # arrows' head
+    y=Y[i],  # arrows' head
     ax=Xp[i - 1],  # arrows' tail
-    ay=Yp[i - 1],  # arrows' tail
+    ay=Y[i - 1],  # arrows' tail
     xref='x',
     yref='y',
     axref='x',
@@ -119,57 +117,14 @@ for i in range(1, len(Xp)):
     arrowhead=2,
     arrowsize=1,
     arrowwidth=2,
-    arrowcolor='gray', row=1, col=1
-  )
-  
-  fig.add_annotation(
-    x=Xp[i],  # arrows' head
-    y=Y[i],  # arrows' head
-    ax=Xp[i - 1],  # arrows' tail
-    ay=Y[i - 1],  # arrows' tail
-    xref='x2',
-    yref='y2',
-    axref='x2',
-    ayref='y2',
-    text='',  # if you want only the arrow
-    showarrow=True,
-    arrowhead=2,
-    arrowsize=1,
-    arrowwidth=2,
-    arrowcolor='gray', row=2, col=1
+    arrowcolor='gray'
   )
 
-fig.add_trace(
-  go.Scatter(
-    name="<i>P</i>      ",
-    # showlegend=False,
-    x=Xp,
-    y=Yp,
-    mode='markers',
-    # fill="tozeroy",
-    # fillcolor="silver",
-    # line=dict(color="gray", width=1),
-    marker=dict(size=7, color="black")
-  ), row=1, col=1
-)
+
 
 fig.add_trace(
   go.Scatter(
-    name="<i>P</i>      ",
-    showlegend=False,
-    x=Xp,
-    y=Y,
-    mode='markers',
-    # fill="tozeroy",
-    # fillcolor="silver",
-    # line=dict(color="gray", width=1),
-    marker=dict(size=7, color="black")
-  ), row=2, col=1
-)
-
-fig.add_trace(
-  go.Scatter(
-    name="<i>V</i>      ",
+    name="V      ",
     # showlegend=False,
     x=[None],
     y=[None],
@@ -181,45 +136,12 @@ fig.add_trace(
   )
 )
 
-fig.add_annotation(
-  x=0,  # arrows' head
-  y=3,  # arrows' head
-  ax=0,  # arrows' tail
-  ay=-1,  # arrows' tail
-  xref='x',
-  yref='y',
-  axref='x',
-  ayref='y',
-  text='',  # if you want only the arrow
-  showarrow=True,
-  arrowhead=2,
-  arrowsize=1,
-  arrowwidth=2,
-  arrowcolor='black'
-)
 
 fig.add_annotation(
   x=0,  # arrows' head
   y=9.5,  # arrows' head
   ax=0,  # arrows' tail
   ay=-1,  # arrows' tail
-  xref='x2',
-  yref='y2',
-  axref='x2',
-  ayref='y2',
-  text='',  # if you want only the arrow
-  showarrow=True,
-  arrowhead=2,
-  arrowsize=1,
-  arrowwidth=2,
-  arrowcolor='black'
-)
-
-fig.add_annotation(
-  x=W.size,  # arrows' head
-  y=0,  # arrows' head
-  ax=-1,  # arrows' tail
-  ay=0,  # arrows' tail
   xref='x',
   yref='y',
   axref='x',
@@ -232,15 +154,16 @@ fig.add_annotation(
   arrowcolor='black'
 )
 
+
 fig.add_annotation(
-  x=W.size,  # arrows' head
+  x=Xp[-1] + 2,  # arrows' head
   y=0,  # arrows' head
   ax=-1,  # arrows' tail
   ay=0,  # arrows' tail
-  xref='x2',
-  yref='y2',
-  axref='x2',
-  ayref='y2',
+  xref='x',
+  yref='y',
+  axref='x',
+  ayref='y',
   text='',  # if you want only the arrow
   showarrow=True,
   arrowhead=2,
@@ -251,5 +174,5 @@ fig.add_annotation(
 
 fig.show(config=dict({'scrollZoom': True}))
 save_name = "./images/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
-fig.write_image(save_name, width=650, height=300, engine="kaleido", format="svg")
+fig.write_image(save_name, width=650, height=200, engine="kaleido", format="svg")
 print("saved:", save_name)

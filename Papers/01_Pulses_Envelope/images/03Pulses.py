@@ -57,7 +57,7 @@ FONT = dict(
 fig = go.Figure()
 fig.layout.template ="plotly_white" 
 fig.update_layout(
-  xaxis_title="<b><i>i</i></b>",
+  xaxis_title="<b>Sample <i>i</i></b>",
   yaxis_title="<b>Amplitude</b>",
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=0, r=0, b=0, t=0),
@@ -70,6 +70,8 @@ fig.layout.yaxis.title.font=FONT
 fig.update_xaxes(showline=False, showgrid=False, zeroline=False)
 fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=2, zerolinecolor='black')
 
+pulses_color = "rgba(250, 140, 132, 0.5)"
+
 '''Samples'''
 fig.add_trace(
   go.Scatter(
@@ -79,7 +81,7 @@ fig.add_trace(
     y=W,
     mode='lines+markers',
     fill="tozeroy",
-    fillcolor="rgba(0,0,0,0.2)",
+    fillcolor=pulses_color,
     line=dict(color="gray", width=1),
     marker=dict(size=5, color="gray")
   )
@@ -88,10 +90,11 @@ fig.add_trace(
 ''' Samples Legend'''
 fig.add_trace(
   go.Scatter(
-    name="Samples      ",
+    name="Signal",
     x=[None],#pulses_X,
     y=[None],#pulses_Y,
-    mode="markers",
+    mode="lines+markers",
+    line=dict(color="gray", width=1),
     marker=dict(size=5, color="gray")
     # visible = "legendonly"
   )
@@ -100,12 +103,12 @@ fig.add_trace(
 ''' Pulses Legend'''
 fig.add_trace(
   go.Scatter(
-    name="Pulses      ",
+    name="Pulses",
     x=[None],#pulses_X,
     y=[None],#pulses_Y,
     fill="tozeroy",
     mode="none",
-    fillcolor="silver",
+    fillcolor=pulses_color,
     # marker=dict(
     #   size=5,
     #   color="black",
@@ -116,7 +119,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Local Extrema      ",
+    name="Local Extrema",
     # showlegend=False,
     x=Xp,
     y=Yp,
@@ -131,7 +134,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Absolute Local Extrema (<i>P</i>)      ",
+    name="Absolute Local Extrema (P)      ",
     # showlegend=False,
     x=Xp,
     y=np.abs(Yp),
@@ -139,7 +142,7 @@ fig.add_trace(
     # fill="tozeroy",
     # fillcolor="silver",
     # line=dict(color="gray", width=1),
-    marker=dict(size=7, color="black")
+    marker=dict(size=5.1, color="black")
   )
 )
 

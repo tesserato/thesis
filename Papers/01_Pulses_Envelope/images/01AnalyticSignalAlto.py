@@ -1,38 +1,33 @@
 from scipy.signal import hilbert
 import numpy as np
 import plotly.graph_objects as go
-import numpy.polynomial.polynomial as poly
+import signal_envelope as se
 import sys
+from scipy.signal import butter, filtfilt
 
-'''Generating Wave'''
+def butter_lowpass_filter(data, fps, cutoff = 10, order = 2):
+  nyq = 0.5 * fps
+  normal_cutoff = cutoff / nyq
+  # Get the filter coefficients 
+  b, a = butter(order, normal_cutoff, btype='low', analog=False)
+  y = filtfilt(b, a, data)
+  return y
 
-np.random.seed(1)
-# fps = 10
-n = 1000+1
+name = "alto"
 
-X = np.arange(n)# / fps
-W = np.zeros(n)
-
-fp = [
-  [40, np.pi],
-  # [2, 1.2 * np.pi],
-  # [2.3, 1.4 * np.pi]
-  ]
-
-coefs = poly.polyfit([0, n//4, 3 * n//4, n], [0.6, 0.1, 0.9, .2], 3)
-A = poly.polyval(X, coefs)
-
-noise = np.random.normal(0, 0.1, n)
-noise[0 : n//2] = 0
-
-for f, p in fp:
-  W += np.cos(p + 2 * np.pi * f * X / n) + noise
-
-W = A * W / np.max(np.abs(W))
+'''==============='''
+''' Read wav file '''
+'''==============='''
+W, fps = se.read_wav(f"test_samples/{name}.wav")
+W = W - np.average(W)
+amplitude = np.max(np.abs(W))
+W = W / amplitude
+n = W.size
 
 '''Analytic_Signal'''
 analytic_signal = hilbert(W)
 hilbert_envelope = np.abs(analytic_signal)
+hilbert_envelope_filtered = butter_lowpass_filter(hilbert_envelope, fps, 100)
 
 
 '''============================================================================'''
@@ -52,7 +47,7 @@ fig.layout.template ="plotly_white"
 fig.update_layout(
   xaxis_title="<b>Sample <i>i</i></b>",
   yaxis_title="<b>Amplitude</b>",
-  legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1, itemsizing='trace'),
+  legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1, itemsizing='constant'),
   margin=dict(l=0, r=0, b=0, t=0),
   font=FONT,
   titlefont=FONT
@@ -68,10 +63,10 @@ fig.add_trace(
     name="Signal",
     # x=X,
     y=W,
-    mode="lines+markers",
+    mode="lines",
     marker=dict(size=2,),
     line=dict(
-        width=.8,
+        width=1,
         color="gray",
     )
   )
@@ -79,32 +74,36 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Hilbert Envelope",
+    name="Hilbert Transform",
     # x=X,
     y=hilbert_envelope,
     mode="lines",
+    line_shape='spline',
+    # fillcolor="rgba(250, 140, 132, 0.5)",
+    # fill="toself",
     line=dict(
-        width=.8,
-        color="red",
+        width=1,
+        color="rgba(250, 0, 0, 0.5)",
     )
   )
 )
 
 fig.add_trace(
   go.Scatter(
-    name="<i>i = n/2 </i>      ",
-    x=[n//2, n//2],
-    y=[-1, 1],
+    name="Filtered Hilbert Transform",
+    # x=X,
+    y=hilbert_envelope_filtered,
     mode="lines",
+    line_shape='spline',
     line=dict(
-        width=2,
+        width=1,
         color="black",
-        dash="dash"
     )
   )
 )
 
+
 fig.show(config=dict({'scrollZoom': True}))
 save_name = "./images/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
-fig.write_image(save_name, width=650, height=200, engine="kaleido", format="svg")
+fig.write_image(save_name, width=650, height=300, engine="kaleido", format="svg")
 print("saved:", save_name)

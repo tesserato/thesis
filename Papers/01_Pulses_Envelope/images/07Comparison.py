@@ -1,18 +1,10 @@
 import plotly.graph_objects as go
 import numpy as np
 from scipy.interpolate import interp1d
-import numpy.polynomial.polynomial as poly
-import wave
-from scipy.signal import savgol_filter, hilbert
-import os
-from pathlib import Path
+from scipy.signal import savgol_filter, hilbert, butter, filtfilt
 import sys
-# sys.path.append("c:/Users/tesse/Desktop/Files/Dropbox/0_Thesis/Python")
-# from Wheel import frontiers
-from plotly.subplots import make_subplots
 from timeit import default_timer as timer
 import signal_envelope as se
-from scipy.signal import butter, filtfilt
 
 def butter_lowpass_filter(data, fps, cutoff = 10, order = 2):
   nyq = 0.5 * fps
@@ -24,11 +16,14 @@ def butter_lowpass_filter(data, fps, cutoff = 10, order = 2):
 
 
 
+name = "piano" # change the name here for any of the files in the "test_samples" folder
+# name = "sinusoid"
+# name = "soprano"
+
 '''==============='''
 ''' Read wav file '''
 '''==============='''
-name = "piano"
-W, fps = se.read_wav(f"C:/Users/tesse/Desktop/Files/Dropbox/0_Science/reps/envelope/test_samples/{name}.wav")
+W, fps = se.read_wav(f"test_samples/{name}.wav")
 W = W - np.average(W)
 amplitude = np.max(np.abs(W))
 W = W / amplitude
@@ -37,14 +32,14 @@ print(f"n={n}")
 X = np.arange(n)
 
 '''==============='''
-'''    Snowball   '''
+'''  Present work '''
 '''==============='''
 start = timer()
 Ex = se.get_frontiers(W, 1)
 f = interp1d(Ex, np.abs(W[Ex]), kind="linear", fill_value="extrapolate", assume_sorted=False)
 envY = f(X)
 lms = np.average((np.abs(W) - envY * 0.5)**2)
-print(f"This work: lms ={lms}, time={timer() - start}")
+print(f"Present work: lms ={lms}, time={timer() - start}")
 
 
 '''==============='''
@@ -69,15 +64,13 @@ print(f"Lowpass:   lms ={lms_lowpass}, time={timer() - start}")
 '''    Hilbert    '''
 '''==============='''
 start = timer()
-analytic_signal = hilbert(butter_lowpass_filter(np.abs(W), fps, 100))
-envY_hilbert = np.abs(analytic_signal)
+analytic_signal = np.abs(hilbert(W))
+envY_hilbert = butter_lowpass_filter(analytic_signal, fps, 100)
 lms_hilbert = np.average((np.abs(W) - envY_hilbert * 0.5)**2)
-# envY_hilbert = [y for y in envY_hilbert] + [None] + [-y for y in envY_hilbert]
 
 print(f"Hilbert:   lms ={lms_hilbert}, time={timer() - start}")
-# exit()
 '''============================================================================'''
-'''                                    PLOT FT                                    '''
+'''                                    PLOT                                    '''
 '''============================================================================'''
 FONT = dict(
     family="Latin Modern Roman",
@@ -89,7 +82,7 @@ FONT = dict(
 fig = go.Figure()
 fig.layout.template ="plotly_white" 
 fig.update_layout(
-  xaxis_title="<b><i>i</i></b>",
+  xaxis_title="<b>Sample <i>i</i></b>",
   yaxis_title="<b>Amplitude</b>",
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=0, r=0, b=0, t=0),
@@ -106,7 +99,7 @@ fig.update_yaxes(showline=False, showgrid=False, zeroline=False)
 
 fig.add_trace(
   go.Scatter(
-    name="Signal", # <|<|<|<|<|<|<|<|<|<|<|<|
+    name="Signal",
     x=X,
     y=W,
     mode="lines",
@@ -116,7 +109,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Hilbert", # <|<|<|<|<|<|<|<|<|<|<|<|
+    name="Hilbert",
     x=X,
     y=envY_hilbert,
     mode="lines",
@@ -127,7 +120,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Smoothing", # <|<|<|<|<|<|<|<|<|<|<|<|
+    name="Smoothing",
     x=X,
     y=envY_smooth,
     mode="lines",
@@ -137,7 +130,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Lowpass Filter", # <|<|<|<|<|<|<|<|<|<|<|<|
+    name="Lowpass Filter",
     x=X,
     y=envY_lowpass,
     mode="lines",
@@ -147,7 +140,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Present Work", # <|<|<|<|<|<|<|<|<|<|<|<|
+    name="Present Work",
     x=X,
     y=envY,
     mode="lines",

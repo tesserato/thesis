@@ -5,7 +5,7 @@ sys.path.append("c:/Users/tesse/Desktop/Files/Dropbox/0_Thesis/Python/01_Envelop
 import numpy as np
 from scipy.spatial import ConvexHull
 from Helper import signal_to_pulses, get_pulses_area, alpha_shape
-from plotly.subplots import make_subplots
+# from plotly.subplots import make_subplots
 '''Generating Wave'''
 
 np.random.seed(1)
@@ -31,7 +31,7 @@ points = np.array([[x, w] for x, w in zip(X, W)])
 hull = ConvexHull(points)
 alpha = 300
 alpha_edges = alpha_shape(points, alpha)
-
+alpha_edges = sorted(alpha_edges, key=lambda tup: tup[0])
 
 XX = []
 YY = []
@@ -39,8 +39,8 @@ for e in alpha_edges:
   idx0 = e[0]
   idx1 = e[1]
 
-  XX.append(points[idx0][0]),XX.append(points[idx0][0]), XX.append(points[idx1][0]), XX.append(points[idx1][0]), XX.append(None)
-  YY.append(0),              YY.append(points[idx0][1]), YY.append(points[idx1][1]), YY.append(0), YY.append(None)
+  XX.append(points[idx0][0]), XX.append(points[idx1][0]), XX.append(None)
+  YY.append(points[idx0][1]), YY.append(points[idx1][1]), YY.append(None)
 
 
 '''============================================================================'''
@@ -69,30 +69,18 @@ fig.layout.yaxis.title.font=FONT
 fig.update_xaxes(showline=False, showgrid=False, zerolinewidth=1, zerolinecolor='black')
 fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=1, zerolinecolor='black')
 
-'''Samples'''
-fig.add_trace(
-  go.Scatter(
-    name="Samples      ",
-    # showlegend=False,
-    x=X,
-    y=W,
-    mode='lines+markers',
-    line=dict(color="silver", width=.5),
-    marker=dict(size=5, color="black")
-  )
-)
 
 I = [v for v in hull.vertices] + [hull.vertices[0]]
 fig.add_trace(
   go.Scatter(
-    name="Convex Hull      ",
+    name="Convex Hull",
     # showlegend=False,
     x=X[I],
     y=W[I],
     # fill="toself",
     # fillcolor="rgba(0,0,0,0.16)",
     mode="lines",
-    line=dict(color="black", width=2),
+    line=dict(color="blue", width=4),
     # marker=dict(size=3, color="black")
     # visible = "legendonly"
   )
@@ -104,15 +92,29 @@ fig.add_trace(
     # showlegend=False,
     x=XX,
     y=YY,
-    fill="tozeroy",
+    # fill="tozeroy",
     fillcolor="rgba(0,0,0,0.16)",
-    mode="none",
+    mode="lines",
+    line=dict(color="red", width=2),
     # line=dict(color="black", width=1),
     # marker=dict(size=3, color="black")
   )
 )
 
-# fig.show(config=dict({'scrollZoom': True}))
+'''Samples'''
+fig.add_trace(
+  go.Scatter(
+    name="Signal",
+    # showlegend=False,
+    x=X,
+    y=W,
+    mode='lines+markers',
+    line=dict(color="silver", width=.5),
+    marker=dict(size=5, color="black")
+  )
+)
+
+fig.show(config=dict({'scrollZoom': True}))
 save_name = "./images/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
 fig.write_image(save_name, width=650, height=300, engine="kaleido", format="svg")
 print("saved:", save_name)
