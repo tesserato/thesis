@@ -112,6 +112,9 @@ Next, we review methods for the estimation of the curvature of a discrete wave, 
 In the results section, we present some illustrations of the envelopes obtained with our method, comparing both accuracy and running time with the most common algorithms encountered in the literature. We also suggest an alternative use of the algorithm to identify the negative and positive frontiers of a wave, that can be seen as partial envelopes considering only the positive and negative pulses of a wave, respectively.
 
 We follow with suggestions about how the approach here presented can be useful beyond envelope detection, exemplifying with some applications, such as the extractions of the average waveform of a digital wave, and concluding with commentary on potential future developments of the method.
+
+Interactive visualizations are available from the repository prepared for this work \parencite{2020TarjanoEnvelope}, that also contains an implementation of the method in pure Python.
+A Python module available at the Python Package Index (PyPI) installable via the command `pip install signal-envelope` for convenience, is also available. Besides, those working under Windows 64-bit can benefit from a specialized dynamic library coded in C++ that is automatically used within this module, and can be separately obtained via the release section in the repository.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -140,7 +143,7 @@ For a real world signal, such as an alto singer sustaining a steady note as show
 
 \begin{figure}[H]
   \centering
-    \includegraphics{images/01AnalyticSignalAlto.pdf.pdf}
+    \includegraphics{images/01AnalyticSignalAlto.pdf}
   \caption{Representation of an alto singer sustaining a steady note and a comparison of the envelopes obtained by the Hilbert transform with and without further filtering.}
   \label{fig:AnalyticSignalAlto}
 \end{figure}
@@ -336,19 +339,11 @@ The procedure is formalized in the algorithm \ref{FindEnvelope}. We don't provid
 The set E obtained via algorithm \ref{FindEnvelope} is a subset of P, and thus also a set of points. The most straightforward way to transform those points into the vector $ \textbf{e} \in \mathbb{R}^n $ is via linear interpolation, the approach used in this work.
 It is worth noting, however, that many other procedures are available, both for the interpolation and the smooth approximation of points.
 
-\section{Quality of an envelope}
-Given the lack of a precise definition of what an envelope is, we begin this section suggesting an empirical metric, based on the behaviour of the carrier wave \textbf{c}, obtained dividing, element-wise, the original signal and the envelope obtained. We also comment on some metrics presented in the literature, and compare our algorithm with traditional demodulation approaches, both in relation to execution time and accuracy; to this last end, a numerical indicator is also introduced.
+\section{Quality of an envelope}\label{sec:quality}
 
-We also illustrate how the method here presented can be adapted to isolate not only a single envelope of the wave, but the superior and inferior envelopes as well, that we call frontiers, 
-% TODO
-ending the section with a suggestion on how the proposed algorithm can be useful beyond envelope detection, by identifying the approximate locations of the pseudo-cycles in a quasi-periodic wave.
+The lack of a precise definition of what an envelope is makes the assessment of the quality of an envelope a difficult task, for which there are no agreed-upon objective metrics. Recalling Fig. \ref{fig:Envelope}, however, and the accompanying discussion, if one divides, element-wise, the original signal by the envelope, the carrier wave thus obtained is expected to be bounded between -1 and 1.
 
-Interactive visualizations are available from the repository prepared for this work \parencite{2020TarjanoEnvelope}, that also contains an implementation of the method in pure Python.
-A Python module available at the Python Package Index (PyPI) installable via the command `pip install signal-envelope` for convenience, is also available. Besides, those working under Windows 64-bit can benefit from a specialized dynamic library coded in C++ that is automatically used within this module, and can be separately obtained via the release section in the repository.
-
-There are no agreed-upon objective metrics to assess the quality of an envelope. Recalling Fig. \ref{fig:Envelope}, however, and the accompanying discussion, an intuitive way is to observe how ell the carrier wave \textbf{c} conforms to the interval $ \{-1, 1\} $.
-
-To illustrate how the algorithm performs on such metric, we provide the following figures of original discrete waves \textbf{w}, their extracted envelope \textbf{e}, and the inferred carrier, obtained after dividing, element-wise, the original signal by its extracted.
+Figs. \ref{fig:spoken_voice}, \ref{fig:singer_voice} and \ref{fig:Bend} present discrete waves \textbf{w}, their extracted envelope \textbf{e}, and the inferred carrier \textbf{c}, obtained after dividing, element-wise, the original signal by its extracted.
 
 From Fig. \ref{fig:spoken_voice} it can be seen that the algorithm performs well under the carrier metric. This is especially remarkable for the case of spoken voice, a notorious complex wave with fast changes in pitch and high noise content.
 
@@ -359,7 +354,7 @@ From Fig. \ref{fig:spoken_voice} it can be seen that the algorithm performs well
   \label{fig:spoken_voice}
 \end{figure}
 
-These characteristics are in stark contrast with those of the sang voice in Fig. \ref{fig:singer_voice}, where a recording of an alto singer sustaining a steady note is shown; there, the wave is almost periodic, with a stable waveform and envelope.
+Those characteristics are in stark contrast with those of the sang voice in Fig. \ref{fig:singer_voice}, where a recording of an alto singer sustaining a steady note is shown; there, the wave is almost periodic, with a stable waveform and envelope.
 
 \begin{figure}[H]
   \centering
@@ -377,8 +372,7 @@ Fig. \ref{fig:Bend} shows the envelope in the case of a bend performed in an ele
   \label{fig:Bend}
 \end{figure}
 
-
-In an effort to formalize the assessment of the quality of temporal envelopes, \textcite{1996Loughlinamplitude} proposed some conditions necessary, but not sufficient, to ensure the physical plausibility of an envelope. We comment briefly below that the algorithm here presented satisfies the four conditions presented.
+In an effort to formalize the assessment of the quality of temporal envelopes, \textcite{1996Loughlinamplitude} proposed some theoretical conditions necessary, but not sufficient, to ensure the physical plausibility of an envelope. We comment briefly below that the algorithm here presented satisfies the four conditions presented.
 
 % TODO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 The first one states that, if a signal is bounded in magnitude, then its envelope should be, as well. Our algorithm complies with this requisite, as the envelope is composed of selected samples from the original signal itself.
@@ -392,7 +386,31 @@ In all other cases, the maximum frequency of the envelope will be smaller than t
 The third condition states what, for a periodic signal, the envelope should be a straight line with the intercept equal to the amplitude of this signal. Since all the local maxima have the same amplitude in the case of a periodic wave, our envelope will indeed be a straight line, with the same amplitude as the original wave. An example of such behaviour can be observed in Fig. \ref{fig:Comparison_sinusoid}.
 
 The fourth and last condition states that if a wave is multiplied by a constant, the envelope should also be multiplied by the same constant. That is also the case, again because the points that form the envelope are points of the original wave itself.
-% TODO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+In order to obtain a numeric indicator of the quality of an envelope, we construct a reference envelope, that trades off pratical applicability in favour of mathematical formality.
+In \textcite{1992BruceCurves} the envelope is defined as the boundary of the region filled by a family of curves. Fig. \ref{fig:RefEnvelopeTheory} illustrates this concept, for a family of sinusoids that share the same frequency and amplitude, and whose phases vary from 0 to $ 2 \pi $.
+
+\begin{figure}[H]
+  \centering
+    \includegraphics{images/09RefEnvelopeTheory.pdf}
+  \caption{Envelope as the boundary of the region filled by a family of curves, for a family of sinusoids with the same frequency and amplitude, modulated by a polynomial.}
+  \label{fig:RefEnvelopeTheory}
+\end{figure}
+
+% TODO
+In practical applications, one seldom has access to a family of curve, instead being interested in obtaining the envelope of a single signal. Nevertheless, an approximation can be obtained, by shifting the original signal along its initial position in the horizontal axis, in order to cover the time of one period of the signal.
+Fig. \ref{fig:RefEnvelope} shows the reference envelope for the sound of a tom.
+
+\begin{figure}[H]
+  \centering
+    \includegraphics{images/10RefEnvelope.pdf}
+  \caption{Reference envelope obtained by shifting the original signal, for part of a sample of a tom.}
+  \label{fig:RefEnvelope}
+\end{figure}
+
+Since envelope is not smooth, being composed of a series of horizontal segments, as can be seen in \ref{fig:RefEnvelope}, besides being computationally expensive to calculate. However, arising from a mathematically sound base, it can serve as a reference to infer the quality of more empirical methods.
+
 
 \section{Comparison with traditional algorithms} 
 
@@ -402,11 +420,13 @@ Nevertheless, insight can be gained from a comparison of the results of the meth
 
 \begin{enumerate}
 \item Smoothing: This is a relatively simple procedure that, applied to the absolute values of a discrete signal, can provide an approximation of the variation of its amplitude in time. We use the Savitzky-Golay algorithm \parencite{1964SavitzkySmoothing} with a window width of 3001 samples and a cubic polynomial.
-\item Filtering: The absolute value of the wave is filtered using a digital implementation of the Butterworth \parencite{butterworth1930theory} low pass filter. We use an order 2 filter with a cut off frequency of 10 Hz.
-\item Hilbert Transform: We apply the Hilbert transform to the original signal, filtering the absolute value of the complex result with a Butterworth filter with a cut off frequency of 100 Hz, using the absolute value of the analytic signal to obtain the envelope.
+\item Filtering: The absolute value of the wave is filtered using a digital implementation of the Butterworth \parencite{butterworth1930theory} low pass filter. We use an order 2 filter with a cut-off frequency of 10 Hz.
+\item Hilbert Transform: We apply the Hilbert transform to the original signal, filtering the absolute value of the complex result with a Butterworth filter with a cut-off frequency of 1/10 of the fundamental frequency of the original signal.
 \end{enumerate}
 
-In Fig. \ref{fig:Comparison_sinusoid} we illustrate the envelope extracted by the conventional algorithms, contrasting it with the result of the method presented in this work, for a simple sinusoid. Note that none of the conventional algorithms complies with the third condition proposed by \textcite{1996Loughlinamplitude}, that states that the envelope of a periodic wave should be a straight line.
+In Fig. \ref{fig:Comparison_sinusoid} we illustrate the envelope extracted by the conventional algorithms, contrasting it with the result of the method presented in this work, for a simple sinusoid. 
+% TODO
+Note that none of the conventional algorithms complies with the third condition proposed by \textcite{1996Loughlinamplitude}, that states that the envelope of a periodic wave should be a straight line.
 
 \begin{figure}[H]
   \centering
@@ -433,11 +453,9 @@ In Fig. \ref{fig:Comparison_soprano} all envelopes exhibit a similar movement al
   \label{fig:Comparison_soprano}
 \end{figure}
 
-Besides, the traditional methods demanded careful choice of parameters. In the case of the Hilbert transform, post-processing in the form of filtering was applied. That is in contrast with our method, that organically tunes itself via the automatic choice of the radius of the circle representing the average discrete curvature of the signal.
+Besides, the traditional methods demanded careful choice of parameters. In the case of the Hilbert transform, post-processing in the form of filtering was applied, and an appropriate cut-off frequency had to be chosen. That is in contrast with our method, that organically tunes itself via the automatic choice of the radius of the circle representing the average discrete curvature of the signal.
 
-Table \ref{table:Error_comparison} presents a comparison of the average errors of the techniques. The average error was calculated by the average of the squared distance of the points in the envelope divided by two and the absolute value of the wave. The rationale is that the values of the envelope divided by two should lie near the average of the absolute values of the wave. This metric is only valid for reasonably smooth envelopes, however.
-
-We can see from the table \ref{table:Error_comparison} that the method presented here consistently outperforms the traditional approaches for all waves tested, yielding an error 33\% smaller, on average, than the other methods. It is also worth noting that the errors of the traditional methods are very similar between them, in agreement with the visualizations.
+Table \ref{table:Error_comparison} presents the average of the absolute errors of the techniques, when compared with the reference envelope introduced in the end of section \ref{sec:quality}
 
 \begin{table}[H]
 \centering
@@ -461,10 +479,13 @@ Average       & 0.037        & 0.055     & 0.055   & 0.054
 \label{table:Error_comparison}
 \end{table}
 
+We can see from the table \ref{table:Error_comparison} that the method presented here consistently outperforms the traditional approaches for all waves tested, yielding an error 33\% smaller, on average, than the other methods. It is also worth noting that the errors of the traditional methods are very similar between them, in agreement with the visualizations.
+
+
 The times taken for the algorithms to process each wave are shown in \ref{table:Time_comparison}. 
 The Python source for the tests, ass well as the samples used, are available at the repository dedicated to this work, in the file "Comparison of Envelope Algorithms.py".
 
-The methods were performed as described in the beginning of this section, using the implementations available at the Scipy library, under the Signal processing module. The presented algorithm is in average the second-fastest.
+The methods were performed as described in the beginning of this section, using the implementations available at the Scipy library, under the Signal processing module. The presented algorithm, is on average, the second-fastest.
 
 \begin{table}[H]
 \centering

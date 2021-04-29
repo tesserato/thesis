@@ -16,9 +16,9 @@ def butter_lowpass_filter(data, fps, cutoff = 10, order = 2):
 
 
 
-name = "piano" # change the name here for any of the files in the "test_samples" folder
+# name = "piano" # change the name here for any of the files in the "test_samples" folder
 # name = "sinusoid"
-# name = "soprano"
+name = "soprano"
 
 '''==============='''
 ''' Read wav file '''
@@ -65,7 +65,8 @@ print(f"Lowpass:   lms ={lms_lowpass}, time={timer() - start}")
 '''==============='''
 start = timer()
 analytic_signal = np.abs(hilbert(W))
-envY_hilbert = butter_lowpass_filter(analytic_signal, fps, 100)
+freq = np.argmax(np.abs(np.fft.rfft(W)))
+envY_hilbert = butter_lowpass_filter(analytic_signal, fps, (freq * fps / n) / 10)
 lms_hilbert = np.average((np.abs(W) - envY_hilbert * 0.5)**2)
 
 print(f"Hilbert:   lms ={lms_hilbert}, time={timer() - start}")
@@ -84,7 +85,7 @@ fig.layout.template ="plotly_white"
 fig.update_layout(
   xaxis_title="<b>Sample <i>i</i></b>",
   yaxis_title="<b>Amplitude</b>",
-  legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
+  legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1, itemsizing='constant'),
   margin=dict(l=0, r=0, b=0, t=0),
   font=FONT,
   titlefont=FONT
@@ -103,6 +104,7 @@ fig.add_trace(
     x=X,
     y=W,
     mode="lines",
+    line_shape='spline',
     line=dict(width=.5, color="silver"),
   )
 )
@@ -113,7 +115,8 @@ fig.add_trace(
     x=X,
     y=envY_hilbert,
     mode="lines",
-    line=dict(width=1, color="red"),
+    line_shape='spline',
+    line=dict(width=1.3, color="red"),
   )
 )
 
@@ -124,7 +127,8 @@ fig.add_trace(
     x=X,
     y=envY_smooth,
     mode="lines",
-    line=dict(width=1, color="blue"),
+    line_shape='spline',
+    line=dict(width=1.2, color="blue"),
   )
 )
 
@@ -134,7 +138,8 @@ fig.add_trace(
     x=X,
     y=envY_lowpass,
     mode="lines",
-    line=dict(width=1, color="green"),
+    line_shape='spline',
+    line=dict(width=1.1, color="green"),
   )
 )
 
@@ -144,6 +149,7 @@ fig.add_trace(
     x=X,
     y=envY,
     mode="lines",
+    line_shape='spline',
     line=dict(width=1, color="black"),
   )
 )

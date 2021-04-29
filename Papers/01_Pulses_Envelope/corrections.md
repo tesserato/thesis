@@ -27,7 +27,9 @@ We changed the legend of the figure and the text of the revised version to make 
 
 
 ## Definition of the envelope is very vague and controversial. What's the relationship with the conventional amplitude modulation?
-We made more explicit that a general definition of envelope is still an open question in the literature, adding recent citations that corroborate this.
+We made more explicit that a general definition of the envelope of a digital signal is still an open question in the literature, adding recent citations that corroborate this. 
+
+We added a general definition for the envelope of a family of curves, that led to a complete rewrite of the metric used to assess the general quality of envelopes, based on the construction of a reference envelope from the approximation of this formal definition to the discrete case.
 
 ## For the proposed "Equivalent Circle Approach", an acceptable mathematical background and justification is missing.
 
@@ -40,7 +42,7 @@ We revised the equation to make clear that the relation holds by definition on o
 We explained the benchmarking more extensively, citing that the implementations used were from the signal processing module of the Scipy Python library, and also made the source code for the tests, as well as the used samples, available at the repository dedicated for the work.
 
 
-# Reviewer #4: This paper proposes a new method for envelope estimation by using the geometric properties of a discrete real signal. Using discrete curvatures to determine the envelope of a discrete signal is an interesting idea and results obtained by this proposed method seem to be acceptable. However, the reviewer cannot recommend the publication of the paper in its current form.The authors need to address the reviewers below and revise the paper accordingly:
+# Reviewer #4: This paper proposes a new method for envelope estimation by using the geometric properties of a discrete real signal. Using discrete curvatures to determine the envelope of a discrete signal is an interesting idea and results obtained by this proposed method seem to be acceptable. However, the reviewer cannot recommend the publication of the paper in its current form. The authors need to address the reviewers below and revise the paper accordingly:
 
 ## 1. The description of the key concepts is not clear. The paragraphs of the current paper were poorly written and readers cannot follow them easily. The authors are suggested to revise the paper extensively to improve its readability.
 We revised the text extensively, with the aim of improving the overall readability and making the flow of ideas more linear. To that end, the overall structure of sections and subsections was substantially changed.
@@ -49,15 +51,12 @@ We revised the text extensively, with the aim of improving the overall readabili
 
 
 ## 3. The reviewer cannot understand why filtering is needed in the pre-processing of Hilbert transform. Clarify the reasoning and necessity.
-We explained in the text that the results of the pure Hilbert retain great part of the frequency content of the underlying wave, specially in the case of broadband signals, and added a figure to exemplify this effect in the case of a real world signal of an alto singer uttering a sustained note.
+We explained in the text that the results of the pure Hilbert transform retain great part of the frequency content of the underlying wave, specially in the case of broadband signals, and added a figure to exemplify this effect in the case of a real world signal of an alto singer uttering a sustained note. We moved the filtering to the post-processing, however, and results for the Hilbert transform were improved substantially.
 
 ## 4. Envelopes obtained by the proposed method seem to be good, but those obtained by other comparable methods, such as Hilbert transform, are not reasonable. The reviewer believes that results obtained by Hilbert transform should not be bad as shown by the authors. 
+Besides moving the filtering to the post-processing phase, we changed the cut-off frequency of the filter, that was fixed at 100 Hz, to 1/10 of the fundamental frequency of the original signal, improving the envelopes obtained by the Hilbert transform substantially.
 
-We made more explicit that the envelopes obtained with the Hilbert transform, in the context of broadband signals, are generally considered suboptimal. We also included a comparison of the filtered and the unfiltered results for the sound of an alto singer.
-
-### Besides, its end effects are serious. 
-
-#### Is it caused by the filtering, which is mentioned by the reviewer in comment #3? 
+### Besides, its end effects are serious. Is it caused by the filtering, which is mentioned by the reviewer in comment #3? 
 The effects were caused by filtering the wave prior to the transform. We changed the order of the operations, eliminating the effects in the revised version.
 
 #### Provide an explanation for the results in Figures 10, 11, and 12.
@@ -68,7 +67,7 @@ The effects were caused by filtering the wave prior to the transform. We changed
 We extensively revised the text.
 
 ### a. Full name at the first time for the abbreviate: being particularly illustrative of the potential synergy between geometric and DSP approaches.
-We inserted the full name and abbreviation for DSP in its first use in the first paragraph of the revised version, and took steps to do the same with other abbreviations.
+We inserted the full name and abbreviation for DSP in its first use in the first paragraph of the revised version, and did the same with other abbreviations.
 
 ### b. Figure or table or equation should be illustrated:
 #### From 3 and the discussion in the preceding chapter; 
@@ -77,7 +76,7 @@ We inserted the full name and abbreviation for DSP in its first use in the first
 #### The times taken for the algorithms compared here to process each wave are shown in 2;
 #### Figure 14 shows the frequency-domain power spectrum for the wave and the carrier presented in 3…..
 
-This issue arose from a misconception that those terms would be added during the latex compilation, discovered late in the process of elaborating the manuscript, that caused and many of the faulty references to remained unnoticed. We took steps to ensure proper indication of figures, tables and algorithms in the revised version.
+This issue arose from a misconception that those terms would be added during the latex compilation, discovered late in the process of elaborating the manuscript, that caused many of the faulty references to remained unnoticed. We took steps to ensure proper indication of figures, tables and algorithms in the revised version.
 
 ### c. Wrong equation, should be 𝑟 : From figure 6 is easy to
   𝑘 = 𝑣𝑘,𝑥/ 𝑠𝑖𝑛(θ𝑘)
@@ -87,7 +86,7 @@ This issue arose from a misconception that those terms would be added during the
 We thank the reviewer for pointing out this error. This mistake was fixed in the revised version. It turned out to be a typo, in the sense that the following equation, derived in part from this one, was correct. We seized the opportunity to also double check all other equations in the revised version. <!-- TODO -->
 
 ## 6. Figure 7 is shown in the manuscript, but there is no explanation on the main body for it. Please add an explanation in the revised paper.
-We added an explanation to the figure 7 in the original paper, that illustrates the envelope of a guitar bend, as suggested.
+We added an explanation to the figure 7 in the revised paper, that illustrates the envelope of a guitar bend, as suggested.
 
 # Reviewer #5: Once the carrier frequency is known the technique presented in this paper is a special kind of limited curvature interpolation technique.
 We apologize if we misunderstood the commentary, but we think we addressed it when making clear that the wave in Fig. XX 
@@ -96,6 +95,11 @@ was constructed from a previously known carrier wave and envelope; that is the o
 
 
 ## The author should improve the citation by referencing corresponding techniques, such as K-curve, and bounded curvature interpolation methods. It is interesting to investigate the application of such technique to signal envelope extraction.
+The K-curves algorithm involves an iterative optimization problem that would probably add a considerable amount of time to the interpolation step, since the number of interpolation points is usually in the hundreds. Our main concern, in the interpolation step, is not so much about curvature, but rather about boundedness between the interpolated values.
+
+As for the curvature estimation step, we tested interpolation and fitting methods during the development of an estimate of the curvature of a discrete curve. Some computational problems arose during piecewise polynomial fitting for example, due to the general high dimensionality of the problem, and some artifacts with B-splines approach motivated us to pursue alternative, local methods, that culminated in the development of the equivalent circle approach. We plan an extension to the algorithm in the future, where the curvature will be allowed to vary along the time, and for that k-curves seems ideal, because of its guarantee of maximum curvature at the control points.
+
+
 
 
 
@@ -185,3 +189,11 @@ Intuitively, the temporal envelope can be understood as a slowly varying functio
 
 
 Besides the most direct applications of this work to audio classification and synthesis, we foresee impact in compression techniques and machine learning approaches to audio. We briefly discuss some potential paths in this direction. The discrete curvature definition presented could also be extended to three-dimensional settings, to improve shape detection algorithms based on alpha shapes.
+
+an intuitive way is to observe how well the carrier wave \textbf{c} conforms to the interval $ \{-1, 1\} $.
+
+We begin this section suggesting an empirical metric, based on the behaviour of the carrier wave \textbf{c}, obtained dividing, element-wise, the original signal and the envelope obtained. We also comment on some metrics presented in the literature, and compare our algorithm with traditional demodulation approaches, both in relation to execution time and accuracy; to this last end, a numerical indicator is also introduced.
+
+% We also illustrate how the method here presented can be adapted to isolate not only a single envelope of the wave, but the superior and inferior envelopes as well, that we call frontiers, 
+% % TODO
+% ending the section with a suggestion on how the proposed algorithm can be useful beyond envelope detection, by identifying the approximate locations of the pseudo-cycles in a quasi-periodic wave.

@@ -60,7 +60,7 @@ fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=.8, zerolinecolor
 '''Plotting Signal'''
 fig.add_trace(
   go.Scatter(
-    name="Signal",
+    name="Signal   ",
     # x=X,
     y=W,
     mode="lines",
@@ -74,7 +74,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Hilbert Transform",
+    name="Hilbert Transform   ",
     # x=X,
     y=hilbert_envelope,
     mode="lines",
@@ -90,7 +90,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Filtered Hilbert Transform",
+    name="Filtered Hilbert Transform   ",
     # x=X,
     y=hilbert_envelope_filtered,
     mode="lines",
