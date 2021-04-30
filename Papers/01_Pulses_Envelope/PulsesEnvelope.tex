@@ -247,6 +247,12 @@ Translating the explanation of the alpha shapes algorithm presented in \textcite
 
 To employ an alpha shapes inspired algorithm in this set of points, however, the radius $ r $ of such circle must be estimated, and for that a measure of discrete curvature is needed.
 
+% TODO proof curvature %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Our problem is to derive a measure of the average curvature of a discrete curve from its oscillations in the vertical axis.
+Recalling that we derived the points in P from the local maxima, there is no local maxima between p0 and p1, and the envelope between both of them doesnt go below the minimum of them.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 The set V of the vectors from each point of P to the next is shown in the Fig. \ref{fig:Vectors}, and will be used to estimate the average curvature of P. We define this set in Eq. \ref{eq:Vectors} below. % TODO
 
 \begin{equation} \label{eq:Vectors}
@@ -462,25 +468,26 @@ Table \ref{table:Error_comparison} presents the average of the absolute errors o
 \begin{tabular}{lcccc}
 \hline
 \multicolumn{5}{c}{\textbf{Average error per frame}} \\
-              & Present Work & Smoothing & Low pass & Hilbert \\ 
+Signal & Present Work & Smoothing & Low pass & Hilbert \\ 
 \hline
-alto          & 0.073        & 0.083     & 0.083   & 0.082   \\
-bend          & 0.009        & 0.015     & 0.015   & 0.014   \\
-piano         & 0.005        & 0.006     & 0.006   & 0.005   \\
-brass         & 0.024        & 0.035     & 0.035   & 0.033   \\
-soprano       & 0.042        & 0.065     & 0.065   & 0.065   \\
-spoken voice  & 0.024        & 0.037     & 0.037   & 0.034   \\
-tom           & 0.003        & 0.005     & 0.005   & 0.005   \\
-sinusoid      & 0.113        & 0.193     & 0.195   & 0.191   \\ 
+alto  & 0.001 & 0.337 & 0.342 & 0.163 \\
+bend  & 0.000 & 0.029 & 0.030 & 0.008 \\
+brass & 0.001 & 0.107 & 0.107 & 0.038 \\
+nonperiodic & 0.000 & 0.211 & 0.158 & 0.000 \\
+piano & 0.003 & 0.016 & 0.016 & 0.007 \\
+sinusoid & 0.000 & 0.132 & 0.131 & 0.000 \\
+soprano & 0.000 & 0.155 & 0.155 & 0.044 \\
+spoken\_voice & 0.006 & 0.109 & 0.110 & 0.045 \\
+tom   & 0.001 & 0.011 & 0.015 & 0.005 \\
 \hline
-Average       & 0.037        & 0.055     & 0.055   & 0.054  
+Average & 0.001 & 0.123 & 0.118 & 0.035 \\
+frac. of max. & 0.010 & 1.000 & 0.961 & 0.281 \\
 \end{tabular}
 \caption{Comparison of the average errors of the algorithm presented in this work with the most common methods of digital envelope identification. The discrete waves used were normalized between -1 and 1. The average is between the absolute value of those waves and the envelope divided by two.}
 \label{table:Error_comparison}
 \end{table}
 
 We can see from the table \ref{table:Error_comparison} that the method presented here consistently outperforms the traditional approaches for all waves tested, yielding an error 33\% smaller, on average, than the other methods. It is also worth noting that the errors of the traditional methods are very similar between them, in agreement with the visualizations.
-
 
 The times taken for the algorithms to process each wave are shown in \ref{table:Time_comparison}. 
 The Python source for the tests, ass well as the samples used, are available at the repository dedicated to this work, in the file "Comparison of Envelope Algorithms.py".
@@ -492,20 +499,22 @@ The methods were performed as described in the beginning of this section, using 
 \begin{tabular}{lcccc}
 \hline
 \multicolumn{5}{c}{\textbf{Time in seconds}} \\
-              & Present Work & Smoothing & Low pass & Hilbert \\ 
+Signal  & Present Work & Smoothing & Low pass & Hilbert \\ 
 \hline
-alto          & 0.008        & 0.101     & 0.007   & 0.011   \\
-bend          & 0.030        & 0.226     & 0.012   & 0.131   \\
-piano         & 0.034        & 0.374     & 0.014   & 0.042   \\
-brass         & 0.032        & 0.297     & 0.011   & 0.045   \\
-soprano       & 0.177        & 0.735     & 0.027   & 0.566   \\
-spoken voice  & 0.014        & 0.105     & 0.003   & 0.038   \\
-tom           & 0.007        & 0.084     & 0.018   & 0.026   \\
-sinusoid      & 0.007        & 0.091     & 0.005   & 0.011   \\ 
+alto  & 0.010 & 0.096 & 0.007 & 0.006 \\
+bend  & 0.009 & 0.146 & 0.005 & 0.067 \\
+brass & 0.015 & 0.253 & 0.005 & 0.035 \\
+nonperiodic & 0.002 & 0.064 & 0.003 & 0.007 \\
+piano & 0.022 & 0.316 & 0.009 & 0.030 \\
+sinusoid & 0.003 & 0.069 & 0.003 & 0.006 \\
+soprano & 0.111 & 0.574 & 0.013 & 0.293 \\
+spoken\_voice & 0.003 & 0.062 & 0.003 & 0.017 \\
+tom   & 0.002 & 0.070 & 0.001 & 0.004 \\
 \hline
-Average       & 0.039        & 0.252     & 0.012   & 0.109  
+Average & 0.020 & 0.183 & 0.005 & 0.052 \\
+frac. of max. & 0.108 & 1.000 & 0.030 & 0.283 \\
 \end{tabular}
-\caption{Comparison of the processing time of the algorithm presented in this work with the most common methods of digital envelope identification.}
+\caption{Comparison of the processing time of the algorithm presented in this work with the most common methods of digital envelope detection.}
 \label{table:Time_comparison}
 \end{table}
 

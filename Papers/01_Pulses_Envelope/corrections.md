@@ -33,6 +33,7 @@ We added a general definition for the envelope of a family of curves, that led t
 
 ## For the proposed "Equivalent Circle Approach", an acceptable mathematical background and justification is missing.
 
+
 ## It's quite doubtful about the assumption of w = e ⊙ c?
 We revised the equation to make clear that the relation holds by definition on our work.
 
