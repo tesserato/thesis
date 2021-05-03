@@ -241,23 +241,29 @@ The effect of this normalization can be seen in the points shown in Fig.\ref{fig
 
 \section{Discrete Curvature Estimation}
 
-We have now a map from the original space of the two-dimensional representation of a discrete wave to the Cartesian coordinate system and thus a way to consistently transform a discrete signal into a set of points in the plane.
+Having established a map from the original space of the two-dimensional representation of a discrete wave to the Cartesian coordinate system and, thus, a way to consistently transform our simplified description of a discrete signal into a set of points in the plane, the shape of which can be estimated with the use of geometric algorithms.
 
-Translating the explanation of the alpha shapes algorithm presented in \textcite{1994EdelsbrunnerThree} to our context, we can say that the points that are part of the envelope are those touched by a circle of a given radius $ r $, coming from $ y \to \infty $ towards the Cartesian representation of the signal, that is not allowed to contain any point of the signal; Intuitively, one can picture a circle being rolled above the signal, and marking the points it touches as envelope points.
+The goal of those algorithms, such as the convex hull and the alpha-shapes, is to discriminate which points of a set are part of its frontier.
+
+Translating the explanation of the alpha-shapes algorithm presented in \textcite{1994EdelsbrunnerThree} to our context, we can say that the points that are part of the envelope are those that can be touched by a circle of a given radius $ r $, that must not contain any point of the signal, coming from $ y \to \infty $ towards the Cartesian representation of the signal.
+
+% TODO formal definition of alpha shapes, maybe image
+
+Intuitively, one can picture a circle of fixed radius being rolled above the signal, and marking the points it touches as envelope points.
 
 To employ an alpha shapes inspired algorithm in this set of points, however, the radius $ r $ of such circle must be estimated, and for that a measure of discrete curvature is needed.
 
-% TODO proof curvature %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Our problem is to derive a measure of the average curvature of a discrete curve from its oscillations in the vertical axis.
-Recalling that we derived the points in P from the local maxima, there is no local maxima between p0 and p1, and the envelope between both of them doesnt go below the minimum of them.
+Discrete curvature estimation is an important task in image processing \parencite{2010FleischmannNovel} for which no default definition exists. 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The two general approaches are the derivation of direct methods that use characteristics of the discrete curve to calculate the curvature, or the use of the curvature of a smooth, continuous curve fitted to the original discrete curve \parencite{2001CoeurjollyDiscrete}.
 
-The set V of the vectors from each point of P to the next is shown in the Fig. \ref{fig:Vectors}, and will be used to estimate the average curvature of P. We define this set in Eq. \ref{eq:Vectors} below. % TODO
+Concerning direct methods \textcite{2014CarrollSurvey}, for example, derive three such definitions based on the approximation of a circle by an inscribed, centered and circumscribed polygon. In the context of three-dimensional meshes, \textcite{2016VasaMultivariate} evaluate a range of existing estimators from a multivariate point of view.
 
-\begin{equation} \label{eq:Vectors}
-\text{V} = \{ v_0, v_1, v_{m-2} \} \quad \text{where} \quad v_k = P_{j+1} - P_j \quad \forall \quad 0 \le k \le m-2
-\end{equation}
+Those approaches define the discrete curvature in relation to the vertices of a discrete curve (or mesh, in the three-dimensional case). Instead, we are interested in the change of direction, what the term curvature ultimately means, between two adjacent points.
+
+Since we are dealing with a potentially large set of points, it is important for this measure to act locally, to assure $ O(n) $ complexity.
+
+Thus, the set V of the vectors from each point of P to the next, shown in the Fig. \ref{fig:Vectors}, will be used to estimate the average curvature of P: We will calculate the equivalent circle for each vector, and average the values thus obtained to infer the average curvature of the whole discrete curve. 
 
 \begin{figure}[H]
   \centering
@@ -266,22 +272,26 @@ The set V of the vectors from each point of P to the next is shown in the Fig. \
   \label{fig:Vectors}
 \end{figure}
 
-Discrete curvature estimation is an important task in image processing \parencite{2010FleischmannNovel} for which no default definition exists. 
+We formalize the set of vectors V in Eq. \ref{eq:Vectors} below.
 
-The two general approaches are the derivation of direct methods that use characteristics of the discrete curve to calculate the curvature, or the use of the curvature of a smooth, continuous curve fitted to the original discrete curve \parencite{2001CoeurjollyDiscrete}.
+\begin{equation} \label{eq:Vectors}
+\text{V} = \{ v_0, v_1, v_{m-2} \} \quad \text{where} \quad v_k = P_{j+1} - P_j \quad \forall \quad 0 \le k \le m-2
+\end{equation}
 
-Concerning direct methods \textcite{2014CarrollSurvey}, for example, derive three such definitions based on the approximation of a circle by an inscribed, centered and circumscribed polygon. In the context of three-dimensional meshes, \textcite{2016VasaMultivariate} evaluate a range of existing estimators from a multivariate point of view.
-
-Those approaches define the discrete curvature in relation to the vertices of a discrete curve (or mesh, in the three-dimensional case). In our particular case, it wouldn't make sense to talk about the curvature of a single pulse, since it is what our points ultimately represent. Instead, we are interested in the change of direction, what the term curvature ultimately means, between two adjacent pulses, as the vectors in the set V suggests.
-
-We thus proceed to define a discrete curvature measure over the edges of a discrete curve. To that end we are going to apply the definition of smooth curvature as the rate of change of the unit tangent to a curve, noting that this is equivalent to that of the osculating circle \parencite{2016VasaMesh}.
 
 
 \subsection{The Equivalent Circle Approach}
 
-The rationale is to find, for each vector $ v_k \in \text{V} $, the radius $ r_k $ of the equivalent circle whose tangent has the same change in direction, in the same horizontal distance, as the vector of interest, as shown in Fig. \ref{fig:DiscreteCurvature}. The average curvature of P will then be obtained by the average of all radii $ r_k $.
+We thus proceed to define a discrete curvature measure over the edges of a discrete curve. To that end we are going to apply the definition of smooth curvature as the rate of change of the unit tangent to a curve. This definition is convenient, since it is equivalent to that of the osculating circle \parencite{2016VasaMesh}.
 
-From Fig. \ref{fig:DiscreteCurvature} is easy to see that $ r_k = v_{k,x} / \sin(\theta_k) $ where $ v_{k,x} $ is the component of $ v_k $ in the horizontal direction; $ \theta_k $ itself can be obtained using the slope $ m_0 = 0 $ of a line in the horizontal direction and the slope $ m_k = v_{k,y} / v_{k,x} $ defined by $ v_k $ via the equality $ \theta_k = \arctan \big( (m_k - m_0) / (1 + m_k m_0) \big) $.
+One of those edges, a vector $ v_k \in \text{V} $, is singled out in Fig. \ref{fig:DiscreteCurvature}. $ v_k $ represents the net displacement of the envelope from the extrema $ P_{j} $ to $ P_{j+1} $. Since we dont yet know which points of P are part of the envelope, instead of assuming the trajectory before $ P_{j} $ passes through  
+$ P_{j-1} $, it is more prudent to assume that it can have passed anywhere in the line segment from 
+% TODO
+That is because all we can assume from $ v_k $ is that, in this current region of the envelope, it is able to a vertical displacement of $ v_{k,y} $ in the same time as it performs a horizontal displacement of $ v_{k,x} $. In average, we can consider the envelope entering from the horizontal direction.
+
+The rationale then is to find, for each vector $ v_k $, the radius $ r_k $ of the equivalent circle whose tangent has the same change in direction, in the same horizontal distance, as the vector of interest, as shown in Fig. \ref{fig:DiscreteCurvature}. The average curvature of P will then be obtained by the average of all radii $ r_k $.
+
+From Fig. \ref{fig:DiscreteCurvature} one can see that $ r_k = v_{k,x} / \sin(\theta_k) $ where $ v_{k,x} $ is the component of $ v_k $ in the horizontal direction; $ \theta_k $ itself can be obtained using the slope $ m_0 = 0 $ of the horizontal line and the slope $ m_k = v_{k,y} / v_{k,x} $ defined by $ v_k $ using the equality $ \theta_k = \arctan \big( (m_k - m_0) / (1 + m_k m_0) \big) $.
 
 \begin{figure}[H]
   \centering
@@ -290,13 +300,22 @@ From Fig. \ref{fig:DiscreteCurvature} is easy to see that $ r_k = v_{k,x} / \sin
   \label{fig:DiscreteCurvature}
 \end{figure}
 
-The radius of the circle that represents the average curvature of V (and, consequently, of P), and will be used to obtain the envelope of the discrete wave \textbf{w} can be obtained via Eq. \ref{eq:Radius}:
+The radius of the circle equivalent to each $ v_k $ is defined in Eq. \ref{eq:Radius}. This equation has the desirable property that $ v_{k,y} \to 0 \implies v_{k,y} \to \infty $, that is, the radius tends to infinity when no vertical oscillation occurs, effectively turning the circle into a line. 
+% It is also directly proportional to $ v_{k,x} $, making the radius larger the more the points are horizontally far from each other.
 
 \begin{equation} \label{eq:Radius}
-r = \frac{\sum\limits_{k=0}^{m-2} \left( \frac{v_{k,x} \sqrt{v_{k,x}^2 + v_{k,y}^2}}{ v_{k,y}} \right)}{m-2}
+  r_k = \frac{v_{k,x} \sqrt{v_{k,x}^2 + v_{k,y}^2}}{ v_{k,y}}
 \end{equation}
 
-We need now to construct an algorithm, using the radius just obtained, to identify the points that belong to the envelope. Generally, alpha shapes based algorithms resort to the construction of the Delaunay triangulation of the set of points, that is latter filtered to contain only the outer edges. We can adopt a more straightforward method, as our points have a sequential structure. Although that is the case throughout this work, the original signal doesn't need to be sampled in equal spaces.
+For calculation purposes, however, this can cause a problem, as a zero could make its way into the denominator of a fraction; in the actual algorithm, the quantity calculated for each vector is the curvature itself, that is, the inverse of the radius. In this way, the problem is avoided, since $ v_{k,y} $ is guaranteed to be greater than zero. The average of curvatures is then inverted in order to obtain the average radius, as illustrated in Eq. \ref{eq:Curvature}.
+
+\begin{equation} \label{eq:Curvature}
+r = \left( \frac{\sum\limits_{k=0}^{m-2} \left( \frac{ v_{k,y}}{v_{k,x} \sqrt{v_{k,x}^2 + v_{k,y}^2}} \right)}{m-2} \right)^{-1}
+\end{equation}
+
+We need now to construct an algorithm, using the radius just obtained, to identify the points that belong to the envelope. Generally, alpha-shapes based algorithms resort to the construction of the Delaunay triangulation of the set of points, that is latter filtered to contain only the outer edges. We can adopt a more straightforward method, as our points have a sequential structure. 
+
+It is worth noting that, although that is the case throughout this work, the original signal doesn't need to be sampled at equal intervals.
 
 Let $ x_o, y_o \in \mathbb{R}, \quad 0 \le y_o < +\infty $ be the coordinates of the center of a circle with radius $ r $, that can be placed anywhere in the upper plane of the coordinate system;
 
@@ -312,10 +331,9 @@ For all circles of center $ x_o, y_o $ and radius $ r $ that can be constructed 
 \end{align}
 \end{subequations}
 
-The algorithm follows directly from the definition in \ref{eq:InEnvelope} after noting that the first and last members of P will always be part of the envelope, since they are reachable by a circle of any radius $ r $. From $ P_0 $, our first pivot point, we construct circles passing through $ P_1, P_2, \cdots, P_d $ until a circle that doesn't contain any point in P is found; $ P_d $ then becomes the new pivot point and is included in E, and this procedure continues until $ P_{m-1} $ is reached.
+The algorithm follows directly from the definition in \ref{eq:InEnvelope} after noting that the first and last members of P will always be part of the envelope, since they are reachable by a circle of any radius $ r $. From $ P_0 $, our first pivot point, we construct circles passing through $ P_1, P_2, \cdots, P_d $ until a circle that doesn't contain any point in P is found; $ P_d $ then becomes the new pivot point and is included in E, and this process continues until $ P_{m-1} $ is reached.
 
-The procedure is formalized in the algorithm \ref{FindEnvelope}. We don't provide similar algorithmic descriptions of the preceding steps since the Python implementation available at % TODO
- can easily serve as pseudocode.
+The procedure is formalized in the algorithm \ref{FindEnvelope}. We don't provide similar algorithmic descriptions of the preceding steps since the Python implementation available at \textcite{2020TarjanoEnvelope} can easily serve as pseudocode.
 
 \begin{algorithm}[H]
 \caption{Retrieve Envelope} \label{FindEnvelope}
@@ -343,6 +361,7 @@ The procedure is formalized in the algorithm \ref{FindEnvelope}. We don't provid
 \end{algorithm}
 
 The set E obtained via algorithm \ref{FindEnvelope} is a subset of P, and thus also a set of points. The most straightforward way to transform those points into the vector $ \textbf{e} \in \mathbb{R}^n $ is via linear interpolation, the approach used in this work.
+% TODO
 It is worth noting, however, that many other procedures are available, both for the interpolation and the smooth approximation of points.
 
 \section{Quality of an envelope}\label{sec:quality}

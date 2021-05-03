@@ -198,3 +198,5 @@ We begin this section suggesting an empirical metric, based on the behaviour of 
 % We also illustrate how the method here presented can be adapted to isolate not only a single envelope of the wave, but the superior and inferior envelopes as well, that we call frontiers, 
 % % TODO
 % ending the section with a suggestion on how the proposed algorithm can be useful beyond envelope detection, by identifying the approximate locations of the pseudo-cycles in a quasi-periodic wave.
+
+Our problem is to derive a measure of the average curvature of a discrete curve from its oscillations in the vertical axis.
