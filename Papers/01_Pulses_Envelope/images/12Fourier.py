@@ -1,4 +1,6 @@
 import sys
+import signal_envelope as se
+
 print(sys.version)
 import plotly.graph_objects as go
 sys.path.append("c:/Users/tesse/Desktop/Files/Dropbox/0_Thesis/Python/01_Envelope")
@@ -6,47 +8,30 @@ import numpy as np
 from scipy.interpolate import interp1d
 from Helper import signal_to_pulses, get_pulses_area
 
-'''Generating Wave'''
+name = "bend"
 
-np.random.seed(0)
-# fps = 10
-n = 100
+'''==============='''
+''' Read wav file '''
+'''==============='''
+W, fps = se.read_wav(f"test_samples/{name}.wav")
+W = W - np.average(W)
+amplitude = np.max(np.abs(W))
+W = W / amplitude
+n = W.size
+print(f"n={n}")
+X = np.arange(n)
 
-X = np.arange(n)# / fps
-C = np.zeros(n)
+Ex = se.get_frontiers(W, 1)
+f = interp1d(Ex, np.abs(W[Ex]), kind="linear", fill_value="extrapolate", assume_sorted=False)
+envY = f(X)
 
-f = interp1d([0, 0.25 * n, 0.5 * n, 0.75 * n, n], np.abs(1 + np.random.normal(0, .3, 5)), "cubic")
-E = f(X)
-
-afp = [
-  [1, 5, 1.4 * np.pi],
-  [1.5, 10, 1.4 * np.pi],
-  # [1, 2 * 6, 1.4 * np.pi]
-  ]
-for a, f, p in afp:
-  C += a * np.cos(p + 2 * np.pi * f * X / n) #+ np.random.normal(0, a / 100, n)
-
-C = -C / np.max(np.abs(C))
-
-W = E * C
-
-'''Wave to pulses'''
-pulses = signal_to_pulses(C)
-pulses_X, pulses_Y = get_pulses_area(pulses)
-
+C = (W / envY)[200:]
+W = W[200:]
 ftc = np.abs(np.fft.rfft(C))
-Xc = []
-Yc = []
-for x, y in enumerate(ftc):
-  Xc.append(x), Xc.append(x), Xc.append(None)
-  Yc.append(0), Yc.append(y), Yc.append(None)
 
-ftc = np.abs(np.fft.rfft(W))
-Xw = []
-Yw = []
-for x, y in enumerate(ftc):
-  Xw.append(x), Xw.append(x), Xw.append(None)
-  Yw.append(0), Yw.append(y), Yw.append(None)
+
+ftw = np.abs(np.fft.rfft(W))
+
 
 '''============================================================================'''
 '''                              PLOT LINES                                    '''
@@ -71,9 +56,9 @@ fig.update_layout(
 fig.layout.xaxis.title.font=FONT
 fig.layout.yaxis.title.font=FONT
 
-fig.update_xaxes(showline=False, showgrid=False, zeroline=False, range=[0, 15])
+fig.update_xaxes(showline=False, showgrid=False, zeroline=False, range=[820, 910])
 fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=1, zerolinecolor='silver')
-fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=1, zerolinecolor='silver')
+# fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=1, zerolinecolor='silver')
 
 # fig.add_trace(
 #   go.Scatter(
@@ -91,10 +76,12 @@ fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=1, zerolinecolor=
 fig.add_trace(
   go.Scatter(
     name="Wave <b>w</b>      ",
-    x=Xw,
-    y=Yw,
-    mode="lines",
-    line=dict(width=6, color="black"),
+    # x=Xw,
+    y=ftc,
+    mode="none",
+    fill="tozeroy",
+    fillcolor="black",
+    line=dict(width=1, color="black"),
     # marker=dict(size=5, color="black")
   )
 )
@@ -102,10 +89,12 @@ fig.add_trace(
 fig.add_trace(
   go.Scatter(
     name="Carrier <b>c</b>      ",
-    x=Xc,
-    y=Yc,
-    mode='lines',
-    line=dict(width=4, color="silver"),
+    # x=Xc,
+    y=ftw,
+    mode='none',
+    fill="tozeroy",
+    fillcolor="rgba(250, 140, 132, 0.5)",
+    line=dict(width=1, color="silver"),
     # marker=dict(size=4, color="gray")
   )
 )

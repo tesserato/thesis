@@ -50,7 +50,7 @@ Y = Yp * scaling
 '''============================================================================'''
 fig = make_subplots(
     rows=2, cols=1, shared_xaxes=False, vertical_spacing=0.01,
-    subplot_titles=("<b>Original coordinate system</b>", "<b>Normalized coordinate system</b>")
+    subplot_titles=("<b>Original basis</b>", "<b>Standard basis</b>")
     )
 
 FONT = dict(
@@ -79,10 +79,10 @@ fig.update_layout(
 
 fig.update_xaxes(showline=False, showgrid=False, zeroline=False, showticklabels=False, title=dict(font=FONT), row=1, col=1)
 fig.update_xaxes(showline=False, showgrid=False, zeroline=False, showticklabels=True, 
-title=dict(text="$ i \mapsto x $",font=FONT), row=2, col=1)
-fig.update_yaxes(showline=False, showgrid=False, zeroline=False, title=dict(text="Amplitude",font=FONT), row=1, col=1, tickvals=[i for i in range(0, 3, 2)])
+title=dict(text="$ x $",font=FONT), row=2, col=1)
+fig.update_yaxes(showline=False, showgrid=False, zeroline=False, title=dict(text="$ y $",font=FONT), row=1, col=1, tickvals=[i for i in range(0, 3, 2)])
 fig.update_yaxes(showline=False, showgrid=False, zeroline=False, 
-title=dict(text="$\\text{Amplitude} . \\beta \mapsto y $",font=FONT), row=2, col=1, tickvals=[i for i in range(0, 11, 2)])
+title=dict(text="$ y $",font=FONT), row=2, col=1, tickvals=[i for i in range(0, 11, 2)])
 
 fig.add_trace(
   go.Scatter(

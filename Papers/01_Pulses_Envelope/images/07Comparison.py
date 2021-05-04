@@ -17,8 +17,8 @@ def butter_lowpass_filter(data, fps, cutoff = 10, order = 2):
 
 
 # name = "piano" # change the name here for any of the files in the "test_samples" folder
-# name = "sinusoid"
-name = "soprano"
+name = "sinusoid"
+# name = "soprano"
 
 '''==============='''
 ''' Read wav file '''
@@ -115,7 +115,7 @@ fig.add_trace(
     x=X,
     y=envY_hilbert,
     mode="lines",
-    line_shape='spline',
+    # line_shape='spline',
     line=dict(width=1.3, color="red"),
   )
 )
@@ -127,7 +127,7 @@ fig.add_trace(
     x=X,
     y=envY_smooth,
     mode="lines",
-    line_shape='spline',
+    # line_shape='spline',
     line=dict(width=1.2, color="blue"),
   )
 )
@@ -138,7 +138,7 @@ fig.add_trace(
     x=X,
     y=envY_lowpass,
     mode="lines",
-    line_shape='spline',
+    # line_shape='spline',
     line=dict(width=1.1, color="green"),
   )
 )
@@ -149,7 +149,7 @@ fig.add_trace(
     x=X,
     y=envY,
     mode="lines",
-    line_shape='spline',
+    # line_shape='spline',
     line=dict(width=1, color="black"),
   )
 )

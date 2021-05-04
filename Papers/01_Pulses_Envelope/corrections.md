@@ -100,6 +100,8 @@ The K-curves algorithm involves an iterative optimization problem that would pro
 
 As for the curvature estimation step, we tested interpolation and fitting methods during the development of an estimate of the curvature of a discrete curve. Some computational problems arose during piecewise polynomial fitting for example, due to the general high dimensionality of the problem, and some artifacts with B-splines approach motivated us to pursue alternative, local methods, that culminated in the development of the equivalent circle approach. We plan an extension to the algorithm in the future, where the curvature will be allowed to vary along the time, and for that k-curves seems ideal, because of its guarantee of maximum curvature at the control points.
 
+We indicated in the revised version that k-curves might be an interesting option, depending on the requisites for the extracted envelope.
+
 
 
 
@@ -200,3 +202,5 @@ We begin this section suggesting an empirical metric, based on the behaviour of 
 % ending the section with a suggestion on how the proposed algorithm can be useful beyond envelope detection, by identifying the approximate locations of the pseudo-cycles in a quasi-periodic wave.
 
 Our problem is to derive a measure of the average curvature of a discrete curve from its oscillations in the vertical axis.
+
+that would , in the sense that pulse's amplitude $ \lvert w_j \lvert $, now mapped to the ordinates of a point, and a pulse's length, approximately equivalent to the horizontal distance between two consecutive points in the geometrical interpretation would define, on average, a square.
