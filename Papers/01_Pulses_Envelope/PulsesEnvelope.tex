@@ -73,7 +73,7 @@ Considering the standard 2d representation of a discrete wave, where the horizon
 
 One direct way of defining the shape of a set of points in $ \mathbb{R}^2 $ is using the concept of a convex hull, as defined in \textcite{2008BergComputational}. The convex hull of a set of points $ S $ in two-dimensional space is the smallest convex subset of the plane that contains all the points in $ S $. Convex hulls are unique, in the sense that a given set of points define one and only one convex hull.
 
-When the general shape of a set of points present prominent concavities, the convex hull overestimates the boundaries. To address this limitation \textcite{1983Edelsbrunnershape} introduced the concept of alpha shapes, that became known as the concave hull: a mathematically well-defined generalization of the convex hull of a finite set of points, closely related to the Delaunay triangulation and Voronoi diagrams of those points. 
+When the general shape of a set of points present prominent concavities, the convex hull overestimates the boundaries. To address this limitation \textcite{1983Edelsbrunnershape} introduced the concept of alpha shapes, also known as concave hull: a mathematically well-defined generalization of the convex hull of a finite set of points, closely related to the Delaunay triangulation and Voronoi diagrams of those points. 
 
 The intuition behind the alpha shapes algorithm is that only points that can be touched by a circle of radius $ \alpha $ coming from an infinite distance towards the baricenter of the set of points are part of the frontier. The polygon obtained linking those points forms the concave hull of this set.
 
@@ -209,20 +209,20 @@ The points in P are not fit for geometric interpretation yet, since the abscissa
 
 Geometrically, we can think of these points as points in a vector space described by a non-standard basis vector $ \mathbf{b} = \{ \mathbf{b}_x, \mathbf{b}_y \}$ with $ \mathbf{b}_x = (a, 0), \mathbf{b}_y = (0, i) $ where $ a $ is an amplitude unit such as decibel, a measure of the instantaneous sound pressure, volt or even a fraction of a fixed maximum value. $ i $ represents the index of the sample, and is linked to time by the aforementioned relation $ i = t \ \text{fps} $.
 
-We are interested in finding a change of basis formula from the original basis to the standard basis $ \mathbf{e} = \{ \mathbf{e}_x, \mathbf{e}_y \} = \{ (1,0),(0,1) \}$ of this vector space, making the geometric representation consistent.
+We are interested in finding a change of basis formula from the original basis to the standard basis $ \mathbf{s} = \{ \mathbf{s}_x, \mathbf{s}_y \} = \{ (1,0),(0,1) \}$ of this vector space, making the geometric representation consistent.
 
 To achieve that, we divide the ordinate of each point by the average of all ordinates, effectively cancelling the unit of the vertical components of the points. If we proceeded similarly in relation to the horizontal components, 
 the direct link between P and \textbf{w} that arises from the fact that the abscissas of the points in P are indices $ i $ of \textbf{w} would be lost.
 
 It is best to leave the abscissas intact and multiply the now unitless vertical coordinates of each point by the average of the difference between the abscissa of a point and the abscissa of the immediately posterior. In this way, we can consider both axes as having unit $ i $, and the relationship is preserved, making it easier to recover the envelope points later.
 
-Considering $P_{\mathbf{b}}$ as a point of the set P represented by the original basis and $P_{\mathbf{e}}$ the same point as represented with the standard basis, we can formalize this change of basis as in \ref{eq:Basis}:
+Considering $P_{\mathbf{b}}$ as a point of the set P represented by the original basis and $P_{\mathbf{s}}$ the same point as represented with the standard basis, we can formalize this change of basis as in \ref{eq:Basis}:
 
 \begin{subequations}  \label{eq:Basis}
 \begin{align}
 P_{\mathbf{b}} &= (x_1, x_2) \\
 \beta &= \frac{\left( \frac{i_{m-1} - i_m}{m-1} \right)}{\left( \frac{\sum_{j=0}^{m-1} \lvert w_j \lvert}{m} \right)}  \\
-P_{\mathbf{e}} &= (x_1, \beta x_2) \quad \forall \  P \in \text{P} \\ 
+P_{\mathbf{s}} &= (x_1, \beta x_2) \quad \forall \  P \in \text{P} \\ 
 \end{align}
 \end{subequations}
 
@@ -242,11 +242,11 @@ Having established a transformation from the original space of the two-dimension
 
 The goal of those algorithms, such as the convex hull and the alpha-shapes, is to discriminate which points of a set are part of its frontier.
 
-Translating the explanation of the alpha-shapes algorithm presented in \textcite{1994EdelsbrunnerThree} to our context, we can say that the points that are part of the envelope are those that can be touched by a circle of a given radius $ r $, that must not contain any point of the signal, coming from $ y \to \infty $ towards the Cartesian representation of the signal.
+A formal definition of alpha-shapes is given at \textcite{1983Edelsbrunnershape}. In the context of this work, gaining the intuition of the algorithm is more important, and thus the explanation of the alpha-shapes algorithm presented in \textcite{1994EdelsbrunnerThree} can be more insightful.
 
-% TODO formal definition of alpha shapes, maybe image
+The explanation, translated to our context, invites one to think of the plane were the samples are represented as a soft material, such as Styrofoam. The samples themselves are a harder material, such as rock, and occupy a fixed position in this plane. The alpha shapes algorithm consists of carving this plane from the outside of those points, with a circular eraser of fixed radius $ \alpha $. In the end of the process, the remaining Styrofoam that couldn't be erased due to the impeding rocks is the alpha-shape of this set of points.
 
-Intuitively, one can picture a circle of fixed radius being rolled above the signal, and marking the points it touches as envelope points.
+Alternatively, one can picture a circle of fixed radius being rolled above the signal, and marking the points it touches as envelope points.
 
 To employ an alpha shapes inspired algorithm in this set of points, however, the radius $ r $ of such circle must be estimated, and for that a measure of discrete curvature is needed.
 
@@ -307,7 +307,7 @@ The radius of the circle equivalent to each $ v_k $ is defined in Eq. \ref{eq:Ra
 For calculation purposes, however, this can cause a problem, as a zero could make its way into the denominator of a fraction; in the actual algorithm, the quantity calculated for each vector is the curvature itself, that is, the inverse of the radius. In this way, the problem is avoided, since $ v_{k,y} $ is guaranteed to be greater than zero. The average of curvatures is then inverted in order to obtain the average radius, as illustrated in Eq. \ref{eq:Curvature}.
 
 \begin{equation} \label{eq:Curvature}
-r = \left( \frac{\sum\limits_{k=0}^{m-2} \left( \frac{ v_{k,y}}{v_{k,x} \sqrt{v_{k,x}^2 + v_{k,y}^2}} \right)}{m-2} \right)^{-1}
+\overline{r} = \left( \frac{\sum\limits_{k=0}^{m-2} \left( \frac{ v_{k,y}}{v_{k,x} \sqrt{v_{k,x}^2 + v_{k,y}^2}} \right)}{m-2} \right)^{-1}
 \end{equation}
 
 \section{Extracting the envelope}
@@ -400,10 +400,13 @@ Fig. \ref{fig:Bend} shows the envelope in the case of a bend performed in an ele
   \label{fig:Bend}
 \end{figure}
 
-In an effort to formalize the assessment of the quality of temporal envelopes, \textcite{1996Loughlinamplitude} proposed some theoretical conditions necessary, but not sufficient, to ensure the physical plausibility of an envelope. We comment briefly below that the algorithm here presented satisfies the four conditions presented.
+\subsection{Theoretical guarantees}
 
-% TODO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-The first one states that, if a signal is bounded in magnitude, then its envelope should be, as well. Our algorithm complies with this requisite, as the envelope is composed of selected samples from the original signal itself.
+In an effort to formalize the assessment of the quality of amplitude and frequency modulations of a signal, \textcite{1996Loughlinamplitude} proposed some theoretical conditions necessary, but not sufficient, to ensure the physical plausibility of an envelope. 
+
+We comment below on how those conditions translate to the discrete setting, and show that the algorithm here presented satisfies the four conditions presented.
+
+The first one states that, if a signal is bounded in magnitude, then its envelope should be, as well. Our algorithm complies with this requirement, as the envelope is composed of selected samples from the original signal itself.
 
 More formally, we have the set P of the absolute values of the local extrema of the original signal $ \mathbf{w} = (w_0, w_1, \cdots, w_{n-1}) $ that contains, by definition, the global extrema of $ \mathbf{w} $.
 The set E of the points that belong to the envelope is a subset of P. We can thus write Eq. \ref{eq:Req1}:
@@ -415,13 +418,30 @@ The set E of the points that belong to the envelope is a subset of P. We can thu
 \end{align}
 \end{subequations}
 
-If the original signal is bounded, that is $ \max (|w_0|, |w_1|, \cdots, |w_{n-1}|) = b \in \mathbb{R} $, not only our envelope is bounded, as required, but is guaranteed to have the same bound $ b $.
+If the amplitude of the original signal is bounded, that is $ \max (|w_0|, |w_1|, \cdots, |w_{n-1}|) = b \in \mathbb{R} $, not only the amplitude of the envelope is bounded, as required, but is guaranteed to have the same bound $ b $.
 
-The second statement is that if the signal has a finite frequency range, that frequency range must not be exceeded by the envelope. This is only directly applicable in the continuous case, where this condition was proposed.
+The second statement dictates that if the signal has a finite frequency range, that frequency range must not be exceeded by the carrier wave. 
 
-Nevertheless, if we picture both the wave and the envelope as samples from continuous functions, is easy to see that this is the case for our algorithm; since the envelope is composed by a subset of the samples of the original digital signal, in the limit where all the samples of the wave are also part of the envelope, we have that the maximum frequency for both is the same. 
+To see that this condition holds for the proposed method, consider a discrete signal $ \mathbf{w} = (w_0, w_1, \cdots, w_{n-1}) $, where all the absolute values $ |P_j| $ of its local extrema are greater than one.
 
-In all other cases, the maximum frequency of the envelope will be smaller than that of the original wave. The range of frequencies of the envelope, then, will always lie between zero and the maximum frequency of the original wave.
+This requirement doesn't imply loss of generality since, for an arbitrary signal, we can assure this condition by dividing all samples by the value of the minimum absolute local extrema. 
+
+The relation $ \min(\text{E}) \ge 1 $ thus holds, since $ \text{E} \subset \text{P}$. 
+
+Provided that one uses a method that preserves the original bounds when interpolating the points in E, such as linear interpolation, we can be sure that all the points in the envelope vector $ \mathbf{e} = (e_0, e_1, \cdots, e_{n-1}) $ are also greater than one.
+
+Recalling Eq. \ref{eq:Envelope}, where the relation between the original signal, the carrier and the envelope was defined as $ \mathbf{w} = \mathbf{e} \odot \mathbf{c} $, we can write the magnitude of an arbitrary frequency of the original signal ($ m_\mathbf{w}(f) $) and, likewise, the magnitude of an arbitrary frequency of the carrier ($ m_\mathbf{c}(f) $) in terms of the Discrete Fourier Transform (DFT) as in Eq. \ref{eq:DFT}:
+
+\begin{subequations}\label{eq:DFT}
+\begin{align}
+m_\mathbf{w}(f) &= \sum_{k=0}^{n-1} \sqrt{\left( w_k \cos(2 \pi k f / n) \right)^2 + \left( w_k \sin(2 \pi k f / n) \right)^2} \\
+m_\mathbf{c}(f) &= \sum_{k=0}^{n-1} \sqrt{\left( \frac{w_k}{e_k} \cos(2 \pi k f / n) \right)^2 + \left( \frac{w_k}{e_k} \sin(2 \pi k f / n) \right)^2} 
+\end{align}
+\end{subequations}
+
+For any given frequency $ f $, both $ m_\mathbf{w}(f) $ and $ m_\mathbf{c}(f) $ are nonnegative. Also, since $ e_k \ge 1 \ \forall \ k, 0 \le k \le n - 1 $ we establish that $ 0 \le m_\mathbf{c}(f) \le m_\mathbf{w}(f) \ \forall \ f $ which is a more restrictive condition than the original: If $ \mathbf{w} $ has a finite frequency range, the magnitude of frequencies outside that range are zero, as are those of the same frequencies of the carrier $ \mathbf{c} $.
+
+% TODO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 The third condition states what, for a periodic signal, the envelope should be a straight line with the intercept equal to the amplitude of this signal. Since all the local maxima have the same amplitude in the case of a periodic wave, our envelope will indeed be a straight line, with the same amplitude as the original wave. An example of such behaviour can be observed in Fig. \ref{fig:Comparison_sinusoid}.
 
@@ -438,6 +458,7 @@ Given a constant $ \alpha > 0, \alpha \in \mathbb{R} $, we can define the scaled
 This guarantees that the same subset of points E will be identified as part of the envelope in both cases.
 In the respective original basis system, applying the inverse change of basis, those points are $ P_j = (i_j, \frac{\beta}{\beta} \lvert w_{i_j} \lvert)  \quad \forall \  P \in \text{E} $, for the original signal, and $ P^\prime_j = (i_j, \frac{\alpha}{\beta}\frac{\beta}{\alpha} \lvert \alpha w_{i_j} \lvert) $ for the scaled signal.
 
+\subsection{Reference envelope}
 
 In order to obtain a numeric indicator of the quality of an envelope, we construct a reference envelope, that trades off practical applicability in favour of mathematical formality.
 In \textcite{1992BruceCurves} the envelope is defined as the boundary of the region filled by a family of curves. Fig. \ref{fig:RefEnvelopeTheory} illustrates this concept, for a family of sinusoids that share the same frequency and amplitude, and whose phases vary from 0 to $ 2 \pi $.
@@ -462,7 +483,7 @@ Fig. \ref{fig:RefEnvelope} shows the reference envelope for the sound of a tom.
 Since envelope is not smooth, being composed of a series of horizontal segments, as can be seen in \ref{fig:RefEnvelope}, besides being computationally expensive to calculate. However, arising from a mathematically sound base, it can serve as a reference to infer the quality of more empirical methods.
 
 
-\section{Comparison with traditional algorithms} 
+\subsection{Comparison with traditional algorithms}  
 
 Direct comparison with many of the more recent algorithms is made difficult by the unavailability of digital implementations of such works, many designed to process analog signals \parencite[e.g.,][]{2018AssefModeling}.
 
@@ -530,12 +551,10 @@ frac. of max. & 0.010 & 1.000 & 0.961 & 0.281 \\
 \label{table:Error_comparison}
 \end{table}
 
-We can see from the table \ref{table:Error_comparison} that the method presented here consistently outperforms the traditional approaches for all waves tested, yielding an error 
-33\% smaller, % TODO
-on average, than the other methods. It is also worth noting that the errors of the traditional methods are very similar between them, in agreement with the visualizations.
+We can see from the table \ref{table:Error_comparison} that the method presented here consistently outperforms the traditional approaches for all waves tested, yielding an error of less than 2\% on average, of the error of the traditional methods. 
 
 The times taken for the algorithms to process each signal are shown in \ref{table:Time_comparison}. 
-The Python source for the tests, ass well as the samples used, are available at the repository dedicated to this work, in the file “Comparison of Envelope Algorithms.py”.
+The Python source for the tests, as well as the samples used, are available at the repository dedicated to this work, in the file “Comparison of Envelope Algorithms.py”.
 
 The methods were performed as described in the beginning of this section, using the implementations available at the Scipy library, under the Signal processing module. The presented algorithm, is on average, the second-fastest.
 

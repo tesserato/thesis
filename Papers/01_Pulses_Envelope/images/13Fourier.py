@@ -8,7 +8,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 from Helper import signal_to_pulses, get_pulses_area
 
-name = "bend"
+name = "nonperiodic"
 
 '''==============='''
 ''' Read wav file '''
@@ -25,12 +25,12 @@ Ex = se.get_frontiers(W, 1)
 f = interp1d(Ex, np.abs(W[Ex]), kind="linear", fill_value="extrapolate", assume_sorted=False)
 envY = f(X)
 
-C = (W / envY)[200:]
-W = W[200:]
-ftc = np.abs(np.fft.rfft(C))
+# C = (W / envY)[200:]
+# W = W[200:]
+# ftc = np.abs(np.fft.rfft(C))
 
 
-ftw = np.abs(np.fft.rfft(W))
+ftw = np.fft.rfft(W, 2 * n)
 
 
 '''============================================================================'''
@@ -56,7 +56,7 @@ fig.update_layout(
 fig.layout.xaxis.title.font=FONT
 fig.layout.yaxis.title.font=FONT
 
-fig.update_xaxes(showline=False, showgrid=False, zeroline=False, range=[820, 910])
+fig.update_xaxes(showline=False, showgrid=False, zeroline=False)#, range=[820, 910])
 fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=1, zerolinecolor='silver')
 # fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=1, zerolinecolor='silver')
 
@@ -75,9 +75,9 @@ fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=1, zerolinecolor=
 
 fig.add_trace(
   go.Scatter(
-    name="Wave <b>w</b>      ",
+    name="Real      ",
     # x=Xw,
-    y=ftc,
+    y=[np.real(f) for f in ftw],
     mode="none",
     fill="tozeroy",
     fillcolor="black",
@@ -88,9 +88,9 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Carrier <b>c</b>      ",
+    name="Imaginary      ",
     # x=Xc,
-    y=ftw,
+    y=[np.imag(f) for f in ftw],
     mode='none',
     fill="tozeroy",
     fillcolor="rgba(250, 140, 132, 0.5)",
