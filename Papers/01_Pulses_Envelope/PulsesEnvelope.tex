@@ -422,7 +422,7 @@ If the amplitude of the original signal is bounded, that is $ \max (|w_0|, |w_1|
 
 The second statement dictates that if the signal has a finite frequency range, that frequency range must not be exceeded by the carrier wave. 
 
-To see that this condition holds for the proposed method, consider a discrete signal $ \mathbf{w} = (w_0, w_1, \cdots, w_{n-1}) $, where all the absolute values $ |P_j| $ of its local extrema are greater than one.
+To see that this condition holds for the proposed method, consider a discrete signal $ \mathbf{w} = (w_0, w_1, \cdots, w_{n-1}) $, where all the absolute values of its local extrema are greater than one.
 
 This requirement doesn't imply loss of generality since, for an arbitrary signal, we can assure this condition by dividing all samples by the value of the minimum absolute local extrema. 
 
@@ -441,13 +441,12 @@ m_\mathbf{c}(f) &= \sum_{k=0}^{n-1} \sqrt{\left( \frac{w_k}{e_k} \cos(2 \pi k f 
 
 For any given frequency $ f $, both $ m_\mathbf{w}(f) $ and $ m_\mathbf{c}(f) $ are nonnegative. Also, since $ e_k \ge 1 \ \forall \ k, 0 \le k \le n - 1 $ we establish that $ 0 \le m_\mathbf{c}(f) \le m_\mathbf{w}(f) \ \forall \ f $ which is a more restrictive condition than the original: If $ \mathbf{w} $ has a finite frequency range, the magnitude of frequencies outside that range are zero, as are those of the same frequencies of the carrier $ \mathbf{c} $.
 
-% TODO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-The third condition states what, for a periodic signal, the envelope should be a straight line with the intercept equal to the amplitude of this signal. Since all the local maxima have the same amplitude in the case of a periodic wave, our envelope will indeed be a straight line, with the same amplitude as the original wave. An example of such behaviour can be observed in Fig. \ref{fig:Comparison_sinusoid}.
+The third condition states that a physically plausible algorithm should, for a signal $ \mathbf{w} $ of constant amplitude $ a > 0, \ a \in \mathbb{R} $ and constant frequency, of the form $ a \cos(\omega i + \phi) $, result in a constant envelope $ \mathbf{e} $ of magnitude $ a $ and o a carrier wave $ \mathbf{c} $ of the form $ \cos(\omega i + \phi) $.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+An example of such behaviour can be observed in Fig. \ref{fig:Comparison_sinusoid}, where the envelope of a simple sinusoid is shown. To see that this is always the case, note that all the extrema of a sinusoid are of the form $ a (\pm 1) $ and $ P_j = (i_j, \lvert a (\pm 1) \lvert) = (i_j, a) \ \forall P_j \in \text{P} $. As $ \text{E} \subset \text{P} $, we have that the envelope $ \mathbf{e} = (a, a, \cdots, a) $ and is, thus constant. Likewise, since $ \mathbf{w} = \mathbf{e} \odot \mathbf{c} $, we have $ c_i = a \cos(\omega i + \phi) / a = \cos(\omega i + \phi) \ \forall \ i, 0 \le i \le n - 1 $.
 
-The fourth and last condition states that if a wave is multiplied by a constant, the envelope should also be multiplied by the same constant. 
+The fourth and last condition states that if a wave is multiplied by a constant, its envelope should also be multiplied by the same constant. 
 
 Recall from section \ref{mapping} that, before the extraction of the envelope, the original points undergo a change of basis to lie in the Cartesian coordinate system. After the extraction, the inverse operation is performed on the points of the Envelope.
 
