@@ -58,7 +58,7 @@ When the general shape of a set of points present prominent concavities, the con
 
 The intuition behind the alpha shapes algorithm is that only points that can be touched by a circle of radius $ \alpha $ coming from an infinite distance towards the baricenter of the set of points are part of the frontier. The polygon obtained linking those points forms the concave hull of this set.
 
-Once a radius $ \alpha $ is defined, alpha shapes exhibit the uniqueness property meaning that, for a given set of points and a given radius, only one concave hull exists. When the radius of the circle $ \alpha \to \infty $, concave hulls tend to the convex hulls.
+Once a radius $ \alpha $ is defined, alpha shapes exhibit the uniqueness property meaning that, for a given set of points and a given radius, only one concave hull exists. When the radius $ \alpha $ of the circle tends to infinity, concave hulls tend to the convex hulls.
 
 Consider, for example, the artificially generated discrete wave in Fig. \ref{fig:Hulls} below, where the links between consecutive samples were deemphasized to highlight the "set of points" nature of a signal: The convex hull and a concave hull, in the form of an alpha shape with a particular value of $ \alpha $ are illustrated.
 
@@ -101,13 +101,13 @@ A Python module available at the Python Package Index (PyPI) installable via the
 
 The interest in the theory of envelope detection arose in the analog domain, with the widespread adoption of radio communications, where the problem is typically restricted to artificial waves, often with well-defined frequencies \cite{2011TurnerDemodulation}.
 
-While there is no general formal definition of the envelope of broadband signals \cite{2014Yangnovel,2015Yangtheoretical,2019Jiaempiricalj}, the general intuition is that an envelope is a smooth curve situated as close as possible to the signal \cite{2019Jiaempiricalj}.
+While there is no general formal definition of the envelope of broadband signals \cite{2014Yangnovel,2015Yangtheoretical,2019Jiaempirical}, the general intuition is that an envelope is a smooth curve situated as close as possible to the signal \cite{2019Jiaempirical}.
 
 In this context, the most mathematically sound definition of an envelope involves the representation of its underlying wave as an analytic signal, as introduced by Gabor in 1946 \cite{2007HahnHistory}. In his work, \cite{1946GaborTheory} applies the then relatively new mathematical machinery of the quantum mechanics to unify the time and frequency-domain representations of a wave, showing how the Hilbert transform could be applied to a real signal in order to obtain an equivalent complex signal, later known as the analytic signal.
 
 This analytic signal has the form $ A(t) = S(t) + \mathbb{H}(S(t)) \ \text{i} $ \cite{2016HePraat} where $ S(t) $ is the original real signal. $ \mathbb{H}(S(t)) $, the Hilbert transform of the original signal, becomes the imaginary part of the analytic signal; the envelope of a signal thus represented can be straightforwardly obtained by the computation of the complex modulus of $ \mathbb{H}(S(t)) $.
 
-Despite its widespread use, and effectiveness in the context of narrowband signals, envelope detection techniques based on the Hilbert transform don't behave well for broadband signals \cite{2012DauSpeech, 2019Jiaempiricalj}, being even physically paradoxical in some cases \cite{1996Loughlinamplitude, 2014Yangnovel}.
+Despite its widespread use, and effectiveness in the context of narrowband signals, envelope detection techniques based on the Hilbert transform don't behave well for broadband signals \cite{2012DauSpeech, 2019Jiaempirical}, being even physically paradoxical in some cases \cite{1996Loughlinamplitude, 2014Yangnovel}.
 
 Fig. \ref{fig:AnalyticSignal} exemplifies the Hilbert envelope, for a pure sinusoid modulated by a polynomial, illustrating the difference in the smoothness of the envelope in the presence and absence of Gaussian white noise. It is readily noticeable from the Fig. \ref{fig:AnalyticSignal} that, as soon as noise is introduced in the original signal, it is directly reflected in the envelope.
 
@@ -430,7 +430,7 @@ An example of such behaviour can be observed in Fig. \ref{fig:Comparison_sinusoi
 
 The fourth and last condition states that if a wave is multiplied by a constant, its envelope should also be multiplied by the same constant. 
 
-Recall from section \ref{mapping} that, before the extraction of the envelope, the original points undergo a change of basis to lie in the Cartesian coordinate system. After the extraction, the inverse operation is performed on the points of the Envelope.
+Recall from section \ref{sec:mapping} that, before the extraction of the envelope, the original points undergo a change of basis to lie in the Cartesian coordinate system. After the extraction, the inverse operation is performed on the points of the Envelope.
 
 Consider a discrete signal $ \mathbf{w} = (w_0, w_1, \cdots, w_{n-1}) $ and the set P of its absolute extrema, represented in the standard basis, $ \text{P} = \{ P_0, P_1, \cdots, P_{m-1} \}, \quad P_j = (i_j, \beta \lvert w_{i_j} \lvert) $, where $ \beta $ is obtained from Eq. \ref{eq:Basis}.
 

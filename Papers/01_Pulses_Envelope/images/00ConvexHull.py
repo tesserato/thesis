@@ -58,7 +58,7 @@ fig.layout.template ="plotly_white"
 fig.update_layout(
   xaxis_title="<b><i>x</i></b>",
   yaxis_title="<b><i>y</i></b>",
-  legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
+  legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1, itemsizing='trace'),
   margin=dict(l=0, r=0, b=0, t=0),
   font=FONT,
   titlefont=FONT
