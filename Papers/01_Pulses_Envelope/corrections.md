@@ -117,7 +117,9 @@ Moreover, we indicated in the revised version that k-curves might be an interest
 
 -----
 
-# Upon submitting your revised manuscript, please upload the source files for your article. For additional details regarding acceptable file formats, please refer to the Guide for Authors at: <<<enter link here>>>
+# Upon submitting your revised manuscript, please upload the source files for your article. For additional details regarding acceptable file formats, please refer to the Guide for Authors at: 
+Build a PDF of your manuscript source files on your computer and attach it with item type 'Manuscript'.
+Bundle all manuscript source files in a single archive and attach it with item type 'LaTeX source files'. Source files include LaTeX files, BibTeX files, figures, tables, all LaTeX classes and packages that are not included in TeX Live and any other material that belongs to your manuscript.
 
 When submitting your revised paper, we ask that you include the following items:
 
