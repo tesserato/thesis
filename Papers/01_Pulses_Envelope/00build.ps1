@@ -1,6 +1,6 @@
-$name = "PulsesEnvelope"
+$name = "00ElsevierPulsesEnvelope"
 pdflatex $name
-biber $name
+bibtex $name
 pdflatex $name
 pdflatex $name
 pdflatex $name

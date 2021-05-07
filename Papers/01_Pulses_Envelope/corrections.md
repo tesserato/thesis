@@ -1,13 +1,14 @@
-"Response to Reviewers"
+# Response to Reviewers
 Mention the page, paragraph, and line number of any revisions that are made.
 
 
 # Reviewer #2: This is an interesting research. It seems that the authors have already put this article publicly accessible at arXiv.org. The authors are suggested to consider and address the following issues:
 
 ## Writing needs to be refined.
-We extensively reviewed the text, rewriting many parts of it, besides reestructuring the sections to improve flow and coherence
+We extensively reviewed the text, rewriting many parts of it, besides restructuring the sections to improve flow and coherence.
 
 ## Issues with the Highlights: maximum 85 characters, including spaces, per bullet point
+<!-- TODO -->
 
 ## Abstract looks too long. Should be presented in a more concise way.
 We revised the abstract, removing superfluous information and verbose phrasing in order to make it more succinct, resulting in a reduction from the original 349 words to 248 words in the revised version.
@@ -16,28 +17,35 @@ We revised the abstract, removing superfluous information and verbose phrasing i
 Alphabetically ordering citations seems to be the default behaviour of biblatex, and we are sorry for the overlook. The issue was fixed by adding `sorting=none` to the biblatex import in the tex source.
 
 ## What's the Abscissa in the highlights (50k, 100k, etc.) and some figures?
-The abscissas refer to the sample i of the digital signal. We revised the legends to make this information explicit, and made this more explicit in the paragraph where the discrete version of the problem is introduced.
+The abscissas refer to the sample i of the digital signal. We revised the legends to make this information explicit, and also made this information more explicit in the paragraph where the discrete version of the problem is introduced.
 <!-- TODO -->
+
 ## Legends in some figures are confusing and hard to distinguish, such as in Fig 2: signal and Hilbert Envelope.
-We reworked all the figures, color coding the different entities shown when deemed helpful, with careful attention to the impact in the redability of the legends.
+We reworked all figures, color coding the different entities shown when deemed helpful, with careful attention to the impact in the readability of the legends.
 
 ## Figure 3: the illustration of the carrier c and wave w does not comply with the common sense of envelope and modulation?
 We changed the legend of the figure and the text of the revised version to make more explicit that the example was constructed from a known carrier and envelope to help in the visualization. 
-<!-- TODO -->
+<!-- TODO cite examples where this is used-->
 
 
 ## Definition of the envelope is very vague and controversial. What's the relationship with the conventional amplitude modulation?
 We made more explicit that a general definition of the envelope of a digital signal is still an open question in the literature, adding recent citations that corroborate this. 
 
-We added a general definition for the envelope of a family of curves, that led to a complete rewrite of the metric used to assess the general quality of envelopes, based on the construction of a reference envelope from the approximation of this formal definition to the discrete case.
+We added a general definition for the envelope of a family of curves, that motivated a complete rewrite of the metric used to assess the general quality of envelopes, based on the construction of a reference envelope from the approximation of this formal definition to the discrete case.
+
+We greatly extended the discussion of how the proposed method satisfies the 4 conditions necessary for the plausibility of the amplitude and frequency modulation of a signal, proposed by \textcite{1996Loughlinamplitude}, reinforcing the relationship with conventional amplitude modulation. 
 
 ## For the proposed "Equivalent Circle Approach", an acceptable mathematical background and justification is missing.
 
 
+
+
 ## It's quite doubtful about the assumption of w = e ⊙ c?
-We revised the equation to make clear that the relation holds by definition on our work.
+We revised the explanation about this equation to make clear that the relation holds by definition in our work.
+% TODO
 
 ## P8: the authors claimed that "the algorithm here presented satisfies the four conditions presented", however, no convincing evidence is provided. Please prove it mathematically.
+We added mathematical proofs for each one of the four conditions.
 
 ## How was the benchmarking carried out? Details on the implementation should be provided.
 We explained the benchmarking more extensively, citing that the implementations used were from the signal processing module of the Scipy Python library, and also made the source code for the tests, as well as the used samples, available at the repository dedicated for the work.
@@ -52,7 +60,7 @@ We revised the text extensively, with the aim of improving the overall readabili
 
 
 ## 3. The reviewer cannot understand why filtering is needed in the pre-processing of Hilbert transform. Clarify the reasoning and necessity.
-We explained in the text that the results of the pure Hilbert transform retain great part of the frequency content of the underlying wave, specially in the case of broadband signals, and added a figure to exemplify this effect in the case of a real world signal of an alto singer uttering a sustained note. We moved the filtering to the post-processing, however, and results for the Hilbert transform were improved substantially.
+We explained in the revised text that the results of the pure Hilbert transform retain great part of the frequency content of the underlying wave, specially in the case of broadband signals, and added a figure to exemplify this effect in the case of a real world signal of an alto singer uttering a sustained note. We moved the filtering to the post-processing, however, and results for the Hilbert transform were improved substantially.
 
 ## 4. Envelopes obtained by the proposed method seem to be good, but those obtained by other comparable methods, such as Hilbert transform, are not reasonable. The reviewer believes that results obtained by Hilbert transform should not be bad as shown by the authors. 
 Besides moving the filtering to the post-processing phase, we changed the cut-off frequency of the filter, that was fixed at 100 Hz, to 1/10 of the fundamental frequency of the original signal, improving the envelopes obtained by the Hilbert transform substantially.
@@ -96,11 +104,11 @@ was constructed from a previously known carrier wave and envelope; that is the o
 
 
 ## The author should improve the citation by referencing corresponding techniques, such as K-curve, and bounded curvature interpolation methods. It is interesting to investigate the application of such technique to signal envelope extraction.
-The K-curves algorithm involves an iterative optimization problem that would probably add a considerable amount of time to the interpolation step, since the number of interpolation points is usually in the hundreds. Our main concern, in the interpolation step, is not so much about curvature, but rather about boundedness between the interpolated values.
+The K-curves algorithm involves an iterative optimization problem that would add a considerable amount of time to the interpolation step, since the number of interpolation points is usually in the hundreds. Our main concern, in the interpolation step, is not so much about curvature, but rather about boundedness between the interpolated values.
 
 As for the curvature estimation step, we tested interpolation and fitting methods during the development of an estimate of the curvature of a discrete curve. Some computational problems arose during piecewise polynomial fitting for example, due to the general high dimensionality of the problem, and some artifacts with B-splines approach motivated us to pursue alternative, local methods, that culminated in the development of the equivalent circle approach. We plan an extension to the algorithm in the future, where the curvature will be allowed to vary along the time, and for that k-curves seems ideal, because of its guarantee of maximum curvature at the control points.
 
-We indicated in the revised version that k-curves might be an interesting option, depending on the requisites for the extracted envelope.
+Moreover, we indicated in the revised version that k-curves might be an interesting option, depending on the requisites for the extracted envelope.
 
 
 
@@ -109,41 +117,27 @@ We indicated in the revised version that k-curves might be an interesting option
 
 -----
 
-Dear Mr. Tarjano,
-
-Thank you for submitting your manuscript to Digital Signal Processing. Below you will find the reviewers' comments on your above-mentioned manuscript.  The reviewers have made suggestions which the Editor feels would improve your manuscript.  The Editor encourages you to consider these comments and make an appropriate revision of your manuscript.
-
-Please submit your revision online within
-May 30, 2021 by logging onto the Editorial Manager for Digital Signal Processing:
-https://www.editorialmanager.com/dsp/
-Your username is: tesserato
-If you need to retrieve password details, please go to:
-Can't remember your password?
-To reset your password please try to sign in and click 'continue'. On the next screen click the 'forgot password' link and follow the steps to reset your password.    
-
-The manuscript record can be found in the "Submissions Needing Revision" menu.
-
-NOTE: Upon submitting your revised manuscript, please upload the source files for your article. For additional details regarding acceptable file formats, please refer to the Guide for Authors at: <<<enter link here>>>
+# Upon submitting your revised manuscript, please upload the source files for your article. For additional details regarding acceptable file formats, please refer to the Guide for Authors at: <<<enter link here>>>
 
 When submitting your revised paper, we ask that you include the following items:
 
-Response to Reviewers (mandatory)
+# Response to Reviewers (mandatory)
 
 This should be a separate file labeled "Response to Reviewers" that carefully addresses, point-by-point, the issues raised in the comments appended below. You should also include a suitable rebuttal to any specific request for change that you have not made. Mention the page, paragraph, and line number of any revisions that are made.
 
-Manuscript and Figure Source Files (mandatory)
+# Manuscript and Figure Source Files (mandatory)
 
-We cannot accommodate PDF manuscript files for production purposes. We also ask that when submitting your revision you follow the journal formatting guidelines.  Figures and tables may be embedded within the source file for the submission as long as they are of sufficient resolution for Production. For any figure that cannot be embedded within the source file (such as *.PSD Photoshop files), the original figure needs to be uploaded separately. Refer to the Guide for Authors for additional information.
+We cannot accommodate PDF manuscript files for production purposes. We also ask that when submitting your revision you follow the journal formatting guidelines. **Figures and tables may be embedded within the source file for the submission as long as they are of sufficient resolution for Production**. For any figure that cannot be embedded within the source file (such as *.PSD Photoshop files), the original figure needs to be uploaded separately. Refer to the Guide for Authors for additional information.
 
 http://www.elsevier.com/journals/digital-signal-processing/1051-2004/guide-for-authors.
 
-Highlights (optional)
+# Highlights (optional)
 
 Highlights consist of a short collection of bullet points that convey the core findings of the article and should be submitted in a separate file in the online submission system. Please use 'Highlights' in the file name and include 3 to 5 bullet points (maximum 85 characters, including spaces, per bullet point). See the following website for more information
 
 http://www.elsevier.com/highlights
 
-Graphical Abstract (optional).
+# Graphical Abstract (optional).
 
 Graphical Abstracts should summarize the contents of the article in a concise, pictorial form designed to capture the attention of a wide readership online. Refer to the following website for more information: http://www.elsevier.com/graphicalabstracts.
 
@@ -157,32 +151,6 @@ Digital Signal Processing features the Interactive Plot Viewer, see: http://www.
 
 Include interactive data visualizations in your publication and let your readers interact and engage more closely with your research. Follow the instructions here: https://www.elsevier.com/authors/author-services/data-visualization to find out about available data visualization options and how to include them with your article.
 
-
-Thank you and we look forward to receiving your revised manuscript.
-
-With kind regards,
-
-Ercan Engin Kuruoglu, Ph.D. Cantab
-Editor-in-Chief
-Digital Signal Processing
-E-mail: dsp@elsevier.com
-
-
-Note: While submitting the revised manuscript, please double check the author names provided in the submission so that authorship related changes are made in the revision stage. If your manuscript is accepted, any authorship change will involve approval from co-authors and respective editor handling the submission and this may cause a significant delay in publishing your manuscript.
-
-Data in Brief (optional):
-We invite you to convert your supplementary data (or a part of it) into an additional journal publication in Data in Brief, a multi-disciplinary open access journal. Data in Brief articles are a fantastic way to describe supplementary data and associated metadata, or full raw datasets deposited in an external repository, which are otherwise unnoticed. A Data in Brief article (which will be reviewed, formatted, indexed, and given a DOI) will make your data easier to find, reproduce, and cite.
- 
-You can submit to Data in Brief when you upload your revised manuscript. To do so, complete the template and follow the co-submission instructions found here: www.elsevier.com/dib-template. If your manuscript is accepted, your Data in Brief submission will automatically be transferred to Data in Brief for editorial review and publication.
- 
-Please note: an open access Article Publication Charge (APC) is payable by the author or research funder to cover the costs associated with publication in Data in Brief and ensure your data article is immediately and permanently free to access by all. For the current APC see: www.elsevier.com/journals/data-in-brief/2352-3409/open-access-journal
- 
-Please contact the Data in Brief editorial office at dib-me@elsevier.com or visit the Data in Brief homepage (www.journals.elsevier.com/data-in-brief/) if you have questions or need further information.
-
-
-
-
-For further assistance, please visit our customer support site at http://help.elsevier.com/app/answers/list/p/7923. Here you can search for solutions on a range of topics, find answers to frequently asked questions and learn more about EM via interactive tutorials. You will also find our 24/7 support contact details should you need any further assistance from one of our customer support representatives.
 
 
 

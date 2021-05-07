@@ -148,7 +148,7 @@ For a real world signal, such as an alto singer sustaining a steady note as show
 
 In general, the problem of envelope detection, or demodulation, can be interpreted as the task of, given a continuous wave $ W(t) $, decomposing it in two components $ E(t) $ and $ C(t) $, such that $ W(t) = E(t) C(t) $ \parencite{2011TurnerDemodulation}. 
 
-$ E(t) $ represents the slow varying part of the wave, also known as the (temporal) envelope, modulator component, or amplitude modulation (AM) of $ W(t) $, while $ C(t) $ models its fast varying part, called throughout the literature as its (temporal) fine structure, carrier component, or frequency modulation (FM).
+$ E(t) $ represents the slow varying part of the wave, also known as the (temporal) envelope, modulator component, or amplitude modulation (AM) of $ W(t) $, while $ C(t) $ models its fast varying part, called throughout the literature as its (temporal) fine structure, carrier wave, or frequency modulation (FM).
 
 In the case of broadband signals, the problem of envelope detection of an arbitrary wave is ill-posed, in the sense that an infinite number of pairs of $ E(t) $ and $ C(t) $ can result in the same $ W(t) $ \parencite{2011TurnerDemodulation, 2013Mengempirical, 1996Loughlinamplitude}.
 
@@ -278,11 +278,11 @@ We formalize the set of vectors V in Eq. \ref{eq:Vectors} below.
 
 \subsection{The Equivalent Circle Approach}
 
-We thus proceed to define a discrete curvature measure over the edges of a discrete curve. To that end we are going to apply the definition of smooth curvature as the rate of change of the unit tangent to a curve. This definition is convenient, since it is equivalent to that of the osculating circle \parencite{2016VasaMesh}.
+We thus proceed to define a discrete curvature measure over the edges of a discrete curve. To that end we are going to apply the definition of smooth curvature as the rate of change of the unit tangent to a curve. This definition is convenient, since it is equivalent to that of the osculating circle \parencite{2016VasaMesh}, the value we are interested in finding.
 
-One of those edges, a vector $ v_k \in \text{V} $, is singled out in Fig. \ref{fig:DiscreteCurvature}. $ v_k $ represents the net displacement of the envelope from the extrema $ P_{j} = (x_j, y_j) $ to $ P_{j+1} = (x_{j+1}, y_{j+1}) $. Since we don't yet know which points of P are part of the envelope, instead of assuming that the trajectory before $ P_{j} $ passes through $ P_{j-1} $, it is more prudent to assume that it can have passed anywhere in the line segment from points $ (x_j - (x_{j+1} - x_j), y_j - (y_{j+1} - y_j)) $ to $ (x_j - (x_{j+1} - x_j), y_j + (y_{j+1} - y_j)) $, the bold line segment before  $ v_k $ in Fig. \ref{fig:DiscreteCurvature}.
+One of those edges, in the form of the vector $ v_k \in \text{V} $, is singled out in Fig. \ref{fig:DiscreteCurvature}. $ v_k $ represents the net displacement of the envelope from the extrema $ P_{j} = (x_j, y_j) $ to $ P_{j+1} = (x_{j+1}, y_{j+1}) $. Since we don't yet know which points of P are part of the envelope, instead of assuming that the trajectory before $ P_{j} $ passes through $ P_{j-1} $, it is more prudent to assume that it can have passed anywhere in the line segment from points $ (x_j - (x_{j+1} - x_j), y_j - (y_{j+1} - y_j)) $ to $ (x_j - (x_{j+1} - x_j), y_j + (y_{j+1} - y_j)) $, the bold line segment before $ v_k $ in Fig. \ref{fig:DiscreteCurvature}.
 
-That is because all we can assume from $ v_k $ is that, in this current region of the envelope, it is able to a vertical displacement of $ v_{k,y} $ in the same time as it performs a horizontal displacement of $ v_{k,x} $;
+That is because all we can safely assume from $ v_k $ is that, in the immediate vicinity of the vector, the envelope is capable of a vertical displacement of $ v_{k,y} $ in the same time as it performs a horizontal displacement of $ v_{k,x} $;
 
 Since this is true for all the vectors $ v_k \in \text{V} $, we can consider that, on average, the envelope insides horizontally at $ P_{j} $.
 
@@ -297,14 +297,15 @@ From Fig. \ref{fig:DiscreteCurvature} one can see that $ r_k = v_{k,x} / \sin(\t
   \label{fig:DiscreteCurvature}
 \end{figure}
 
-The radius of the circle equivalent to each $ v_k $ is defined in Eq. \ref{eq:Radius}. This equation has the desirable property that $ v_{k,y} \to 0 \implies v_{k,y} \to \infty $, that is, the radius tends to infinity when no vertical oscillation occurs, effectively turning the circle into a line. 
-% It is also directly proportional to $ v_{k,x} $, making the radius larger the more the points are horizontally far from each other.
+The radius $ r_k $ of the circle equivalent to each $ v_k $ is defined in Eq. \ref{eq:Radius}. This equation has the desirable property that $ v_{k,y} \to 0 \implies v_{k,y} \to \infty $, that is, the radius tends to infinity when no vertical oscillation occurs, effectively turning the circle into a line. 
+
+The radius is also directly proportional to $ v_{k,x} $, making the radius larger the more the points are horizontally far from each other.
 
 \begin{equation} \label{eq:Radius}
   r_k = \frac{v_{k,x} \sqrt{v_{k,x}^2 + v_{k,y}^2}}{ v_{k,y}}
 \end{equation}
 
-For calculation purposes, however, this can cause a problem, as a zero could make its way into the denominator of a fraction; in the actual algorithm, the quantity calculated for each vector is the curvature itself, that is, the inverse of the radius. In this way, the problem is avoided, since $ v_{k,y} $ is guaranteed to be greater than zero. The average of curvatures is then inverted in order to obtain the average radius, as illustrated in Eq. \ref{eq:Curvature}.
+For calculation purposes, however, this can pose a problem, as a zero could make its way into the denominator of a fraction; in the actual algorithm, the quantity calculated for each vector is the curvature itself, that is, the inverse of each radius $ r_k $. In this way, the problem is avoided, since $ v_{k,x} $ is guaranteed to be greater than zero. The average of curvatures is then inverted in order to obtain the average radius $ \overline{r} $, as illustrated in Eq. \ref{eq:Curvature}.
 
 \begin{equation} \label{eq:Curvature}
 \overline{r} = \left( \frac{\sum\limits_{k=0}^{m-2} \left( \frac{ v_{k,y}}{v_{k,x} \sqrt{v_{k,x}^2 + v_{k,y}^2}} \right)}{m-2} \right)^{-1}
