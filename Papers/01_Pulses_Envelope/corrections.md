@@ -174,3 +174,11 @@ We begin this section suggesting an empirical metric, based on the behaviour of 
 Our problem is to derive a measure of the average curvature of a discrete curve from its oscillations in the vertical axis.
 
 that would , in the sense that pulse's amplitude $ \lvert w_j \lvert $, now mapped to the ordinates of a point, and a pulse's length, approximately equivalent to the horizontal distance between two consecutive points in the geometrical interpretation would define, on average, a square.
+
+putting forth our own method, tailored to the definition of the equivalent circle of a wave; we end this section by showing how this circle can be used to identify the envelope of a discrete wave, in a similar approach to that of the alpha shapes theory, but taking advantage of some unique structure present in discrete waves.
+
+
+
+We proceed to illustrate the representation of a discrete wave used in this work, largely based on the concept of dividing the wave into its constituent pulses, and how it can simplify the algorithm, reducing the high dimensionality generally present in digital representations of waves.
+
+Next, we review methods for the estimation of the curvature of a discrete wave, after which we present our own; this method will then be used to estimate the equivalent circle, that will be used to define the envelope of the wave, via the procedure described in sequence.

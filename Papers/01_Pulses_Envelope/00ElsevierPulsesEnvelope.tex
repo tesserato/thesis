@@ -19,13 +19,24 @@
 
 \title{Envelope Estimation using Geometric Properties of a Discrete Real Signal}
 
+% \author{Carlos Henrique Tarjano Santos\corref{cor1}}
+% \author{Valdecy Pereira}
+% \address{Department of Production Engineering, Universidade Federal Fluminense, Rua Passo da Pátria, 156, Campus Praia Vermelha, Bloco D - sala 309, São Domingos, Niterói, RJ, Brasil, CEP: 24.210-240}
+% \cortext[cor1]{Corresponding author}
+% \ead{carlostarjano@id.uff.br}
+
+\cortext[cor1]{Corresponding author}
+\address{Department of Production Engineering, Universidade Federal Fluminense, Rua Passo da Pátria, 156, Campus Praia Vermelha, Bloco D - sala 309, São Domingos, Niterói, RJ, Brasil, CEP: 24.210-240}
+
 \author{Carlos Henrique Tarjano Santos\corref{cor1}}
 \ead{carlostarjano@id.uff.br}
-\address{Department of Production Engineering, Universidade Federal Fluminense, Rua Passo da Pátria, 156, Campus Praia Vermelha, Bloco D - sala 309, São Domingos, Niterói, RJ, Brasil, CEP: 24.210-240}
-\cortext[cor1]{Corresponding author, carlostarjano@id.uff.br}
 
 \author{Valdecy Pereira}
-\address{Department of Production Engineering, Universidade Federal Fluminense, Rua Passo da Pátria, 156, Campus Praia Vermelha, Bloco D - sala 309, São Domingos, Niterói, RJ, Brasil, CEP: 24.210-240}
+% \ead{support@elsevier.com}
+
+
+% \author{Valdecy Pereira}
+% \address{Department of Production Engineering, Universidade Federal Fluminense, Rua Passo da Pátria, 156, Campus Praia Vermelha, Bloco D - sala 309, São Domingos, Niterói, RJ, Brasil, CEP: 24.210-240}
 
 \begin{abstract} 
 Despite being an elusive concept, the temporal amplitude envelope of a signal is essential for its complete characterization, being the primary information-carrying medium in spoken voice and telecommunications, for example. Envelope detection techniques have applications in areas like medicine, sound classification and synthesis, seismology and speech recognition. Nevertheless, a general approach to envelope detection doesn't exist, as most methods involve manual intervention, in the form of filter design, smoothing, and other specific design choices based on prior knowledge of the signals under investigation. To address this problem, we propose an algorithm that uses characteristics of a signal to estimate its envelope, eliminating the necessity of parameter tuning. The method draws inspiration from geometric concepts; the discrete signal is mapped to a set of points in the Cartesian plane, were a new measure of discrete curvature is used to identify the samples that are part of the envelope. Due to its geometric nature, the method can optionally generate the superior and inferior envelopes of a given wave. The algorithm compares favourably with classic envelope detection techniques based on smoothing, filtering and the Hilbert Transform, besides being physically plausible. We provide visualizations of the envelope extracted for various real-world signals, with very diverse characteristics, such as voice, spoken and sang, and pitched and non-pitched musical instruments, and discuss some approaches to assess the quality of the obtained envelopes. An optimized implementation is available via the Python Package Index (PyPI); interactive visualizations and source code are available at the accompanying repository.
@@ -81,27 +92,25 @@ Other steps in the direction of translating geometric algorithms to the context 
 
 Following this path, we present a general approach to envelope detection, exploiting the intrinsic characteristics of a spectrally complex wave, in order to completely avoid the need for manual intervention or parameter tuning.
 
+We start with a brief background of envelope detection in Section \ref{sec:envelope} and define, as specifically as possible, what constitutes a temporal envelope. 
+
+In Section \ref{sec:representation} we explore some simplifications to the task of detecting the envelope of a signal that arise from the envelope definition adopted in this work and simplify the task of envelope detection. 
+
+Section \ref{sec:mapping} explores the geometric characteristics of envelope detection and formalizes how this classic DSP problem can be translated to the geometric problem of finding the shape of a set of points.
+
+We next explore, in Section \ref{sec:curvature}, the concept of discrete curvature, that will be used in Section \ref{sec:envelopedetection}, where the envelope detection algorithm is presented.
+
+Section \ref{sec:quality} discusses the difficulties in the assessment of the quality of an envelope, proposing qualitative and quantitative approaches, and demonstrates that the method propose conforms to four requirements for a physically plausible envelope proposed in \cite{1996Loughlinamplitude}.
+
+In Section \ref{sec:comparison} we compare the presented algorithm with traditional envelope detection methods, both in terms of accuracy and time and present, in Section \ref{sec:extensions},  potential applications of the algorithm, some of which might not be immediately obvious.
+
 % TODO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-After defining what will be considered an envelope in the context of this work, in this section we explore some simplifications that can be applied to a discrete wave, defining the representation that will be used in the subsequent part of the work. 
-
-We next explore the concept of discrete curvature, putting forth our own method, tailored to the definition of the equivalent circle of a wave; we end this section by showing how this circle can be used to identify the envelope of a discrete wave, in a similar approach to that of the alpha shapes theory, but taking advantage of some unique structure present in discrete waves.
-
-The rest of this paper is divided as follows: We start by defining as specifically as possible what a temporal envelope is, especially in the context of this work and providing a mathematical definition, in terms of the Hilbert transform, for the case of a narrowband signal.
-
-We proceed to illustrate the representation of a discrete wave used in this work, largely based on the concept of dividing the wave into its constituent pulses, and how it can simplify the algorithm, reducing the high dimensionality generally present in digital representations of waves.
-
-Next, we review methods for the estimation of the curvature of a discrete wave, after which we present our own; this method will then be used to estimate the equivalent circle, that will be used to define the envelope of the wave, via the procedure described in sequence.
-
-In the results section, we present some illustrations of the envelopes obtained with our method, comparing both accuracy and running time with the most common algorithms encountered in the literature. We also suggest an alternative use of the algorithm to identify the negative and positive frontiers of a wave, that can be seen as partial envelopes considering only the positive and negative pulses of a wave, respectively.
-
-We follow with suggestions about how the approach here presented can be useful beyond envelope detection, exemplifying with some applications, such as the extractions of the average waveform of a digital wave, and concluding with commentary on potential future developments of the method.
-
 Interactive visualizations are available from the repository prepared for this work \cite{2020TarjanoEnvelope}, that also contains an implementation of the method in pure Python.
 A Python module available at the Python Package Index (PyPI) installable via the command `pip install signal-envelope` for convenience, is also available. Besides, those working under Windows 64-bit can benefit from a specialized dynamic library coded in C++ that is automatically used within this module, and can be separately obtained via the release section in the repository.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\section{Temporal envelope}\label{sec:Characterization of a temporal envelope}
+\section{Temporal envelope}\label{sec:envelope}
 
 The interest in the theory of envelope detection arose in the analog domain, with the widespread adoption of radio communications, where the problem is typically restricted to artificial waves, often with well-defined frequencies \cite{2011TurnerDemodulation}.
 
@@ -173,7 +182,7 @@ This realization that the envelope of a wave is defined only at some of the wave
 
 We start with the definition of a pulse: each time the value of $ w_i$ changes sign, that is, every time the amplitude of the discrete wave \textbf{w} crosses the horizontal axis, the beginning of a pulse is defined, with the next crossing defining its end. This definition is in line with the one presented in \cite{national1996telecommunications}, where a pulse is defined as a rapid change in the amplitude of a signal, followed by a fast return to the baseline value; zero, in our case.
 
-From \ref{fig:Envelope} and the discussion in Section \ref{sec:Characterization of a temporal envelope}, we can see that only the maximum point of a positive pulse or the minimum point of a negative pulse can potentially be equal to the envelope and are, thus, our only points of interest. We can then proceed, for the rest of the method, considering only those points, to great computational economy.
+From \ref{fig:Envelope} and the discussion in Section \ref{sec:envelope}, we can see that only the maximum point of a positive pulse or the minimum point of a negative pulse can potentially be equal to the envelope and are, thus, our only points of interest. We can then proceed, for the rest of the method, considering only those points, to great computational economy.
 
 For this reason we define P as the set of the points $ \{P_0, P_1, \cdots, P_{m-1}\} $ where $ P_j = (i_j, \lvert w_{i_j} \lvert) $, that is, $ \lvert w_{i_j} \lvert $, the absolute value of the extrema of each pulse, becomes the ordinate of each point and $ i_j $, its original index, becomes the abscissa.
 
@@ -211,7 +220,7 @@ P_{\mathbf{s}} &= (x_1, \beta x_2) \quad \forall \  P \in \text{P} \\
 \end{split}
 \end{align}
 
-The effect of this normalization can be seen in the points shown in Fig.\ref{fig:Coordinates}, shown in scale for both basis. We can consider our points now residing in the Cartesian coordinate system.
+The effect of this normalization can be seen in the points shown in Fig. \ref{fig:Coordinates}, shown in scale for both basis. We can consider our points now residing in the Cartesian coordinate system.
 
 \begin{figure}[ht!]
   \centering
@@ -221,7 +230,7 @@ The effect of this normalization can be seen in the points shown in Fig.\ref{fig
 \end{figure}
 
 
-\section{Discrete Curvature Estimation}
+\section{Discrete Curvature Estimation} \label{sec:curvature}
 
 Having established a transformation from the original space of the two-dimensional representation of a discrete wave to the Cartesian coordinate system and, thus, a way to consistently transform our simplified description of a discrete signal into a set of points in the plane, the shape of which can be estimated with the use of geometric algorithms.
 
@@ -261,7 +270,7 @@ We formalize the set of vectors V in Eq. \ref{eq:Vectors} below.
 \end{align}
 
 
-\subsection{The Equivalent Circle Approach}
+\subsection{The Equivalent Circle Approach} 
 
 We thus proceed to define a discrete curvature measure over the edges of a discrete curve. To that end we are going to apply the definition of smooth curvature as the rate of change of the unit tangent to a curve. This definition is convenient, since it is equivalent to that of the osculating circle \cite{2016VasaMesh}, the value we are interested in finding.
 
@@ -296,7 +305,7 @@ For calculation purposes, however, this can pose a problem, as a zero could make
 \overline{r} = \left( \frac{\sum\limits_{k=0}^{m-2} \left( \frac{ v_{k,y}}{v_{k,x} \sqrt{v_{k,x}^2 + v_{k,y}^2}} \right)}{m-2} \right)^{-1}
 \end{align}
 
-\section{Extracting the envelope}
+\section{Identifying the envelope} \label{sec:envelopedetection}
 
 We need now to construct an algorithm, using the radius just obtained, to identify the points that belong to the envelope. Generally, alpha-shapes based algorithms resort to the construction of the Delaunay triangulation of the set of points, that is latter filtered to contain only the outer edges. We can adopt a more straightforward method, as our points have a sequential structure. 
 
@@ -353,7 +362,7 @@ The most straightforward way to transform those points into the vector $ \textbf
 
 It is worth noting, however, that many other procedures are available, both for the interpolation and the smooth approximation of points. Depending on the intended use of the envelope, k-curves interpolation \cite{2017Yank}is a specially interesting approach, since it guarantees that the maximum curvature occurs at the interpolated points.
 
-\section{Quality of an envelope}\label{sec:quality}
+\section{Quality of an envelope} \label{sec:quality}
 
 The lack of a precise definition of what an envelope is makes the assessment of the quality of an envelope a difficult task, for which there are no agreed-upon objective metrics. Recalling Fig. \ref{fig:Envelope}, however, and the accompanying discussion, if one divides, element-wise, the original signal by the envelope, the carrier wave thus obtained is expected to be bounded between -1 and 1.
 
@@ -468,7 +477,7 @@ Fig. \ref{fig:RefEnvelope} shows the reference envelope for the sound of a tom.
 Since envelope is not smooth, being composed of a series of horizontal segments, as can be seen in \ref{fig:RefEnvelope}, besides being computationally expensive to calculate. However, arising from a mathematically sound base, it can serve as a reference to infer the quality of more empirical methods.
 
 
-\subsection{Comparison with traditional algorithms}  
+\subsection{Comparison with traditional algorithms}\label{sec:comparison}
 
 Direct comparison with many of the more recent algorithms is made difficult by the unavailability of digital implementations of such works, many designed to process analog signals \cite[e.g.,][]{2018AssefModeling}.
 
@@ -567,7 +576,7 @@ frac. of max. & 0.108 & 1.000 & 0.030 & 0.283 \\
 \label{table:Time_comparison}
 \end{table}
 
-\section{Extensions}
+\section{Extensions} \label{sec:extensions}
 
 In this section we comment briefly on some characteristics and extensions of the presented algorithm, in order to suggest possible applications beyond envelope extraction. One of the less obvious is, perhaps, its use in the segmentation of a signal into pseudo cycles.
 
