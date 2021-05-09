@@ -87,7 +87,7 @@ fig.add_trace(
     x=[i for x in Xp for i in (x, x, None)],
     y=[i for y in Y for i in (0, y, None)],
     mode='lines',
-    line=dict(color="silver", width=2)
+    line=dict(color="silver", width=1)
   )
 )
 

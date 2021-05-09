@@ -22,7 +22,7 @@
 \author{Valdecy Pereira}
 
 \begin{abstract} 
-Despite being an elusive concept, the temporal amplitude envelope of a signal is essential for its complete characterization, being the primary information-carrying medium in spoken voice and telecommunications, for example. Envelope detection techniques have applications in areas like medicine, sound classification and synthesis, seismology and speech recognition. Nevertheless, a general approach to envelope detection doesn't exist, as most methods involve manual intervention, in the form of filter design, smoothing, and other specific design choices based on prior knowledge of the signals under investigation. To address this problem, we propose an algorithm that uses characteristics of a signal to estimate its envelope, eliminating the necessity of parameter tuning. The method draws inspiration from geometric concepts; the discrete signal is mapped to a set of points in the Cartesian plane, were a new measure of discrete curvature is used to identify the samples that are part of the envelope. Due to its geometric nature, the method can optionally generate the superior and inferior envelopes of a given wave. The algorithm compares favourably with classic envelope detection techniques based on smoothing, filtering and the Hilbert Transform, besides being physically plausible. We provide visualizations of the envelope extracted for various real-world signals, with very diverse characteristics, such as voice, spoken and sang, and pitched and non-pitched musical instruments, and discuss some approaches to assess the quality of the obtained envelopes. An optimized implementation is available via the Python Package Index (PyPI); interactive visualizations and source code are available at the accompanying repository.
+Despite being an elusive concept, the temporal amplitude envelope of a signal is essential for its complete characterization, being the primary information-carrying medium in spoken voice and telecommunications, for example. Envelope detection techniques have applications in areas like medicine, sound classification and synthesis, seismology, and speech recognition. Nevertheless, a general approach to envelope detection doesn't exist, as most methods involve manual intervention, in the form of filter design, smoothing, and other specific design choices based on prior knowledge of the signals under investigation. To address this problem, we propose an algorithm that uses characteristics of a signal to estimate its envelope, eliminating the necessity of parameter tuning. The method draws inspiration from geometric concepts; the discrete signal is mapped to a set of points in the Cartesian plane, where a new measure of discrete curvature is used to identify the samples that are part of the envelope. Due to its geometric nature, the method can optionally generate the superior and inferior envelopes of a given wave. The algorithm compares favorably with classic envelope detection techniques based on smoothing, filtering, and the Hilbert Transform, besides being physically plausible. We provide visualizations of the envelope extracted for various real-world signals with very diverse characteristics, such as voice, spoken and sang, and pitched and unpitched musical instruments, and discuss some approaches to objectively assess the quality of the obtained envelopes. An optimized implementation is available via the Python Package Index (PyPI); interactive visualizations and source code are available at the accompanying repository.
 \end{abstract}
 
 \begin{keyword}
@@ -52,11 +52,12 @@ One direct way of defining the shape of a set of points in $ \mathbb{R}^2 $ is u
 
 When the general shape of a set of points present prominent concavities, the convex hull overestimates the boundaries. To address this limitation \cite{1983Edelsbrunnershape} introduced the concept of alpha shapes, also known as concave hull: a mathematically well-defined generalization of the convex hull of a finite set of points, closely related to the Delaunay triangulation and Voronoi diagrams of those points. 
 
-The intuition behind the alpha shapes algorithm is that only points that can be touched by a circle of radius $ \alpha $ coming from an infinite distance towards the baricenter of the set of points are part of the frontier. The polygon obtained linking those points forms the concave hull of this set.
+% TODO
+The intuition behind the alpha shapes algorithm is that only points that can be touched by a disc of radius $ \alpha $ coming from an infinite distance towards the baricenter of the set of points are part of the frontier. The polygon obtained linking those points forms the concave hull of this set.
 
-Once a radius $ \alpha $ is defined, alpha shapes exhibit the uniqueness property meaning that, for a given set of points and a given radius, only one concave hull exists. When the radius $ \alpha $ of the circle tends to infinity, concave hulls tend to the convex hulls.
+Once a radius $ \alpha $ is defined, alpha shapes exhibit the uniqueness property: for a given set of points and a given radius, only one concave hull exists. When the radius $ \alpha $ of the circle tends to infinity, concave hulls tend to the convex hulls. This
 
-Consider, for example, the artificially generated discrete wave in Fig. \ref{fig:Hulls} below, where the links between consecutive samples were deemphasized to highlight the "set of points" nature of a signal: The convex hull and a concave hull, in the form of an alpha shape with a particular value of $ \alpha $ are illustrated.
+Consider, for example, the artificially generated discrete wave in Fig. \ref{fig:Hulls} below, where the links between consecutive samples were deemphasized to highlight the “set of points” nature of a signal: two alpha shapes with different values for $ \alpha $ and the convex hull are illustrated. As $ \alpha $ increases, the contour of the set of points becomes smoother, and closer to the convex hull.
 
 \begin{figure}[ht!]
   \centering
@@ -112,7 +113,7 @@ Fig. \ref{fig:AnalyticSignal} exemplifies the Hilbert envelope, for a pure sinus
   \label{fig:AnalyticSignal}
 \end{figure}
 
-For a real world signal, such as an alto singer sustaining a steady note as shown in Fig. \ref{fig:AnalyticSignalAlto} the Hilbert transform alone provides a poor envelope, since it retains most part of the frequencies of the underlying wave. With further processing, however, such as filtering, an output closer to the intuitive definition of envelope given in the beginning of this section can be obtained.
+For a real world signal, such as an alto singer sustaining a steady note as shown in Fig. \ref{fig:AnalyticSignalAlto} the Hilbert transform alone provides a poor envelope, since it retains most of the frequencies of the underlying wave. With further processing, however, such as filtering, a smoother output can be obtained.
 
 \begin{figure}[ht!]
   \centering
@@ -182,16 +183,16 @@ While the exact relation between $ n $, the size of the original signal, and $ m
 
 The points in P are not fit for geometric interpretation yet, since the abscissa and ordinate of their orthogonal coordinate system have different units: in the vertical axis, we have a unit related to the instantaneous amplitude of the wave, while in the horizontal axis we have the index at which each extremum occurs, ultimately a time-related unit. 
 
-Geometrically, we can think of these points as points in a vector space described by a non-standard basis vector $ \mathbf{b} = \{ \mathbf{b}_x, \mathbf{b}_y \}$ with $ \mathbf{b}_x = (a, 0), \mathbf{b}_y = (0, i) $ where $ a $ is an amplitude unit such as decibel, a measure of the instantaneous sound pressure, volt or even a fraction of a fixed maximum value. $ i $ represents the index of the sample, and is linked to time by the aforementioned relation $ i = t \ \text{fps} $.
+Geometrically, we can think of these points as points in a vector space on a non-standard, orthogonal basis vector $ \mathbf{b} = \{ \mathbf{b}_x, \mathbf{b}_y \}$ with $ \mathbf{b}_x = (a, 0), \mathbf{b}_y = (0, i) $ where $ a $ is an amplitude unit such as decibel, a measure of the instantaneous sound pressure, volt or even a fraction of a fixed maximum value. $ i $ represents the index of the sample, and is linked to time by the aforementioned relation $ i = t \ \text{fps} $.
 
-We are interested in finding a change of basis formula from the original basis to the standard basis $ \mathbf{s} = \{ \mathbf{s}_x, \mathbf{s}_y \} = \{ (1,0),(0,1) \}$ of this vector space, making the geometric representation consistent.
+We are interested in representing the point in the standard basis $ \mathbf{s} = \{ \mathbf{s}_x, \mathbf{s}_y \} = \{ (1,0),(0,1) \}$ of this vector space, making the geometric representation consistent.
 
 To achieve that, we divide the ordinate of each point by the average of all ordinates, effectively cancelling the unit of the vertical components of the points. If we proceeded similarly in relation to the horizontal components, 
-the direct link between P and \textbf{w} that arises from the fact that the abscissas of the points in P are indices $ i $ of \textbf{w} would be lost.
+the direct link between P and \textbf{w} that arises from the fact that the abscissas of the points in P are numerically equivalent to the indices $ i $ of \textbf{w} would be lost.
 
-It is best to leave the abscissas intact and multiply the now unitless vertical coordinates of each point by the average of the difference between the abscissa of a point and the abscissa of the immediately posterior. In this way, we can consider both axes as having unit $ i $, and the relationship is preserved, making it easier to recover the envelope points later.
+It is best to leave the abscissas intact and multiply the now unitless vertical coordinates of each point by the average of the difference between the abscissa of a point and the abscissa of the immediately posterior. In this way, we can consider both axes as having unit $ i $, and the relationship is preserved, making it easier to recover the envelope points in the original basis later.
 
-Considering $P_{\mathbf{b}}$ as a point of the set P represented by the original basis and $P_{\mathbf{s}}$ the same point as represented with the standard basis, we can formalize this change of basis as in \ref{eq:Basis}:
+Considering $P_{\mathbf{b}}$ as a point of the set P represented on the original basis and $P_{\mathbf{s}}$ the same point as represented on the standard basis, we can formalize this transformation as in \ref{eq:Basis}:
 
 \begin{align}\label{eq:Basis}
 \begin{split}

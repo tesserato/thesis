@@ -47,14 +47,14 @@ fig.layout.template ="plotly_white"
 fig.update_layout(
   xaxis_title="<b>Sample <i>i</i></b>",
   yaxis_title="<b>Amplitude</b>",
-  legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1, itemsizing='constant'),
+  legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1, itemsizing='trace'),
   margin=dict(l=0, r=0, b=0, t=0),
   font=FONT,
   titlefont=FONT
 )
 fig.layout.xaxis.title.font=FONT
 fig.layout.yaxis.title.font=FONT
-fig.update_xaxes(showline=False, showgrid=False, zeroline=False)
+fig.update_xaxes(showline=False, showgrid=False, zeroline=False, range=[10744, 13683])
 fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=.8, zerolinecolor="silver")
 
 '''Plotting Signal'''
@@ -74,29 +74,29 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Hilbert Transform   ",
+    name="Hilbert Envelope   ",
     # x=X,
     y=hilbert_envelope,
     mode="lines",
-    line_shape='spline',
+    # line_shape='spline',
     # fillcolor="rgba(250, 140, 132, 0.5)",
     # fill="toself",
     line=dict(
         width=1,
-        color="rgba(250, 0, 0, 0.5)",
+        color="red",
     )
   )
 )
 
 fig.add_trace(
   go.Scatter(
-    name="Filtered Hilbert Transform   ",
+    name="Filtered Hilbert Envelope   ",
     # x=X,
     y=hilbert_envelope_filtered,
     mode="lines",
-    line_shape='spline',
+    # line_shape='spline',
     line=dict(
-        width=1,
+        width=2,
         color="black",
     )
   )

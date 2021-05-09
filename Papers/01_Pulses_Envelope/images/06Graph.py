@@ -5,9 +5,9 @@ import signal_envelope as se
 from scipy import interpolate
 import plotly.graph_objects as go
 
-# name = "alto"
+name = "alto"
 # name="bend"
-name="spoken_voice"
+# name="spoken_voice"
 W, _ = se.read_wav(f"test_samples/{name}.wav")
 amp = np.max(np.abs(W))
 W = 4 * W / amp
@@ -59,7 +59,7 @@ fig.add_trace(
     # x=np.arange(W.size),
     y=W,
     mode="lines",
-    line_shape='spline',
+    # line_shape='spline',
     # fillcolor="gray",
     line=dict(width=1, color="silver",),
   )
@@ -71,7 +71,7 @@ fig.add_trace(
     # x=np.arange(W.size),
     y=C,
     mode="lines",
-    line_shape='spline',
+    # line_shape='spline',
     # fillcolor="rgba(0,0,0,0.3)",
     line=dict(width=1, color="rgba(235, 64, 52,0.3)",),
   )
@@ -80,7 +80,7 @@ fig.add_trace(
 fig.add_trace(
   go.Scatter(
     name="Envelope (<b>e</b>)      ",
-    line_shape='spline',
+    # line_shape='spline',
     y=E,
     mode="lines",
     line=dict(width=2, color="black"),

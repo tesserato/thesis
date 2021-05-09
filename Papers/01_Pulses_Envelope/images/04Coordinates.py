@@ -49,8 +49,8 @@ Y = Yp * scaling
 '''                              PLOT LINES                                    '''
 '''============================================================================'''
 fig = make_subplots(
-    rows=2, cols=1, shared_xaxes=False, vertical_spacing=0.01,
-    subplot_titles=("<b>Original basis</b>", "<b>Standard basis</b>")
+    rows=2, cols=1, shared_xaxes=False, #vertical_spacing=0.01,
+    subplot_titles=("<b>Original coordinates</b>", "<b>Cartesian coordinates</b>")
     )
 
 FONT = dict(
@@ -77,10 +77,10 @@ fig.update_layout(
 # fig.layout.xaxis.title.font=FONT
 # fig.layout.yaxis.title.font=FONT
 
-fig.update_xaxes(showline=False, showgrid=False, zeroline=False, showticklabels=False, title=dict(font=FONT), row=1, col=1)
+fig.update_xaxes(showline=False, showgrid=False, zeroline=False, showticklabels=False, title=dict(text="$ i $",font=FONT), row=1, col=1, title_standoff=.0)
 fig.update_xaxes(showline=False, showgrid=False, zeroline=False, showticklabels=True, 
-title=dict(text="$ x $",font=FONT), row=2, col=1)
-fig.update_yaxes(showline=False, showgrid=False, zeroline=False, title=dict(text="$ y $",font=FONT), row=1, col=1, tickvals=[i for i in range(0, 3, 2)])
+title=dict(text="$ x \equiv i $",font=FONT), row=2, col=1)
+fig.update_yaxes(showline=False, showgrid=False, zeroline=False, title=dict(text="Amplitude",font=FONT), row=1, col=1, tickvals=[i for i in range(0, 3, 2)])
 fig.update_yaxes(showline=False, showgrid=False, zeroline=False, 
 title=dict(text="$ y $",font=FONT), row=2, col=1, tickvals=[i for i in range(0, 11, 2)])
 
@@ -106,41 +106,6 @@ fig.add_trace(
   ), row=2, col=1
 )
 
-# for i in range(1, len(Xp)):  
-#   fig.add_annotation(
-#     x=Xp[i],  # arrows' head
-#     y=Yp[i],  # arrows' head
-#     ax=Xp[i - 1],  # arrows' tail
-#     ay=Yp[i - 1],  # arrows' tail
-#     xref='x',
-#     yref='y',
-#     axref='x',
-#     ayref='y',
-#     text='',  # if you want only the arrow
-#     showarrow=True,
-#     arrowhead=2,
-#     arrowsize=1,
-#     arrowwidth=2,
-#     arrowcolor='gray', row=1, col=1
-#   )
-  
-#   fig.add_annotation(
-#     x=Xp[i],  # arrows' head
-#     y=Y[i],  # arrows' head
-#     ax=Xp[i - 1],  # arrows' tail
-#     ay=Y[i - 1],  # arrows' tail
-#     xref='x2',
-#     yref='y2',
-#     axref='x2',
-#     ayref='y2',
-#     text='',  # if you want only the arrow
-#     showarrow=True,
-#     arrowhead=2,
-#     arrowsize=1,
-#     arrowwidth=2,
-#     arrowcolor='gray', row=2, col=1
-#   )
-
 fig.add_trace(
   go.Scatter(
     name="P      ",
@@ -151,7 +116,7 @@ fig.add_trace(
     # fill="tozeroy",
     # fillcolor="silver",
     # line=dict(color="gray", width=1),
-    marker=dict(size=7, color="black")
+    marker=dict(size=4, color="black")
   ), row=1, col=1
 )
 
@@ -165,7 +130,7 @@ fig.add_trace(
     # fill="tozeroy",
     # fillcolor="silver",
     # line=dict(color="gray", width=1),
-    marker=dict(size=7, color="black")
+    marker=dict(size=4, color="black")
   ), row=2, col=1
 )
 
