@@ -294,24 +294,25 @@ For calculation purposes, however, the formulation in Eq. \ref{eq:Radius} poses 
 
 \section{Identifying the envelope} \label{sec:envelopedetection}
 
-We need now to construct an algorithm, using the radius just obtained, to identify the points that belong to the envelope. Generally, alpha shapes based algorithms resort to the construction of the Delaunay triangulation of the set of points, that is latter filtered to contain only the outer edges. We can adopt a more straightforward method, as our points have a sequential structure. 
+We need now to construct an algorithm, using the radius just obtained, to identify the points that belong to the envelope. Generally, alpha shapes based algorithms resort to the construction of the Delaunay triangulation of the set of points, which is later filtered to contain only the outer edges. We can adopt a more straightforward method, as our points have a sequential structure. 
 
 Let $ x_o, y_o \in \mathbb{R}, \quad 0 \le y_o $ be the coordinates of the center of a circle with radius $ r $, that can be placed anywhere in the upper plane of the coordinate system;
 
-Let $ P_a, P_b, P_c \in \text{P}, \quad P_a \ne P_b \ne P_c $ be three different points of the set P;
+Let $ P_a, P_b \in \text{P}, \quad P_a \ne P_b $ be two different points of the set P;
 
-
-For all circles of center $ x_o, y_o $ and radius $ r $ that can be constructed to pass through any two different points of P, that is, $ \forall \quad P_b, P_c $ such that $ (P_{b,x} - x_o)^2 + (P_{b,y} - y_o)^2 = (P_{c,x} - x_o)^2 + (P_{c,y} - y_o)^2 = r^2 $, $ P_a $ will be part of the set $ E $ of the points belonging to the envelope if and only if none of those circles contain $ P_a $, or $ P_a \in \text{E} \leftrightarrow (P_{b,x} - x_o)^2 + (P_{b,y} - y_o)^2 > r^2 $. Summarizing this, we have Eq. \ref{eq:InEnvelope}:
+For all circles of center $ x_o, y_o $ and radius $ r $ that can be constructed to pass through any two different points of P, that is, all circles such that $ (P_{a,x} - x_o)^2 + (P_{a,y} - y_o)^2 = (P_{b,x} - x_o)^2 + (P_{b,y} - y_o)^2 = r^2 $, $ P_a $ and $ P_b $ will be part of the set $ E $ of the points belonging to the envelope if and only if exist one such circle that defines a disc that does not contain any other point of P. Summarizing this, we have Eq. \ref{eq:InEnvelope}:
 
 \begin{align} \label{eq:InEnvelope}
 \begin{split}
-& P_a \in \text{E} \leftrightarrow (P_{b,x} - x_o)^2 + (P_{b,y} - y_o)^2 > r^2, \\
-& \forall \ P_b, P_c \mid (P_{b,x} - x_o)^2 + (P_{b,y} - y_o)^2 = (P_{c,x} - x_o)^2 + (P_{c,y} - y_o)^2 = r^2, \\
-& P_a, P_b, P_c \in \text{P}, \quad P_a \ne P_b \ne P_c \quad \text{and} \quad x_o, y_o \in \mathbb{R}, \quad 0 \le y_o
+& (P_{a,x} - x_o)^2 + (P_{a,y} - y_o)^2 = (P_{b,x} - x_o)^2 + (P_{b,y} - y_o)^2 = r^2 \\
+& P_a, P_b \in \text{E} \leftrightarrow (P_{c,x} - x_o)^2 + (P_{c,y} - y_o)^2 > r^2 \ \forall \ P_c \in \text{P} - \{P_a, P_b\} \\
+& P_a, P_b, P_c \in \text{P}, \quad P_a \ne P_c, P_b \ne P_c \quad \text{and} \quad x_o, y_o \in \mathbb{R}, \ 0 \le y_o
 \end{split}
 \end{align}
 
-The algorithm follows directly from the definition in \ref{eq:InEnvelope} after noting that the first and last members of P will always be part of the envelope, since they are reachable by any circle of any radius $ r $. From $ P_0 $, our first pivot point, we construct circles passing through $ P_1, P_2, \cdots, P_d $ until a circle that doesn't contain any point in P is found; $ P_d $ then becomes the new pivot point and is included in E, and this process continues until $ P_{m-1} $ is reached.
+The algorithm follows directly from the definition in Eq. \ref{eq:InEnvelope} after noting that the first and last points of P will always be part of the envelope. Since $ P_a $ can be equal to $ P_b $, it is always possible to construct a circle containing those points, by placing the center of the circle to the left of or right of the first or last point, respectively. The discs defined by those circles can't contain any other point.
+
+From $ P_0 $, our first pivot point, we construct circles passing through $ P_1, P_2, \cdots, P_d $ until a circle that doesn't contain any point in P is found; $ P_d $ then becomes the new pivot point and is included in E, and this process continues until $ P_{m-1} $ is reached.
 
 The procedure is formalized in the algorithm \ref{FindEnvelope}. We don't provide similar algorithmic descriptions of the preceding steps since the Python implementation available at \cite{2020TarjanoEnvelope} can easily serve as pseudocode.
 
@@ -340,21 +341,22 @@ The procedure is formalized in the algorithm \ref{FindEnvelope}. We don't provid
 \end{algorithmic}
 \end{algorithm}
 
-The set E obtained via algorithm \ref{FindEnvelope} is a subset of P, and thus also a set of points in the Euclidean space. 
+The set E obtained via the algorithm \ref{FindEnvelope} is a subset of P, and thus also a set of points in the Euclidean space. 
 
-Recall from section \ref{sec:mapping} that the vertical coordinates of these points are currently scaled by the change of basis described in Eq. \ref{eq:Basis}, in relation to the original signal as represented in his original basis. We could invert this transformation, but since we were careful to maintain the direct link between the horizontal coordinates in both basis, we can simply consider the horizontal coordinates of P as the indices of samples of the original discrete signal, whose absolute value are part of the envelope.
+Recall from section \ref{sec:mapping} that the vertical coordinates of these points are currently scaled, in relation to the original signal, by the transformation described in Eq. \ref{eq:Basis}. We could invert this transformation, but since we were careful to maintain the direct link between the horizontal coordinates in both coordinate systems, we can simply consider the horizontal coordinates of P as the indices of the samples of the original discrete signal, and retrieve the envelope at each point directly.
 
-The most straightforward way to transform those points into the vector $ \textbf{e} \in \mathbb{R}^n $ is via linear interpolation, the approach used in this work.
+After converting E to the original coordinate system, the most straightforward way to transform those points into the vector $ \textbf{e} \in \mathbb{R}^n $ is via linear interpolation, the approach used in this work.
 
-It is worth noting, however, that many other procedures are available, both for the interpolation and the smooth approximation of points. Depending on the intended use of the envelope, k-curves interpolation \cite{2017Yank}is a specially interesting approach, since it guarantees that the maximum curvature occurs at the interpolated points.
+It is worth noting, however, that many other procedures are available, both for the interpolation and the smooth approximation of points. Depending on the intended use of the envelope, k-curves interpolation \cite{2017Yank} is a specially interesting approach, since it guarantees that the maximum curvature occurs at the interpolated points.
+
 
 \section{Quality of an envelope} \label{sec:quality}
 
 The lack of a precise definition of what an envelope is makes the assessment of the quality of an envelope a difficult task, for which there are no agreed-upon objective metrics. Recalling Fig. \ref{fig:Envelope}, however, and the accompanying discussion, if one divides, element-wise, the original signal by the envelope, the carrier wave thus obtained is expected to be bounded between -1 and 1.
 
-Figs. \ref{fig:spokenvoice}, \ref{fig:singer_voice} and \ref{fig:Bend} present discrete waves \textbf{w}, their extracted envelope \textbf{e}, and the inferred carrier \textbf{c}, obtained after dividing, element-wise, the original signal by its extracted.
+Figs. \ref{fig:spokenvoice}, \ref{fig:singer_voice} and \ref{fig:Bend} present discrete waves \textbf{w}, their extracted envelope \textbf{e}, and the inferred carrier \textbf{c}, obtained after dividing, element-wise, the original signal by its extracted envelope.
 
-From Fig. \ref{fig:spokenvoice} it can be seen that the algorithm performs well under the carrier metric. This is especially remarkable for the case of spoken voice, a notorious complex wave with fast changes in pitch and high noise content.
+From Fig. \ref{fig:spokenvoice} it can be seen that the algorithm performs well under the carrier criteria. This is especially remarkable for the case of spoken voice, a notorious complex wave with fast changes in pitch and high noise content.
 
 \begin{figure}[ht!]
   \centering
@@ -363,7 +365,7 @@ From Fig. \ref{fig:spokenvoice} it can be seen that the algorithm performs well 
   \label{fig:spokenvoice}
 \end{figure}
 
-Those characteristics are in stark contrast with those of the sang voice in Fig. \ref{fig:singer_voice}, where a recording of an alto singer sustaining a steady note is shown; there, the wave is almost periodic, with a stable waveform and envelope.
+Those characteristics are in stark contrast with those of the singing voice in Fig. \ref{fig:singer_voice}, where a recording of an alto singer sustaining a steady note is shown. There, the wave is almost periodic, with a stable waveform and envelope.
 
 \begin{figure}[ht!]
   \centering
@@ -372,7 +374,7 @@ Those characteristics are in stark contrast with those of the sang voice in Fig.
   \label{fig:singer_voice}
 \end{figure}
 
-Fig. \ref{fig:Bend} shows the envelope in the case of a bend performed in an electric guitar. The variations in frequency in the signal didn't affect the envelope extracted.
+Fig. \ref{fig:Bend} shows the envelope in the case of a bend performed in an electric guitar. The fast frequency variations in the signal didn't affect the envelope extracted.
 
 \begin{figure}[ht!]
   \centering
@@ -385,7 +387,7 @@ Fig. \ref{fig:Bend} shows the envelope in the case of a bend performed in an ele
 
 In an effort to formalize the assessment of the quality of amplitude and frequency modulations of a signal, \cite{1996Loughlinamplitude} proposed some theoretical conditions necessary, but not sufficient, to ensure the physical plausibility of an envelope. 
 
-We comment below on how those conditions translate to the discrete setting, and show that the algorithm here presented satisfies the four conditions presented.
+We comment below on how those conditions translate to the discrete setting, and show that the algorithm proposed satisfies all the four conditions presented.
 
 The first one states that, if a signal is bounded in magnitude, then its envelope should be, as well. Our algorithm complies with this requirement, as the envelope is composed of selected samples from the original signal itself.
 
@@ -411,7 +413,7 @@ The relation $ \min(\text{E}) \ge 1 $ thus holds, since $ \text{E} \subset \text
 
 Provided that one uses a method that preserves the original bounds when interpolating the points in E, such as linear interpolation, we can be sure that all the points in the envelope vector $ \mathbf{e} = (e_0, e_1, \cdots, e_{n-1}) $ are also greater than one.
 
-Recalling Eq. \ref{eq:Envelope}, where the relation between the original signal, the carrier and the envelope was defined as $ \mathbf{w} = \mathbf{e} \odot \mathbf{c} $, we can write the magnitude of an arbitrary frequency of the original signal ($ m_\mathbf{w}(f) $) and, likewise, the magnitude of an arbitrary frequency of the carrier ($ m_\mathbf{c}(f) $) in terms of the Discrete Fourier Transform (DFT) as in Eq. \ref{eq:DFT}:
+Recalling Eq. \ref{eq:Envelope}, where the relation between the original signal, the carrier and the envelope was defined as $ \mathbf{w} = \mathbf{e} \odot \mathbf{c} $, we can write the magnitude of an arbitrary frequency of the original signal ($ m_\mathbf{w}(f) $) and, likewise, the magnitude of an arbitrary frequency of the carrier ($ m_\mathbf{c}(f) $), in terms of the Discrete Fourier Transform (DFT) as in Eq. \ref{eq:DFT}:
 
 \begin{align} \label{eq:DFT}
 \begin{split}
@@ -422,14 +424,13 @@ m_\mathbf{c}(f) &= \sum_{k=0}^{n-1} \sqrt{\left( \frac{w_k}{e_k} \cos(2 \pi k f 
 
 For any given frequency $ f $, both $ m_\mathbf{w}(f) $ and $ m_\mathbf{c}(f) $ are nonnegative. Also, since $ e_k \ge 1 \ \forall \ k, 0 \le k \le n - 1 $ we establish that $ 0 \le m_\mathbf{c}(f) \le m_\mathbf{w}(f) \ \forall \ f $ which is a more restrictive condition than the original: If $ \mathbf{w} $ has a finite frequency range, the magnitude of frequencies outside that range are zero, as are those of the same frequencies of the carrier $ \mathbf{c} $.
 
+The third condition states that a physically plausible algorithm should, for a signal $ \mathbf{w} $ of constant amplitude $ a > 0, \ a \in \mathbb{R} $ and constant frequency, of the form $ a \cos(\omega i + \phi) $, generate a constant envelope $ \mathbf{e} $ of magnitude $ a $ and a carrier wave $ \mathbf{c} $ of the form $ \cos(\omega i + \phi) $.
 
-The third condition states that a physically plausible algorithm should, for a signal $ \mathbf{w} $ of constant amplitude $ a > 0, \ a \in \mathbb{R} $ and constant frequency, of the form $ a \cos(\omega i + \phi) $, result in a constant envelope $ \mathbf{e} $ of magnitude $ a $ and o a carrier wave $ \mathbf{c} $ of the form $ \cos(\omega i + \phi) $.
-
-An example of such behaviour can be observed in Fig. \ref{fig:Comparison_sinusoid}, where the envelope of a simple sinusoid is shown. To see that this is always the case, note that all the extrema of a sinusoid are of the form $ a (\pm 1) $ and $ P_j = (i_j, \lvert a (\pm 1) \lvert) = (i_j, a) \ \forall P_j \in \text{P} $. As $ \text{E} \subset \text{P} $, we have that the envelope $ \mathbf{e} = (a, a, \cdots, a) $ and is, thus constant. Likewise, since $ \mathbf{w} = \mathbf{e} \odot \mathbf{c} $, we have $ c_i = a \cos(\omega i + \phi) / a = \cos(\omega i + \phi) \ \forall \ i, 0 \le i \le n - 1 $.
+An example of such behaviour can be observed in Fig. \ref{fig:Comparison_sinusoid}, where the envelope of a simple sinusoid is shown. To see that this is always the case, note that all the extrema of a sinusoid are of the form $ a (\pm 1) $ and $ P_j = (i_j, \lvert a (\pm 1) \lvert) = (i_j, a) \ \forall P_j \in \text{P} $. As $ \text{E} \subset \text{P} $, we have that the envelope $ \mathbf{e} = (a, a, \cdots, a) $ and is, thus, constant. Likewise, since $ \mathbf{w} = \mathbf{e} \odot \mathbf{c} $, we have $ c_i = a \cos(\omega i + \phi) / a = \cos(\omega i + \phi) \ \forall \ i, 0 \le i \le n - 1 $.
 
 The fourth and last condition states that if a wave is multiplied by a constant, its envelope should also be multiplied by the same constant. 
 
-Recall from section \ref{sec:mapping} that, before the extraction of the envelope, the original points undergo a change of basis to lie in the Cartesian coordinate system. After the extraction, the inverse operation is performed on the points of the Envelope.
+Recall from section \ref{sec:mapping} that, before the extraction of the envelope, the original points undergo a transformation to lie in the Cartesian coordinate system. After the extraction, the inverse operation is performed on the points of the Envelope.
 
 Consider a discrete signal $ \mathbf{w} = (w_0, w_1, \cdots, w_{n-1}) $ and the set P of its absolute extrema, represented in the standard basis, $ \text{P} = \{ P_0, P_1, \cdots, P_{m-1} \}, \quad P_j = (i_j, \beta \lvert w_{i_j} \lvert) $, where $ \beta $ is obtained from Eq. \ref{eq:Basis}.
 
@@ -438,75 +439,75 @@ Given a constant $ \alpha > 0, \alpha \in \mathbb{R} $, we can define the scaled
 This guarantees that the same subset of points E will be identified as part of the envelope in both cases.
 In the respective original basis system, applying the inverse change of basis, those points are $ P_j = (i_j, \frac{\beta}{\beta} \lvert w_{i_j} \lvert)  \quad \forall \  P \in \text{E} $, for the original signal, and $ P^\prime_j = (i_j, \frac{\alpha}{\beta}\frac{\beta}{\alpha} \lvert \alpha w_{i_j} \lvert) $ for the scaled signal.
 
+
 \subsection{Reference envelope}
 
-In order to obtain a numeric indicator of the quality of an envelope, we construct a reference envelope, that trades off practical applicability in favour of mathematical formality.
+In order to obtain a numeric indicator of the quality of an envelope, we construct a reference envelope, that trades off applicability in favour of mathematical formality.
 In \cite{1992BruceCurves} the envelope is defined as the boundary of the region filled by a family of curves. Fig. \ref{fig:RefEnvelopeTheory} illustrates this concept, for a family of sinusoids that share the same frequency and amplitude, and whose phases vary from 0 to $ 2 \pi $.
-
+ 
 \begin{figure}[ht!]
   \centering
     \includegraphics{images/09RefEnvelopeTheory.pdf}
   \caption{Envelope as the boundary of the region filled by a family of curves, for a family of sinusoids with the same frequency and amplitude, modulated by a polynomial.}
   \label{fig:RefEnvelopeTheory}
 \end{figure}
-
-In practical applications, one seldom has access to a family of curves, instead being interested in obtaining the envelope of a single signal. Nevertheless, an approximation can be obtained, by shifting the original signal along its initial position in the horizontal axis, in order to cover the time of one period of the signal.
+ 
+In practical applications, one seldom has access to a family of curves, instead being interested in obtaining the envelope of a single signal. Nevertheless, an approximation can be obtained, by shifting the original signal along its initial position in the horizontal axis by half of its period.
 Fig. \ref{fig:RefEnvelope} shows the reference envelope for the sound of a tom.
-
+ 
 \begin{figure}[ht!]
   \centering
     \includegraphics{images/10RefEnvelope.pdf}
   \caption{Reference envelope obtained by shifting the original signal, for part of a sample of a tom.}
   \label{fig:RefEnvelope}
 \end{figure}
-
-Since envelope is not smooth, being composed of a series of horizontal segments, as can be seen in \ref{fig:RefEnvelope}, besides being computationally expensive to calculate. However, arising from a mathematically sound base, it can serve as a reference to infer the quality of more empirical methods.
-
-
+ 
+The envelope obtained is not smooth, being composed of a series of horizontal segments, as can be seen in \ref{fig:RefEnvelope}, besides being computationally expensive to calculate. However, arising from a mathematically sound basis, it can serve as a reference to infer the quality of more empirical methods.
+ 
 \subsection{Comparison with traditional algorithms}\label{sec:comparison}
-
+ 
 Direct comparison with many of the more recent algorithms is made difficult by the unavailability of digital implementations of such works, many designed to process analog signals \cite[e.g.,][]{2018AssefModeling}.
-
+ 
 Nevertheless, insight can be gained from a comparison of the results of the method here proposed with some of the most common envelope extraction algorithms. Specifically, we compare the present method with the following approaches:
-
+ 
 \begin{enumerate}
-\item Smoothing: This is a relatively simple procedure that, applied to the absolute values of a discrete signal, can provide an approximation of the variation of its amplitude in time. We use the Savitzky-Golay algorithm \cite{1964SavitzkySmoothing} with a window width of 3001 samples and a cubic polynomial.
+\item Smoothing: This is a relatively simple procedure that, applied to the absolute values of a discrete signal, can provide an approximation of the variation of its amplitude in time. We use the Savitzky-Golay algorithm \cite{1964SavitzkySmoothing} with a window width of 3001 samples and a cubic polynomial fitting.
 \item Filtering: The absolute value of the wave is filtered using a digital implementation of the Butterworth \cite{butterworth1930theory} low pass filter. We use an order 2 filter with a cut-off frequency of 10 Hz.
 \item Hilbert Transform: We apply the Hilbert transform to the original signal, filtering the absolute value of the complex result with a Butterworth filter with a cut-off frequency of 1/10 of the fundamental frequency of the original signal.
 \end{enumerate}
-
+ 
 In Fig. \ref{fig:Comparison_sinusoid} we illustrate the envelope extracted by the conventional algorithms, contrasting it with the result of the method presented in this work, for a simple sinusoid. 
 Only the present algorithm and the one based on the Hilbert transform comply with the third condition proposed by \cite{1996Loughlinamplitude}, that states that the envelope of a periodic wave should be a straight line.
-
+ 
 \begin{figure}[ht!]
   \centering
     \includegraphics{images/07Comparison_sinusoid.pdf}
   \caption{Comparison of envelope detection algorithms for a simple sinusoid. The envelope for the Hilbert transform and for the present work are coincident in the image.}
   \label{fig:Comparison_sinusoid}
 \end{figure}
-
-For a recording of the key 33 of a grand piano, where parts of the sound, specially at the start, are highly percussive and noisy, the Hilbert approach presents a considerable deviation, as can be seen in Fig. \ref{fig:Comparison_piano}.
-
+ 
+For a recording of the key 33 of a grand piano, where parts of the sound, specially at the start, are highly percussive and noisy, the Hilbert approach presents a considerable undershooting, as can be seen in Fig. \ref{fig:Comparison_piano}.
+ 
 \begin{figure}[ht!]
   \centering
     \includegraphics{images/07Comparison_piano.pdf}
   \caption{Comparison of envelope detection algorithms for the recording of the key 33 of a grand piano}
   \label{fig:Comparison_piano}
 \end{figure}
-
+ 
 In Fig. \ref{fig:Comparison_soprano} all envelopes exhibit a similar movement along the samples, but the ones generated by traditional algorithms are consistently undershooting the original wave.
-
+ 
 \begin{figure}[ht!]
   \centering
     \includegraphics{images/07Comparison_soprano.pdf}
   \caption{Comparison of envelope detection algorithms for the recording of the vocalization of a soprano singer}
   \label{fig:Comparison_soprano}
 \end{figure}
-
+ 
 Besides, the traditional methods demanded careful choice of parameters. In the case of the Hilbert transform, post-processing in the form of filtering was applied, and an appropriate cut-off frequency had to be chosen. That is in contrast with our method, that organically tunes itself via the automatic choice of the radius of the circle representing the average discrete curvature of the signal.
-
+ 
 Table \ref{table:Error_comparison} presents the average of the absolute errors of the techniques, when compared with the reference envelope introduced in the end of section \ref{sec:quality}
-
+ 
 \begin{table}[ht!]
 \centering
 \begin{tabular}{lcccc}
@@ -527,17 +528,17 @@ tom   & 0.001 & 0.011 & 0.015 & 0.005 \\
 Average & 0.001 & 0.123 & 0.118 & 0.035 \\
 frac. of max. & 0.010 & 1.000 & 0.961 & 0.281 \\
 \end{tabular}
-\caption{Comparison of the average errors of the algorithm presented in this work with the most common methods of digital envelope identification. The discrete waves used were normalized between -1 and 1. The average is between the absolute value of those waves and the envelope divided by two.}
+\caption{Comparison of the average errors of the algorithm presented in this work with the most common methods of digital envelope identification. The discrete waves used were normalized between -1 and 1.}
 \label{table:Error_comparison}
 \end{table}
-
+ 
 We can see from the table \ref{table:Error_comparison} that the method presented here consistently outperforms the traditional approaches for all waves tested, yielding an error of less than 2\% on average, of the error of the traditional methods. 
-
+ 
 The times taken for the algorithms to process each signal are shown in \ref{table:Time_comparison}. 
 The Python source for the tests, as well as the samples used, are available at the repository dedicated to this work, in the file “Comparison of Envelope Algorithms.py”.
-
+ 
 The methods were performed as described in the beginning of this section, using the implementations available at the Scipy library, under the Signal processing module. The presented algorithm, is on average, the second-fastest.
-
+ 
 \begin{table}[ht!]
 \centering
 \begin{tabular}{lcccc}
@@ -561,89 +562,87 @@ frac. of max. & 0.108 & 1.000 & 0.030 & 0.283 \\
 \caption{Comparison of the processing time of the algorithm presented in this work with the most common methods of digital envelope detection.}
 \label{table:Time_comparison}
 \end{table}
-
+ 
 \section{Extensions} \label{sec:extensions}
-
+ 
 In this section we comment briefly on some characteristics and extensions of the presented algorithm, in order to suggest possible applications beyond envelope extraction. One of the less obvious is, perhaps, its use in the segmentation of a signal into pseudo cycles.
-
+ 
 \subsection{Superior and inferior envelopes}
-
+ 
 In practice, is not uncommon for a discrete wave, especially in the case of sound, to present somewhat different superior and inferior contours; in those cases, the algorithm can be easily adapted to infer from the positive and negative pulses defined by the original wave to define two independent “envelopes”, that we are going to call superior and inferior frontiers.
-
+ 
 If we split P, as defined in section \ref{sec:representation}, into $\text{P}^+$, the set of the local maxima of the original signal and $\text{P}^-$, the set of its local minima, we can apply the remaining steps of the algorithm in those two sets independently, arriving at a positive and a negative frontier.
-
+ 
 Fig. \ref{fig:FullFrontiers} illustrates these frontiers for six diverse discrete sound waves, as well as an in-detail view of the highlighted segment for each signal. All waves are records of physical sounds, chosen to represent the applicability of the algorithm in real-world scenarios. The implementation available at the PyPI repository provides an option to extract the frontiers.
-
+ 
 \begin{figure}[ht!]
   \centering
     \includegraphics{images/08FullFrontiers.pdf}
   \caption{Positive and negative frontiers of six digital waves, as extracted by the algorithm here presented. For each wave, the region highlighted in black is shown in detail besides the whole wave. For each wave, the horizontal axis is the sample number $ i $, while the vertical axis is the normalized amplitude. All 6 waves were recorded at 44100 fps.}
   \label{fig:FullFrontiers}
 \end{figure}
-
-The frontiers were are satisfactorily detected in the case of harmonic and inharmonic sounds, and are robust in relation to the number of samples and the frequencies of the waves. It is worth noting that the positive and negative frontiers are generally smoother than the unified envelope and seems to conform better to the countours of the underlying digital signal.
-
-
+ 
+The frontiers were satisfactorily detected in the case of harmonic and inharmonic sounds, and are robust in relation to the number of samples and the frequencies of the waves. It is worth noting that the positive and negative frontiers are generally smoother than the unified envelope and seems to conform better to the contours of the underlying digital signal.
+ 
 \subsection{Simplified spectral representation} 
-
-The temporal envelope adds complexity to the spectral representation of a wave \cite{2019TarjanoNeuro}, and an accurate description of the envelope, while describing the evolution of the instantaneous amplitude of a signal in time, would also simplify further spectral analysis. 
-
+ 
+The temporal envelope adds complexity to the spectral representation of a wave \cite{2019TarjanoNeuro}, and an accurate representation of the envelope, while describing the evolution of the instantaneous amplitude of a signal in time, would also simplify further spectral analysis. 
+ 
 Fig. \ref{fig:Fourier} shows the frequency-domain power spectrum for the wave and the carrier presented in \ref{fig:Envelope}. For the carrier, the power spectrum presents two nonzero values, while the power spectrum for the wave composed of the carrier modulated by the envelope is more complex.
-
+ 
 \begin{figure}[ht!]
   \centering
     \includegraphics{images/11Fourier.pdf}
   \caption{Fourier power spectrum for the wave and carrier shown in \ref{fig:Envelope}.}
   \label{fig:Fourier}
 \end{figure}
-
-Fig. \ref{fig:FourierBend} shows part the power spectra for both the original wave and the carrier obtained by the present algorithm, for the guitar bend sound in Fig. \ref{fig:Bend}, around its fundamental frequency. Two prominent frequencies can be seen, the initial and final notes of the bend. In the carrier, the other frequencies appear more smooth.
-
+ 
+Fig. \ref{fig:FourierBend} shows part of the power spectra for both the original wave and the carrier obtained by the present algorithm, for the guitar bend sound in Fig. \ref{fig:Bend}, around its fundamental frequency. Two prominent frequencies can be seen, the initial and final notes of the bend. In the carrier, the other frequencies appear smoother.
+ 
 \begin{figure}[ht!]
   \centering
     \includegraphics{images/12Fourier.pdf}
   \caption{Fourier power spectrum for the wave and carrier of the sound of a guitar bend shown in Fig. \ref{fig:Bend}.}
   \label{fig:FourierBend}
 \end{figure}
-
+ 
 \subsection{Approximated location of pseudo-cycles} 
-
+ 
 The algorithm developed in this work naturally divides a signal into its pseudo-cycles, pinpointing them in the time-domain, as illustrated in Fig. \ref{fig:singer_voice}, for the sound of an alto singer singing a sustained note, as in Fig. \ref{fig:singer_voice}. 
-
-The vertical lines mark the indices of the samples that belong to the positive frontier of the original signal, and the section between each vertical line isolates a pseudo cycle of the wave. Note that, although two local maxima exist in each pseudo cycle, only the largest was marked.
-
+ 
+The vertical lines mark the indices of the samples that belong to the positive frontier of the original signal, and the section between each vertical line isolates a pseudo cycle of the wave. Note that, although two local maxima exist in each pseudo cycle, only the largest was marked by the algorithm.
+ 
 \begin{figure}[ht!]
   \centering
     \includegraphics{images/09PCs.pdf}
   \caption{Section of the digital wave illustrated in \ref{fig:singer_voice}, with vertical lines at the indices of the samples that belong to the positive frontier.}
   \label{fig:PCs}
 \end{figure}
-
-Therefore, using those indices, one can split a discrete wave into its pseudo cycles. One application of that is illustrated in Fig. \ref{fig:AvgPc}: It shows the superposition of the extracted pseudo cycles, after being normalized by length, and their average. They were also rotated to make their starting point more close to zero.
-
+ 
+Therefore, using those indices, one can split a discrete wave into its pseudo cycles. One application of that is illustrated in Fig. \ref{fig:AvgPc}: It shows the superposition of the extracted pseudo cycles, after being normalized by length, and their average. They were also rotated to make their starting point closer to zero.
+ 
 This same average is shown shifted, to exemplify that approximate $C^0$ and $C^1$ continuity is achieved. This can be seen as the average waveform of the original discrete signal, and can be used, along with the information of its envelope, to generate an alternative representation of the wave, useful, for example, for compression and classification purposes.
-
+ 
 \begin{figure}[ht!]
   \centering
     \includegraphics{images/10AvgPc.pdf}
   \caption{Pseudo-cycles of the wave illustrated in \ref{fig:singer_voice}, segmented and superposed, and their average. The average is also shown shifted by one average period, to illustrate the average continuity.}
   \label{fig:AvgPc}
 \end{figure}
-
-
+ 
 \section{Conclusion}
 This work fills a gap identified in the theory of digital signal processing, where the lack of general procedures for the accurate identification of the temporal envelope of arbitrary waves poses an obstacle to the complete description and eventual manipulation of signals.
-
+ 
 By presenting a general approach for envelope detection, and eliminating the need for parameter tuning, we expect to facilitate further research in the many areas that rely on envelope detection techniques, and improve already existing algorithms that have envelope detection as an intermediary step.
-
+ 
 Illustrating the efficiency of an algorithm inspired by geometric aspects of a discrete signal on a wide range of real-world signals, we also hope to encourage research in this direction.
-
+ 
 The present work also highlights some gaps in our current understanding and definition of temporal envelope and, in so doing, endeavours to motivate further research in this topic, that can ultimately give rise to a more mathematically rigorous envelope theory, especially concerning broadband waves; suggestions in this direction were also presented.
-
+ 
 While relevant in its own accord, the procedure here presented approximately isolates the individual pseudo-cycles of a wave, pinpointing them in the time-domain. 
-
+ 
 Similarly, by decomposing a wave into its envelope and carrier, and simplifying the representation of such carrier in the frequency-domain, a rich set of advancements, especially in the areas of sound compression and synthesis in the time and frequency-domains, can be built upon this initial algorithm.
-
+ 
 By illustrating how this information can be used to obtain the average waveform of a discrete wave, we hope to encourage research in this area, ultimately leading to alternative representations of discrete waves.
 
 \bibliography{bibli}
