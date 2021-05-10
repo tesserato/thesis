@@ -96,7 +96,7 @@ Section \ref{sec:quality} discusses the difficulties in the assessment of the qu
 In Section \ref{sec:comparison} we compare the presented algorithm with traditional envelope detection methods in terms of accuracy and time and present, in Section \ref{sec:extensions},  potential applications of the algorithm, some of which might not be immediately obvious.
 
 Links to interactive visualizations are available from the repository prepared for this work \cite{2020TarjanoEnvelope}, which also contains an implementation of the method in pure Python.
-A Python module can be installed from the Python Package Index (PyPI) with the command `pip install signal-envelope`. Besides, those working under Windows 64-bit can benefit from a specialized dynamic library coded in C++ that is automatically used within this module, and can be separately obtained via the release section in the repository.
+A Python module can be installed from the Python Package Index (PyPI) with the command “pip install signal-envelope”. Besides, those working under Windows 64-bit can benefit from a specialized dynamic library coded in C++ that is automatically used within this module, and can be separately obtained via the release section in the repository.
 
 
 \section{Temporal envelopes}\label{sec:envelope}
@@ -139,7 +139,7 @@ We address this problem by assuming $ C(t) $ to be normalized between $ \{-1, 1\
 
 In this work we are concerned with the discrete version of the envelope detection problem: given a finite digital wave represented by the vector $ \mathbf{w} \in \mathbb{R}^n $, obtaining the temporal envelope $ \mathbf{e} $ of $ \mathbf{w} $. 
 
-The preceding definitions can be translated to this discrete scenario assuming that the discrete quantities arise from observing the continuous ones at regular time intervals. In that case, the equality $ i = t \ \text{fps} $ can be used to link both settings, where $ i $ is the index of each sample of the digital signal, $ t $ stands for the time in seconds, and fps is the frame rate, or the number of observations made in one second. We can thus define:
+The preceding definitions can be translated to this discrete scenario assuming that the discrete quantities arise from observing the continuous ones at regular time intervals. In that case, the equality $ i = t \ \text{fps} $ can be used to link both settings, where $ i $ is the index of each sample of the discrete signal, $ t $ stands for the time in seconds, and fps is the frame rate, or the number of observations made in one second. We can thus define:
 
 \begin{align} \label{eq:Envelope}
 \begin{split}
@@ -165,8 +165,9 @@ The $ \odot $ operator in \ref{eq:Envelope} stands for the Hadamard product, den
 
 In Fig. \ref{fig:Envelope} a signal arising from the multiplication of a known carrier wave \textbf{c} and a known envelope \textbf{e} is shown; this helps to illustrate a key concept: note from Fig. \ref{fig:Envelope} that, only at some local extrema, the envelope can be inferred without prior knowledge of the underlying carrier, being, in fact, equal to the value of the instantaneous amplitude of the wave $ w_i $. That is, $ c_i = 1 $ at those points, rendering $ e_i = 1 w_i $.
 
-This realization that the envelope of a wave is defined only at some of the wave's local extrema is important, as we can use it to generate a simplified representation of a signal that will make the algorithm more efficient. 
+This realization that the envelope of a wave is defined only at some of the wave's local extrema is important, as we can use it to generate a simplified representation of a signal that will make the algorithm more efficient.
 
+Note that, in Fig. \ref{fig:Envelope}, the carrier, the original signal and even the envelope are representations of similar entities: signals in the same coordinate system. That is in contrast with some representations found in the literature of amplitude and frequency modulation of narrowband signals \cite[e.g.,][]{1996Loughlinamplitude} where the FM and AM of a signal are represented in different coordinate systems, commonly frequency versus time and amplitude versus time, respectively.
 
 \section{Simplified Representation of a signal} \label{sec:representation}
 
@@ -582,7 +583,7 @@ Fig. \ref{fig:FullFrontiers} illustrates these frontiers for six diverse discret
   \label{fig:FullFrontiers}
 \end{figure}
  
-The frontiers were satisfactorily detected in the case of harmonic and inharmonic sounds, and are robust in relation to the number of samples and the frequencies of the waves. It is worth noting that the positive and negative frontiers are generally smoother than the unified envelope and seems to conform better to the contours of the underlying digital signal.
+The frontiers were satisfactorily detected in the case of harmonic and inharmonic sounds, and are robust in relation to the number of samples and the frequencies of the waves. It is worth noting that the positive and negative frontiers are generally smoother than the unified envelope and seems to conform better to the contours of the underlying discrete signal.
  
 \subsection{Simplified spectral representation} 
  

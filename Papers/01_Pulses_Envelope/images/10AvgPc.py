@@ -65,7 +65,7 @@ FONT = dict(
 fig = go.Figure()
 fig.layout.template ="plotly_white" 
 fig.update_layout(
-  xaxis_title="<b><i>i</i></b>",
+  xaxis_title="<b>Sample <i>i</i></b>",
   yaxis_title="<b>Amplitude</b>",
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=0, r=0, b=0, t=0),

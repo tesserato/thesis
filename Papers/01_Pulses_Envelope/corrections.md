@@ -1,5 +1,5 @@
 # Response to Reviewers
-Mention the page, paragraph, and line number of any revisions that are made.
+<!-- Mention the page, paragraph, and line number of any revisions that are made. -->
 
 
 # Reviewer #2: This is an interesting research. It seems that the authors have already put this article publicly accessible at arXiv.org. The authors are suggested to consider and address the following issues:
@@ -14,11 +14,10 @@ We extensively reviewed the text, rewriting many parts of it, besides restructur
 We revised the abstract, removing superfluous information and verbose phrasing in order to make it more succinct, resulting in a reduction from the original 349 words to 248 words in the revised version.
 
 ## Citation of references should be in order and no jump of reference numbers.
-Alphabetically ordering citations seems to be the default behaviour of biblatex, and we are sorry for the overlook. The issue was fixed by adding `sorting=none` to the biblatex import in the tex source.
+This issue seems to be caused by the set of commands used to compile the TeX source, and we are sorry for the overlook. It was fixed in the revised version.
 
 ## What's the Abscissa in the highlights (50k, 100k, etc.) and some figures?
-The abscissas refer to the sample i of the digital signal. We revised the legends to make this information explicit, and also made this information more explicit in the paragraph where the discrete version of the problem is introduced.
-<!-- TODO -->
+The abscissas refer to the index *i* of the samples of the discrete signal. We revised the legends of figures 3 to 6, 10 to 17, 21 and 22 to include this information, and also made this more explicit in the paragraph where the discrete version of the problem is introduced (line 107).
 
 ## Legends in some figures are confusing and hard to distinguish, such as in Fig 2: signal and Hilbert Envelope.
 We reworked all figures, color coding the different entities shown when deemed helpful, with careful attention to the impact in the readability of the legends.
