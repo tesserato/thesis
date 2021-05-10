@@ -160,6 +160,7 @@ Include interactive data visualizations in your publication and let your readers
 
 Intuitively, the temporal envelope can be understood as a slowly varying function that multiplies the signal, being responsible for its outer shape.
 
+It is worth noting that, although that is the case throughout this work, the algorithm doesn't the original signal to be sampled at equal intervals.
 
 Besides the most direct applications of this work to audio classification and synthesis, we foresee impact in compression techniques and machine learning approaches to audio. We briefly discuss some potential paths in this direction. The discrete curvature definition presented could also be extended to three-dimensional settings, to improve shape detection algorithms based on alpha shapes.
 

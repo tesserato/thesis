@@ -259,7 +259,7 @@ We formalize the set V of vectors in Eq. \ref{eq:Vectors} below.
 
 \subsection{The Equivalent Circle Approach}
 
-We thus proceed to define a discrete curvature measure over the edges of a discrete curve. To that end we are going to apply the definition of smooth curvature as the rate of change of the unit tangent to a curve. This definition is convenient, since it is equivalent to that of the osculating circle \cite{2016VasaMesh}, the value we are interested in finding.
+We thus proceed to define a discrete curvature measure over the edges of a discrete curve. To that end, we are going to apply the definition of smooth curvature as the rate of change of the unit tangent to a curve. This definition is convenient, since it is equivalent to that of the osculating circle \cite{2016VasaMesh}, the value we are interested in finding.
 
 One of those edges, in the form of the vector $ v_k \in \text{V} $, is singled out in Fig. \ref{fig:DiscreteCurvature}. $ v_k $ represents the net displacement of the envelope from the extrema $ P_{j} = (x_j, y_j) $ to $ P_{j+1} = (x_{j+1}, y_{j+1}) $. Since we don't yet know which points of P are part of the envelope, instead of assuming that the trajectory before $ P_{j} $ passes through $ P_{j-1} $, it is more prudent to assume that it can have passed anywhere in the line segment from points $ (x_j - (x_{j+1} - x_j), y_j - (y_{j+1} - y_j)) $ to $ (x_j - (x_{j+1} - x_j), y_j + (y_{j+1} - y_j)) $, the bold line segment before $ v_k $ in Fig. \ref{fig:DiscreteCurvature}.
 
@@ -267,14 +267,14 @@ That is because all we can safely assume from $ v_k $ is that, in the immediate 
 
 Since this is true for all the vectors $ v_k \in \text{V} $, we can consider that, on average, the envelope insides horizontally at $ P_{j} $.
 
-The rationale then is to find, for each vector $ v_k $, the radius $ r_k $ of the equivalent circle whose tangent has the same change in direction, in the same horizontal distance, as the vector, as shown in Fig. \ref{fig:DiscreteCurvature}. The average curvature of P will then be obtained by the average of all radii $ r_k $.
+The rationale then is to find, for each vector $ v_k $, the radius $ r_k $ of the equivalent circle whose tangent has the same change in direction, in the same horizontal distance, as the vector and the horizontal direction, as shown in Fig. \ref{fig:DiscreteCurvature}. The average curvature of P will then be obtained by the average of all radii $ r_k $.
 
 From Fig. \ref{fig:DiscreteCurvature} one can see that $ r_k = v_{k,x} / \sin(\theta_k) $ where $ v_{k,x} $ is the component of $ v_k $ in the horizontal direction; $ \theta_k $ itself can be obtained using the slope $ m_0 = 0 $ of the horizontal line and the slope $ m_k = v_{k,y} / v_{k,x} $ defined by $ v_k $ using the equality $ \theta_k = \arctan \big( (m_k - m_0) / (1 + m_k m_0) \big) $.
 
 \begin{figure}[ht!]
   \centering
     \includegraphics{images/05DiscreteCurvature.pdf}
-  \caption{The tangent unit vector of the circle changes from the horizontal direction in $ \hat{u}_0 $ to an inclination of $ \theta_k $ in $ \hat{u}_1 $, $ \theta_k $ being the angle that the vector $ v_k $ makes with the horizontal direction.}
+  \caption{The unit vector tangent to the circle changes from the horizontal direction in $ \hat{u}_0 $ to an inclination of $ \theta_k $ in $ \hat{u}_1 $, $ \theta_k $ being the angle that the vector $ v_k $ makes with the horizontal direction.}
   \label{fig:DiscreteCurvature}
 \end{figure}
 
@@ -286,7 +286,7 @@ The radius is also directly proportional to $ v_{k,x} $, making the radius large
   r_k = \frac{v_{k,x} \sqrt{v_{k,x}^2 + v_{k,y}^2}}{ v_{k,y}}
 \end{align}
 
-For calculation purposes, however, this can pose a problem, as a zero could make its way into the denominator of a fraction; in the actual algorithm, the quantity calculated for each vector is the curvature itself, that is, the inverse of each radius $ r_k $. In this way, the problem is avoided, since $ v_{k,x} $ is guaranteed to be greater than zero. The average of curvatures is then inverted in order to obtain the average radius $ \overline{r} $, as illustrated in Eq. \ref{eq:Curvature}.
+For calculation purposes, however, the formulation in Eq. \ref{eq:Radius} poses a problem, as a zero could make its way into the denominator of a fraction; in the actual algorithm, the quantity calculated for each vector is the curvature itself, that is, the inverse of each radius $ r_k $. In this way, the problem is avoided, since $ v_{k,x} $ is guaranteed to be greater than zero. The average of curvatures is then inverted in order to obtain the average radius $ \overline{r} $, as illustrated in Eq. \ref{eq:Curvature}.
 
 \begin{align} \label{eq:Curvature}
 \overline{r} = \left( \frac{\sum\limits_{k=0}^{m-2} \left( \frac{ v_{k,y}}{v_{k,x} \sqrt{v_{k,x}^2 + v_{k,y}^2}} \right)}{m-2} \right)^{-1}
@@ -294,13 +294,12 @@ For calculation purposes, however, this can pose a problem, as a zero could make
 
 \section{Identifying the envelope} \label{sec:envelopedetection}
 
-We need now to construct an algorithm, using the radius just obtained, to identify the points that belong to the envelope. Generally, alpha-shapes based algorithms resort to the construction of the Delaunay triangulation of the set of points, that is latter filtered to contain only the outer edges. We can adopt a more straightforward method, as our points have a sequential structure. 
+We need now to construct an algorithm, using the radius just obtained, to identify the points that belong to the envelope. Generally, alpha shapes based algorithms resort to the construction of the Delaunay triangulation of the set of points, that is latter filtered to contain only the outer edges. We can adopt a more straightforward method, as our points have a sequential structure. 
 
-It is worth noting that, although that is the case throughout this work, the original signal doesn't need to be sampled at equal intervals.
-
-Let $ x_o, y_o \in \mathbb{R}, \quad 0 \le y_o < +\infty $ be the coordinates of the center of a circle with radius $ r $, that can be placed anywhere in the upper plane of the coordinate system;
+Let $ x_o, y_o \in \mathbb{R}, \quad 0 \le y_o $ be the coordinates of the center of a circle with radius $ r $, that can be placed anywhere in the upper plane of the coordinate system;
 
 Let $ P_a, P_b, P_c \in \text{P}, \quad P_a \ne P_b \ne P_c $ be three different points of the set P;
+
 
 For all circles of center $ x_o, y_o $ and radius $ r $ that can be constructed to pass through any two different points of P, that is, $ \forall \quad P_b, P_c $ such that $ (P_{b,x} - x_o)^2 + (P_{b,y} - y_o)^2 = (P_{c,x} - x_o)^2 + (P_{c,y} - y_o)^2 = r^2 $, $ P_a $ will be part of the set $ E $ of the points belonging to the envelope if and only if none of those circles contain $ P_a $, or $ P_a \in \text{E} \leftrightarrow (P_{b,x} - x_o)^2 + (P_{b,y} - y_o)^2 > r^2 $. Summarizing this, we have Eq. \ref{eq:InEnvelope}:
 
@@ -308,11 +307,11 @@ For all circles of center $ x_o, y_o $ and radius $ r $ that can be constructed 
 \begin{split}
 & P_a \in \text{E} \leftrightarrow (P_{b,x} - x_o)^2 + (P_{b,y} - y_o)^2 > r^2, \\
 & \forall \ P_b, P_c \mid (P_{b,x} - x_o)^2 + (P_{b,y} - y_o)^2 = (P_{c,x} - x_o)^2 + (P_{c,y} - y_o)^2 = r^2, \\
-& P_a, P_b, P_c \in \text{P}, \quad P_a \ne P_b \ne P_c \quad \text{and} \quad x_o, y_o \in \mathbb{R}, \quad 0 \le y_o < +\infty
+& P_a, P_b, P_c \in \text{P}, \quad P_a \ne P_b \ne P_c \quad \text{and} \quad x_o, y_o \in \mathbb{R}, \quad 0 \le y_o
 \end{split}
 \end{align}
 
-The algorithm follows directly from the definition in \ref{eq:InEnvelope} after noting that the first and last members of P will always be part of the envelope, since they are reachable by a circle of any radius $ r $. From $ P_0 $, our first pivot point, we construct circles passing through $ P_1, P_2, \cdots, P_d $ until a circle that doesn't contain any point in P is found; $ P_d $ then becomes the new pivot point and is included in E, and this process continues until $ P_{m-1} $ is reached.
+The algorithm follows directly from the definition in \ref{eq:InEnvelope} after noting that the first and last members of P will always be part of the envelope, since they are reachable by any circle of any radius $ r $. From $ P_0 $, our first pivot point, we construct circles passing through $ P_1, P_2, \cdots, P_d $ until a circle that doesn't contain any point in P is found; $ P_d $ then becomes the new pivot point and is included in E, and this process continues until $ P_{m-1} $ is reached.
 
 The procedure is formalized in the algorithm \ref{FindEnvelope}. We don't provide similar algorithmic descriptions of the preceding steps since the Python implementation available at \cite{2020TarjanoEnvelope} can easily serve as pseudocode.
 
