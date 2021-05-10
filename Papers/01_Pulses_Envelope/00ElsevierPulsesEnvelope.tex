@@ -95,7 +95,7 @@ We next explore, in Section \ref{sec:curvature}, the concept of discrete curvatu
  
 Section \ref{sec:quality} discusses the difficulties in assessing the quality of an envelope, proposing qualitative and quantitative approaches, and demonstrates that the method presented conforms to four requirements for a physically plausible envelope proposed in \cite{1996Loughlinamplitude}.
  
-In Section \ref{sec:comparison} we compare the presented algorithm with traditional envelope detection methods in terms of accuracy and time and present, in Section \ref{sec:extensions},  potential applications of the algorithm, some of which might not be immediately obvious.
+In Section \ref{sec:comparison} we compare the presented algorithm with traditional envelope detection methods in terms of accuracy and time and present, in Section \ref{sec:extensions}, potential applications of the algorithm, some of which might not be immediately obvious.
 
 Links to interactive visualizations are available from the repository prepared for this work \cite{2020TarjanoEnvelope}, which also contains an implementation of the method in pure Python.
 A Python module can be installed from the Python Package Index (PyPI) with the command “pip install signal-envelope”. Besides, those working under Windows 64-bit can benefit from a specialized dynamic library coded in C++ that is automatically used within this module, and can be separately obtained via the release section in the repository.
@@ -157,7 +157,7 @@ The preceding definitions can be translated to this discrete scenario assuming t
 \end{split}
 \end{align}
 
-The $ \odot $ operator in \ref{eq:Envelope} stands for the Hadamard product, denoting element-wise multiplication of two vectors. Fig. \ref{fig:Envelope} provides an example of the vectors just defined: \textbf{w} is obtained by multiplying the normalized carrier wave \textbf{c} using the envelope \textbf{e}.
+The $ \odot $ operator in Equation \ref{eq:Envelope} stands for the Hadamard product, denoting element-wise multiplication of two vectors. Fig. \ref{fig:Envelope} provides an example of the vectors just defined: \textbf{w} is obtained by multiplying the normalized carrier wave \textbf{c} using the envelope \textbf{e}.
 
 \begin{figure}[ht!]
   \centering
@@ -204,7 +204,7 @@ the direct link between P and \textbf{w}, that arises from the fact that the abs
 
 It is best to leave the abscissas intact and multiply the now unitless vertical coordinates of each point by the average of the difference between the abscissa of a point and the abscissa of the immediately posterior. In this way, we can consider both axes as having unit $ i $, and the relationship is preserved, making it easier to recover the envelope points in the original coordinates later.
 
-Considering $P_{\mathbf{b}}$ as a point of the set P represented on the original basis and $P_{\mathbf{s}}$ the same point as represented on the standard basis, we can formalize this transformation as in \ref{eq:Basis}:
+Considering $P_{\mathbf{b}}$ as a point of the set P represented on the original basis and $P_{\mathbf{s}}$ the same point as represented on the standard basis, we can formalize this transformation as in Equation \ref{eq:Basis}:
 
 \begin{align}\label{eq:Basis}
 \begin{split}
@@ -254,7 +254,7 @@ Thus, the set V of the vectors from each point of P to the next, shown in the Fi
   \label{fig:Vectors}
 \end{figure}
 
-We formalize the set V of vectors in Eq. \ref{eq:Vectors} below.
+We formalize the set V of vectors in Equation \ref{eq:Vectors} below.
 
 \begin{align} \label{eq:Vectors}
 \text{V} = \{ v_0, v_1, \cdots, v_{m-2} \} \quad \text{where} \quad v_k = P_{j+1} - P_j \quad \forall \quad 0 \le k \le m-2
@@ -284,7 +284,7 @@ From Fig. \ref{fig:DiscreteCurvature} one can see that $ r_k = v_{k,x} / \sin(\t
   \label{fig:DiscreteCurvature}
 \end{figure}
 
-The radius $ r_k $ of the circle equivalent to each $ v_k $ is defined in Eq. \ref{eq:Radius}. This equation has the desirable property that $ v_{k,y} \to 0 \implies v_{k,y} \to \infty $, that is, the radius tends to infinity when no vertical oscillation occurs, effectively turning the circle into a line. 
+The radius $ r_k $ of the circle equivalent to each $ v_k $ is defined in Equation \ref{eq:Radius}. This equation has the desirable property that $ v_{k,y} \to 0 \implies v_{k,y} \to \infty $, that is, the radius tends to infinity when no vertical oscillation occurs, effectively turning the circle into a line. 
 
 The radius is also directly proportional to $ v_{k,x} $, making the radius larger the more the points are horizontally far from each other.
 
@@ -292,7 +292,7 @@ The radius is also directly proportional to $ v_{k,x} $, making the radius large
   r_k = \frac{v_{k,x} \sqrt{v_{k,x}^2 + v_{k,y}^2}}{ v_{k,y}}
 \end{align}
 
-For calculation purposes, however, the formulation in Eq. \ref{eq:Radius} poses a problem, as a zero could make its way into the denominator of a fraction; in the actual algorithm, the quantity calculated for each vector is the curvature itself, that is, the inverse of each radius $ r_k $. In this way, the problem is avoided, since $ v_{k,x} $ is guaranteed to be greater than zero. The average of curvatures is then inverted in order to obtain the average radius $ \overline{r} $, as illustrated in Eq. \ref{eq:Curvature}.
+For calculation purposes, however, the formulation in Equation \ref{eq:Radius} poses a problem, as a zero could make its way into the denominator of a fraction; in the actual algorithm, the quantity calculated for each vector is the curvature itself, that is, the inverse of each radius $ r_k $. In this way, the problem is avoided, since $ v_{k,x} $ is guaranteed to be greater than zero. The average of curvatures is then inverted in order to obtain the average radius $ \overline{r} $, as illustrated in Equation \ref{eq:Curvature}.
 
 \begin{align} \label{eq:Curvature}
 \overline{r} = \left( \frac{\sum\limits_{k=0}^{m-2} \left( \frac{ v_{k,y}}{v_{k,x} \sqrt{v_{k,x}^2 + v_{k,y}^2}} \right)}{m-2} \right)^{-1}
@@ -316,7 +316,7 @@ For all circles of center $ x_o, y_o $ and radius $ r $ that can be constructed 
 \end{split}
 \end{align}
 
-The algorithm follows directly from the definition in Eq. \ref{eq:InEnvelope} after noting that the first and last points of P will always be part of the envelope. Since $ P_a $ can be equal to $ P_b $, it is always possible to construct a circle containing those points, by placing the center of the circle to the left of or right of the first or last point, respectively. The discs defined by those circles can't contain any other point.
+The algorithm follows directly from the definition in Equation \ref{eq:InEnvelope} after noting that the first and last points of P will always be part of the envelope. Since $ P_a $ can be equal to $ P_b $, it is always possible to construct a circle containing those points, by placing the center of the circle to the left of or right of the first or last point, respectively. The discs defined by those circles can't contain any other point.
 
 From $ P_0 $, our first pivot point, we construct circles passing through $ P_1, P_2, \cdots, P_d $ until a circle that doesn't contain any point in P is found; $ P_d $ then becomes the new pivot point and is included in E, and this process continues until $ P_{m-1} $ is reached.
 
@@ -349,7 +349,7 @@ The procedure is formalized in algorithm \ref{FindEnvelope}. We don't provide si
 
 The set E obtained via the algorithm \ref{FindEnvelope} is a subset of P, and thus also a set of points in the Euclidean space. 
 
-Recall from section \ref{sec:mapping} that the vertical coordinates of these points are currently scaled, in relation to the original signal, by the transformation described in Eq. \ref{eq:Basis}. We could invert this transformation, but since we were careful to maintain the direct link between the horizontal coordinates in both coordinate systems, we can simply consider the horizontal coordinates of P as the indices of the samples of the original discrete signal, and retrieve the envelope at each point directly.
+Recall from Section \ref{sec:mapping} that the vertical coordinates of these points are currently scaled, in relation to the original signal, by the transformation described in Equation \ref{eq:Basis}. We could invert this transformation, but since we were careful to maintain the direct link between the horizontal coordinates in both coordinate systems, we can simply consider the horizontal coordinates of P as the indices of the samples of the original discrete signal, and retrieve the envelope at each point directly.
 
 After converting E to the original coordinate system, the most straightforward way to transform those points into the vector $ \textbf{e} \in \mathbb{R}^n $ is via linear interpolation, the approach used in this work.
 
@@ -398,7 +398,7 @@ We comment below on how those conditions translate to the discrete setting, and 
 The first one states that, if a signal is bounded in magnitude, its envelope should also be bounded. Our algorithm complies with this requirement, as the envelope is composed of selected samples from the original signal itself.
 
 More formally, we have the set P of the absolute values of the local extrema of the original signal $ \mathbf{w} = (w_0, w_1, \cdots, w_{n-1}) $ that contains, by definition, the global extrema of $ \mathbf{w} $.
-The set E of the points that belong to the envelope is a subset of P. We can thus write Eq. \ref{eq:Req1}:
+The set E of the points that belong to the envelope is a subset of P. We can thus write Equation \ref{eq:Req1}:
 
 \begin{align} \label{eq:Req1}
 \begin{split}
@@ -419,7 +419,7 @@ The relation $ \min(\text{E}) \ge 1 $ thus holds, since $ \text{E} \subset \text
 
 Provided that one uses a method that preserves the original bounds when interpolating the points in E, such as linear interpolation, we can be sure that all the points in the envelope vector $ \mathbf{e} = (e_0, e_1, \cdots, e_{n-1}) $ are also greater than one.
 
-Recalling Eq. \ref{eq:Envelope}, where the relation between the original signal, the carrier and the envelope was defined as $ \mathbf{w} = \mathbf{e} \odot \mathbf{c} $, we can write the magnitude of an arbitrary frequency of the original signal ($ m_\mathbf{w}(f) $) and, likewise, the magnitude of an arbitrary frequency of the carrier ($ m_\mathbf{c}(f) $), in terms of the Discrete Fourier Transform (DFT) as in Eq. \ref{eq:DFT}:
+Recalling Equation \ref{eq:Envelope}, where the relation between the original signal, the carrier and the envelope was defined as $ \mathbf{w} = \mathbf{e} \odot \mathbf{c} $, we can write the magnitude of an arbitrary frequency of the original signal ($ m_\mathbf{w}(f) $) and, likewise, the magnitude of an arbitrary frequency of the carrier ($ m_\mathbf{c}(f) $), in terms of the Discrete Fourier Transform (DFT) as in Equation \ref{eq:DFT}:
 
 \begin{align} \label{eq:DFT}
 \begin{split}
@@ -436,11 +436,11 @@ An example of such behaviour can be observed in Fig. \ref{fig:Comparison_sinusoi
 
 The fourth and last condition states that if a wave is multiplied by a constant, its envelope should also be multiplied by the same constant. 
 
-Recall from section \ref{sec:mapping} that, before the extraction of the envelope, the original points undergo a transformation to lie in the Cartesian coordinate system. After the extraction, the inverse operation is performed on the points of the Envelope.
+Recall from Section \ref{sec:mapping} that, before the extraction of the envelope, the original points undergo a transformation to lie in the Cartesian coordinate system. After the extraction, the inverse operation is performed on the points of the Envelope.
 
-Consider a discrete signal $ \mathbf{w} = (w_0, w_1, \cdots, w_{n-1}) $ and the set P of its absolute extrema, represented in the standard basis, $ \text{P} = \{ P_0, P_1, \cdots, P_{m-1} \}, \quad P_j = (i_j, \beta \lvert w_{i_j} \lvert) $, where $ \beta $ is obtained from Eq. \ref{eq:Basis}.
+Consider a discrete signal $ \mathbf{w} = (w_0, w_1, \cdots, w_{n-1}) $ and the set P of its absolute extrema, represented in the standard basis, $ \text{P} = \{ P_0, P_1, \cdots, P_{m-1} \}, \quad P_j = (i_j, \beta \lvert w_{i_j} \lvert) $, where $ \beta $ is obtained from Equation \ref{eq:Basis}.
 
-Given a constant $ \alpha > 0, \alpha \in \mathbb{R} $, we can define the scaled signal as $ \mathbf{w}^\prime = (\alpha w_0, \alpha w_1, \cdots, \alpha w_{n-1}) $. Observing, from Eq. \ref{eq:Basis}, that $ \alpha $ can be factored out of denominator of the summation, we have $ \beta^\prime = \beta / \alpha $ and the new set $ \text{P}^\prime = \{ P^\prime_0, P^\prime_1, \cdots, P^\prime_{m-1} \}, \quad P^\prime_j = (i_j, \frac{\beta}{\alpha} \lvert \alpha w_{i_j} \lvert) $ is equal to the set P for the signal before scaling.
+Given a constant $ \alpha > 0, \alpha \in \mathbb{R} $, we can define the scaled signal as $ \mathbf{w}^\prime = (\alpha w_0, \alpha w_1, \cdots, \alpha w_{n-1}) $. Observing, from Equation \ref{eq:Basis}, that $ \alpha $ can be factored out of denominator of the summation, we have $ \beta^\prime = \beta / \alpha $ and the new set $ \text{P}^\prime = \{ P^\prime_0, P^\prime_1, \cdots, P^\prime_{m-1} \}, \quad P^\prime_j = (i_j, \frac{\beta}{\alpha} \lvert \alpha w_{i_j} \lvert) $ is equal to the set P for the signal before scaling.
 
 This guarantees that the same subset of points E will be identified as part of the envelope in both cases.
 In the respective original basis system, applying the inverse change of basis, those points are $ P_j = (i_j, \frac{\beta}{\beta} \lvert w_{i_j} \lvert)  \quad \forall \  P \in \text{E} $, for the original signal, and $ P^\prime_j = (i_j, \frac{\alpha}{\beta}\frac{\beta}{\alpha} \lvert \alpha w_{i_j} \lvert) $ for the scaled signal.
@@ -468,7 +468,7 @@ Fig. \ref{fig:RefEnvelope} shows the reference envelope for the sound of a tom.
   \label{fig:RefEnvelope}
 \end{figure}
  
-The envelope obtained is not smooth, being composed of a series of horizontal segments, as can be seen in \ref{fig:RefEnvelope}, besides being computationally expensive to calculate. However, arising from a mathematically sound background, it can serve as a reference to infer the quality of empirical methods.
+The envelope obtained is not smooth, being composed of a series of horizontal segments, as can be seen in Fig. \ref{fig:RefEnvelope}, besides being computationally expensive to calculate. However, arising from a mathematically sound background, it can serve as a reference to infer the quality of empirical methods.
  
 \subsection{Comparison with traditional algorithms}\label{sec:comparison}
  
@@ -512,7 +512,7 @@ In Fig. \ref{fig:Comparison_soprano} all envelopes exhibit a similar movement al
  
 Besides, the traditional methods demanded careful choice of parameters. In the case of the Hilbert transform, post-processing in the form of filtering was applied, and an appropriate cut-off frequency had to be chosen. That is in contrast with our method, which organically tunes itself via the automatic choice of the circle's radius representing the average discrete curvature of the signal.
  
-Table \ref{table:Error_comparison} presents the average of the absolute errors of the techniques, when compared with the reference envelope introduced in the end of section \ref{sec:quality}
+Table \ref{table:Error_comparison} presents the average of the absolute errors of the techniques, when compared with the reference envelope introduced in the end of Section \ref{sec:quality}
  
 \begin{table}[ht!]
 \centering
@@ -538,9 +538,9 @@ frac. of max. & 0.010 & 1.000 & 0.961 & 0.281 \\
 \label{table:Error_comparison}
 \end{table}
  
-We can see from the table \ref{table:Error_comparison} that the method presented here consistently outperforms the traditional approaches for all waves tested, yielding an error of less than 2\% on average, of the error of the traditional methods. 
+We can see from Table \ref{table:Error_comparison} that the method presented here consistently outperforms the traditional approaches for all waves tested, yielding an error of less than 2\% on average, of the error of the traditional methods. 
  
-The times taken for the algorithms to process each signal are shown in \ref{table:Time_comparison}. 
+The times taken for the algorithms to process each signal are shown in Table \ref{table:Time_comparison}. 
 The Python source for the tests, as well as the samples used, are available at the repository dedicated to this work, in the file “Comparison of Envelope Algorithms.py”.
  
 The methods were performed as described in the beginning of this section, using the implementations available at the Scipy library, under the Signal processing module. The presented algorithm, is on average, the second-fastest.
@@ -577,7 +577,7 @@ In this section we comment briefly on some characteristics and extensions of the
  
 In practice, is not uncommon for a discrete wave, especially in the case of sound, to present somewhat different superior and inferior contours; in those cases, the algorithm can be easily adapted to infer from the positive and negative pulses defined by the original wave to define two independent “envelopes”, that we are going to call superior and inferior frontiers.
  
-If we split P, as defined in section \ref{sec:representation}, into $\text{P}^+$, the set of the local maxima of the original signal and $\text{P}^-$, the set of its local minima, we can apply the remaining steps of the algorithm in those two sets independently, arriving at a positive and a negative frontier.
+If we split P, as defined in Section \ref{sec:representation}, into $\text{P}^+$, the set of the local maxima of the original signal and $\text{P}^-$, the set of its local minima, we can apply the remaining steps of the algorithm in those two sets independently, arriving at a positive and a negative frontier.
  
 Fig. \ref{fig:FullFrontiers} illustrates these frontiers for six diverse discrete sound waves, as well as an in-detail view of the highlighted segment for each signal. All waves are records of physical sounds, chosen to represent the applicability of the algorithm in real-world scenarios. The implementation available at the PyPI repository provides an option to extract the frontiers.
  
@@ -599,11 +599,11 @@ Fig. \ref{fig:Fourier} shows the frequency-domain power spectrum for the wave an
 \begin{figure}[ht!]
   \centering
     \includegraphics{images/11Fourier.pdf}
-  \caption{Fourier power spectrum for the wave and carrier shown in \ref{fig:Envelope}.}
+  \caption{Fourier power spectrum for the wave and carrier shown in Fig. \ref{fig:Envelope}.}
   \label{fig:Fourier}
 \end{figure}
  
-Fig. \ref{fig:FourierBend} shows part of the power spectra for both the original wave and the carrier obtained by the present algorithm, for the guitar bend sound in Fig. \ref{fig:Bend}, around its fundamental frequency. Two prominent frequencies can be seen, the initial and final notes of the bend. In the carrier, the other frequencies appear smoother.
+Fig. \ref{fig:FourierBend} shows part of the power spectra for both the original wave and the carrier obtained by the present algorithm, for the guitar bend sound in Fig. \ref{fig:Bend}, around its fundamental frequency. Two prominent frequencies can be seen, corresponding to the initial and final notes of the bend. In the carrier, the other frequencies appear smoother.
  
 \begin{figure}[ht!]
   \centering
@@ -622,7 +622,7 @@ The vertical lines mark the indices of the samples that belong to the positive f
 \begin{figure}[ht!]
   \centering
     \includegraphics{images/09PCs.pdf}
-  \caption{Section of the digital wave illustrated in \ref{fig:singer_voice}, with vertical lines at the indices of the samples that belong to the positive frontier.}
+  \caption{Section of the digital wave illustrated in Fig. \ref{fig:singer_voice}, with vertical lines at the indices of the samples that belong to the positive frontier.}
   \label{fig:PCs}
 \end{figure}
  
@@ -633,7 +633,7 @@ This same average is shown shifted, to exemplify that approximate $C^0$ and $C^1
 \begin{figure}[ht!]
   \centering
     \includegraphics{images/10AvgPc.pdf}
-  \caption{Pseudo-cycles of the wave illustrated in \ref{fig:singer_voice}, segmented and superposed, and their average. The average is also shown shifted by one average period, to illustrate the average continuity.}
+  \caption{Pseudo-cycles of the wave illustrated in Fig. \ref{fig:singer_voice}, segmented and superposed, and their average. The average is also shown shifted by one average period, to illustrate the average continuity.}
   \label{fig:AvgPc}
 \end{figure}
  
