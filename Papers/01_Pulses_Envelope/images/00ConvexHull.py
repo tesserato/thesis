@@ -98,7 +98,7 @@ fig.update_yaxes(showline=False, showgrid=False, zerolinewidth=1, zerolinecolor=
 
 fig.add_trace(
   go.Scatter(
-    name=f"Alpha-Shape (\u03B1={alpha1})    ",
+    name=f"Alpha shape (\u03B1={alpha1})    ",
     # showlegend=False,
     x=XX1,
     y=YY1,
@@ -113,7 +113,7 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name=f"Alpha-Shape (\u03B1={alpha2})    ",
+    name=f"Alpha shape (\u03B1={alpha2})    ",
     # showlegend=False,
     x=XX2,
     y=YY2,

@@ -1,2 +1,5 @@
 PyPI
 unpitched
+sinusoid
+Hadamard
+extrema
