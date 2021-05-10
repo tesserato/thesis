@@ -3,3 +3,4 @@ unpitched
 sinusoid
 Hadamard
 extrema
+sinusoids

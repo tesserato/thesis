@@ -8,7 +8,7 @@
 We extensively reviewed the text, rewriting many parts of it, besides restructuring the sections to improve flow and coherence.
 
 ## Issues with the Highlights: maximum 85 characters, including spaces, per bullet point
-<!-- TODO -->
+Highlights were rewritten to conform with the requirement of less than 85 characters.
 
 ## Abstract looks too long. Should be presented in a more concise way.
 We revised the abstract, removing superfluous information and verbose phrasing in order to make it more succinct, resulting in a reduction from the original 349 words to 248 words in the revised version.
@@ -17,31 +17,35 @@ We revised the abstract, removing superfluous information and verbose phrasing i
 This issue seems to be caused by the set of commands used to compile the TeX source, and we are sorry for the overlook. It was fixed in the revised version.
 
 ## What's the Abscissa in the highlights (50k, 100k, etc.) and some figures?
-The abscissas refer to the index *i* of the samples of the discrete signal. We revised the legends of figures 3 to 6, 10 to 17, 21 and 22 to include this information, and also made this more explicit in the paragraph where the discrete version of the problem is introduced (line 107).
+The abscissas refer to the index *i* of the samples of the discrete signal. We revised the legends of figures 3 to 6, 10 to 17, 21 and 22 to include this information, and also made this more explicit in the paragraph where the discrete version of the problem is introduced (page 5, line 108).
 
 ## Legends in some figures are confusing and hard to distinguish, such as in Fig 2: signal and Hilbert Envelope.
-We reworked all figures, color coding the different entities shown when deemed helpful, with careful attention to the impact in the readability of the legends.
+We reworked all figures, color coding the different entities shown when deemed helpful, with careful attention to the impact in the readability of the legends. In the case of Fig. 2 in the original manuscript, now Fig. 3 in the revised version (page 4, line 90), we changed the color of the Hilbert envelope to red, and the line indicating the start of the noisy section to black, making both stand apart from the signal.
 
 ## Figure 3: the illustration of the carrier c and wave w does not comply with the common sense of envelope and modulation?
-We changed the legend of the figure and the text of the revised version to make more explicit that the example was constructed from a known carrier and envelope to help in the visualization. 
-<!-- TODO cite examples where this is used-->
+We changed the legend of the figure (page 6, Fig 5, top of the page) and the text of the revised version (page 5, line 113) to make more explicit that the example was constructed from a known carrier and envelope.
+
+Besides, we added a paragraph in the revised version (page 6, line 119) calling attention to the differences between the representations found in the literature.
 
 
 ## Definition of the envelope is very vague and controversial. What's the relationship with the conventional amplitude modulation?
-We made more explicit that a general definition of the envelope of a digital signal is still an open question in the literature, adding recent citations that corroborate this. 
+We made more explicit that a general definition of the envelope of a digital signal is still an open question in the literature, adding recent citations that corroborate this.(page 4, line 74)
 
-We added a general definition for the envelope of a family of curves, that motivated a complete rewrite of the metric used to assess the general quality of envelopes, based on the construction of a reference envelope from the approximation of this formal definition to the discrete case.
+In an effort to better define an envelope, we added a general definition for the envelope of a family of curves (page 13, line 307), that motivated a rewrite of the metric used to assess the general quality of envelopes. This metric is now based on the construction of a reference envelope from the approximation of this formal definition to the discrete case (page 13, line 313).
 
-We greatly extended the discussion of how the proposed method satisfies the 4 conditions necessary for the plausibility of the amplitude and frequency modulation of a signal, proposed by \textcite{1996Loughlinamplitude}, reinforcing the relationship with conventional amplitude modulation. 
+We greatly extended the discussion of how the proposed method satisfies the 4 conditions necessary for the plausibility of the amplitude and frequency modulation of a signal, proposed by 
+TODO \textcite{1996Loughlinamplitude} 
+, reinforcing the relationship with conventional amplitude modulation (page 12, line 261). 
 
 ## For the proposed "Equivalent Circle Approach", an acceptable mathematical background and justification is missing.
-
-
-
+We expanded the explanation for the Equivalent circle, justifying the assumption of the horizontal initial direction, and making the assumptions explicit (page 9, line 190).
 
 ## It's quite doubtful about the assumption of w = e ⊙ c?
-We revised the explanation about this equation to make clear that the relation holds by definition in our work.
-% TODO
+We revised the explanation about this equation to make clear that, besides being assumed in 
+TODO \cite{2011TurnerDemodulation} 
+the relation holds by definition in our work (page 5, equation 1, line 108).  \cite{2019Jiaempirical}
+
+We also noted that the definition based on the analytic signal is common in classic AM-FM literature that deals with narrowband signals.
 
 ## P8: the authors claimed that "the algorithm here presented satisfies the four conditions presented", however, no convincing evidence is provided. Please prove it mathematically.
 We added mathematical proofs for each one of the four conditions.
@@ -54,6 +58,8 @@ We explained the benchmarking more extensively, citing that the implementations 
 
 ## 1. The description of the key concepts is not clear. The paragraphs of the current paper were poorly written and readers cannot follow them easily. The authors are suggested to revise the paper extensively to improve its readability.
 We revised the text extensively, with the aim of improving the overall readability and making the flow of ideas more linear. To that end, the overall structure of sections and subsections was substantially changed.
+
+We also extended the definition of the basic concepts, adding Figures to better illustrate
 
 ## 2. The authors describe basic concepts of convex and concave hulls in an intuitive manner and show that “the idea is to identify the local extrema that tough the envelope”. But the reviewer cannot fully understand the logical connection between them. The authors are suggested to explain their idea in a more explicit manner.
 

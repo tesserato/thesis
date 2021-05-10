@@ -67,7 +67,7 @@ fig.update_yaxes(showline=False, zeroline=False, showgrid=True)
 
 fig.add_trace(
   go.Scatter(
-    name="Signal       ",
+    name="Signal",
     # x=np.arange(rolled_W.size).tolist() + [None],
     y=W,
     mode="lines",
@@ -81,12 +81,12 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Signal, shifted from -T/2 to T/2       ",
+    name="$ \\text{Family of signals, shifted from } i-T/2 \\text{ to } i + T/2 $",
     x=Xf[0:-1:20].flatten()[t : ],#pulses_X,
     y=Yf[0:-1:20].flatten()[t : ],#pulses_Y,
     mode="lines",
     line=dict(width=1, color="rgba(120, 120, 120, .5)"
-    , shape = 'spline'
+    # , shape = 'spline'
     ),
     marker=dict(size=4, color="gray"),
     # showlegend=False
@@ -96,19 +96,19 @@ fig.add_trace(
 
 fig.add_trace(
   go.Scatter(
-    name="Reference envelope       ",
+    name="Reference envelope",
     x=(np.arange(rolled_W.size) - t//2)[t//2 : ],
     y=(np.max(np.array(Yf)[:, 0:-1], 0)[t//2 : ]),
     mode="lines",
     line=dict(width=2, color="red"
-    , shape = 'spline'
+    # , shape = 'spline'
     ),
     marker=dict(size=3, color="red")
     # visible = "legendonly"
   )
 )
 
-fig.show(config=dict({'scrollZoom': True}))
+# fig.show(config=dict({'scrollZoom': True}))
 save_name = "./images/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
 fig.write_image(save_name, width=650, height=350, engine="kaleido", format="svg")
 print("saved:", save_name)
