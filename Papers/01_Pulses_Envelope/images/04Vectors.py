@@ -67,7 +67,7 @@ fig.layout.template ="plotly_white"
 fig.update_layout(
   xaxis_title="<b><i>x</i></b>", # ( <b><i>i</i></b> ) ",
   yaxis_title="<b><i>y</i></b>", # ( <b><i>i</i></b> ) ",
-  yaxis = dict(scaleanchor = "x", scaleratio = 1),
+  # yaxis = dict(scaleanchor = "x", scaleratio = 1),
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=0, r=0, b=0, t=0),
   font=FONT,
@@ -139,7 +139,7 @@ fig.add_trace(
 
 fig.add_annotation(
   x=0,  # arrows' head
-  y=9.5,  # arrows' head
+  y=8,  # arrows' head
   ax=0,  # arrows' tail
   ay=-1,  # arrows' tail
   xref='x',

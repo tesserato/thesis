@@ -50,7 +50,7 @@ Y = Yp * scaling
 '''============================================================================'''
 fig = make_subplots(
     rows=2, cols=1, shared_xaxes=False, #vertical_spacing=0.01,
-    subplot_titles=("<b>Original coordinates</b>", "<b>Cartesian coordinates</b>")
+    subplot_titles=("<b>Original coordinates </b>", "<b>Cartesian coordinates</b>")
     )
 
 FONT = dict(
@@ -66,9 +66,13 @@ for i in fig['layout']['annotations']:
 
 fig.layout.template ="plotly_white" 
 fig.update_layout(
-  # xaxis_title="<b><i>x</i></b>", # ( <b><i>i</i></b> ) ",
-  # yaxis_title="<b><i>y</i></b>", # ( <b><i>i</i></b> ) ",
-  yaxis = dict(scaleanchor = "x", scaleratio = 1),
+  yaxis2=dict(
+      domain=[0, 0.4]
+  ),
+  yaxis=dict(
+      domain=[0.7, 1]
+  ),
+  # yaxis = dict(scaleanchor = "x", scaleratio = 1),
   legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
   margin=dict(l=0, r=0, b=0, t=0),
   font=FONT,
@@ -77,38 +81,57 @@ fig.update_layout(
 # fig.layout.xaxis.title.font=FONT
 # fig.layout.yaxis.title.font=FONT
 
-fig.update_xaxes(showline=False, showgrid=False, zeroline=False, showticklabels=False, title=dict(text="$ i $",font=FONT), row=1, col=1, title_standoff=.0)
-fig.update_xaxes(showline=False, showgrid=False, zeroline=False, showticklabels=True, 
-title=dict(text="$ x \equiv i $",font=FONT), row=2, col=1)
-fig.update_yaxes(showline=False, showgrid=False, zeroline=False, title=dict(text="Amplitude",font=FONT), row=1, col=1, tickvals=[i for i in range(0, 3, 2)])
+fig.update_xaxes(showline=False, showgrid=True, zeroline=False, showticklabels=True, title=dict(text="$ i $",font=FONT), row=1, col=1, 
+# title_standoff=.0, 
+# ticks="inside",
+tickvals=Xp,
+ticktext =Xp
+)
+
+fig.update_yaxes(showline=False, showgrid=False, zeroline=False, title=dict(text="Amplitude",font=FONT), row=1, col=1, tickvals=[i for i in range(0, 3, 2)],
+# scaleanchor = "x", 
+# scaleratio = 1,
+)
+
+scale = 0.9
+
+fig.update_xaxes(showline=False, showgrid=True, zeroline=False, showticklabels=True, 
+title=dict(text="$ x $",font=FONT), row=2, col=1,
+tickvals=Xp * scale,
+ticktext =Xp
+)
+
 fig.update_yaxes(showline=False, showgrid=False, zeroline=False, 
-title=dict(text="$ y $",font=FONT), row=2, col=1, tickvals=[i for i in range(0, 11, 2)])
-
-fig.add_trace(
-  go.Scatter(
-    name= "Stem",
-    showlegend=False,
-    x=[i for x in Xp for i in (x, x, None)],
-    y=[i for y in Yp for i in (0, y, None)],
-    mode='lines',
-    line=dict(color="silver", width=1)
-  ), row=1, col=1
+title=dict(text="$ y $",font=FONT), row=2, col=1, tickvals=[i for i in range(0, 11, 2)],
+# scaleanchor = "x", 
+# scaleratio = 1,
 )
 
-fig.add_trace(
-  go.Scatter(
-    name= "Stem",
-    showlegend=False,
-    x=[i for x in Xp for i in (x, x, None)],
-    y=[i for y in Y for i in (0, y, None)],
-    mode='lines',
-    line=dict(color="silver", width=1)
-  ), row=2, col=1
-)
+# fig.add_trace(
+#   go.Scatter(
+#     name= "Stem",
+#     showlegend=False,
+#     x=[i for x in Xp for i in (x, x, None)],
+#     y=[i for y in Yp for i in (0, y, None)],
+#     mode='lines',
+#     line=dict(color="silver", width=1)
+#   ), row=1, col=1
+# )
+
+# fig.add_trace(
+#   go.Scatter(
+#     name= "Stem",
+#     showlegend=False,
+#     x=[i for x in Xp for i in (x, x, None)],
+#     y=[i for y in Y for i in (0, y, None)],
+#     mode='lines',
+#     line=dict(color="silver", width=1)
+#   ), row=2, col=1
+# )
 
 fig.add_trace(
   go.Scatter(
-    name="P      ",
+    name="Set P      ",
     # showlegend=False,
     x=Xp,
     y=Yp,
@@ -124,8 +147,8 @@ fig.add_trace(
   go.Scatter(
     name="P      ",
     showlegend=False,
-    x=Xp,
-    y=Y,
+    x=Xp * scale,
+    y=Y * scale,
     mode='markers',
     # fill="tozeroy",
     # fillcolor="silver",
@@ -150,7 +173,7 @@ fig.add_trace(
 
 fig.add_annotation(
   x=0,  # arrows' head
-  y=3,  # arrows' head
+  y=9.5,  # arrows' head
   ax=0,  # arrows' tail
   ay=-1,  # arrows' tail
   xref='x',
@@ -218,5 +241,5 @@ fig.add_annotation(
 
 fig.show(config=dict({'scrollZoom': True}))
 save_name = "./images/" + sys.argv[0].split('/')[-1].replace(".py", ".svg")
-fig.write_image(save_name, width=650, height=300, engine="kaleido", format="svg")
+fig.write_image(save_name, width=650, height=400, engine="kaleido", format="svg")
 print("saved:", save_name)
