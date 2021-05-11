@@ -627,7 +627,7 @@ Fig. \ref{fig:FourierBend} shows part of the power spectra for both the original
 \end{figure}
 
  
-\subsection{Approximated location of pseudo-cycles} 
+\subsection{Approximated location of pseudo cycles} 
  
 The algorithm developed in this work naturally divides a signal into its pseudo cycles, pinpointing them in the time-domain. Fig. \ref{fig:singer_voice} exemplifies this, for the sound of an alto singer singing a sustained note seen in Fig. \ref{fig:singer_voice}. 
  
@@ -640,31 +640,35 @@ The vertical lines mark the indices of the samples that belong to the positive f
   \label{fig:PCs}
 \end{figure}
  
-Therefore, using those indices, one can split a discrete wave into its pseudo cycles. One application of that is illustrated in Fig. \ref{fig:AvgPc}: It shows the superposition of the extracted waveforms, after being normalized by length, and their average. They were horizontally shifted to make their starting point close to zero.
+Therefore, using those indices, one can split a discrete wave into its pseudo cycles. One application of that is illustrated in Fig. \ref{fig:AvgPc}: It shows the superposition of the extracted waveforms, after being normalized by length, and their average.
  
-This same average is shown shifted, to exemplify that approximate $C^0$ and $C^1$ continuity is achieved. This can be seen as the average waveform of the original discrete signal, and can be used, along with the information of its envelope, to generate an alternative representation of the wave, useful, for example, for compression and classification purposes.
+This same average is shown shifted, to exemplify that approximate $C^0$ and $C^1$ continuity is achieved. This can be seen as the average waveform of the original discrete signal, and can be used, along with the description of the signal's envelope, to generate an alternative representation of the wave, useful, for example, for compression purposes.
  
 \begin{figure}[ht!]
   \centering
     \includegraphics{images/10AvgPc.pdf}
-  \caption{Pseudo-cycles of the wave illustrated in Fig. \ref{fig:singer_voice}, segmented and superposed, and their average. The average is also shown shifted by one average period, to illustrate the average continuity.}
+  \caption{Waveform of each pseudo cycles of the wave illustrated in Fig. \ref{fig:singer_voice}, interpolated to the same length and superposed. The average in its original position, and shifted, is also shown.}
   \label{fig:AvgPc}
 \end{figure}
  
+
 \section{Conclusion}
-This work fills a gap identified in the theory of digital signal processing, where the lack of general procedures for the accurate identification of the temporal envelope of arbitrary waves poses an obstacle to the complete description and eventual manipulation of signals.
- 
+
+This work fills a gap in the theory of digital signal processing, especially in the context of broadband signals, where the lack of general procedures for envelope detection is an obstacle to the complete description and manipulation of signals.
+
 By presenting a general approach for envelope detection, and eliminating the need for parameter tuning, we expect to facilitate further research in the many areas that rely on envelope detection techniques, and improve already existing algorithms that have envelope detection as an intermediary step.
- 
-Illustrating the efficiency of an algorithm inspired by geometric aspects of a discrete signal on a wide range of real-world signals, we also hope to encourage research in this direction.
- 
-The present work also highlights some gaps in our current understanding and definition of temporal envelope and, in so doing, endeavors to motivate further research in this topic, that can ultimately give rise to a more mathematically rigorous envelope theory, especially concerning broadband waves; suggestions in this direction were also presented.
- 
-While relevant in its own accord, the procedure here presented approximately isolates the individual pseudo-cycles of a wave, pinpointing them in the time-domain. 
- 
-Similarly, by decomposing a wave into its envelope and carrier, and simplifying the representation of such carrier in the frequency-domain, a rich set of advancements, especially in sound compression and synthesis, both in the time and frequency-domains, can be built upon this initial algorithm.
- 
-By illustrating how this information can be used to obtain the average waveform of a discrete wave, we hope to encourage research in this area, ultimately leading to alternative representations of discrete waves.
+
+Illustrating the efficiency of a geometric envelope detection algorithm on a wide range of real-world signals, we also hope to encourage research in this direction.
+
+Showing that some important guarantees can be derived for envelope detection approaches based on selecting samples from the local extrema of the original signal, this works a direction to future research, that can give rise to a more mathematically rigorous envelope theory.
+
+The present work also highlights some gaps in our current understanding and definition of temporal envelope and, in so doing, endeavors to motivate further research in this topic.
+
+While relevant on its own, the procedure here presented approximately isolates the individual pseudo cycles of a wave, pinpointing them in the time-domain. This approach can serve as a basis for sound compression techniques.
+
+Similarly, decomposing a wave into its envelope and carrier, thus simplifying the wave's spectral representation, can improve frequency-domain approaches to sound classification, compression, and synthesis.
+
+By illustrating how this algorithm can be used to segment a discrete signal into its pseudo cycles, and generate a description of the evolution of the signal's waveform over time, we hope to encourage research in this direction, potentially leading to alternative representations of discrete waves.
 
 \bibliography{bibli}
 

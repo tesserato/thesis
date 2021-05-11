@@ -40,7 +40,7 @@ transp_black = "rgba(38, 12, 12, 0.2)"
 name = "alto"
 W, _ = se.read_wav(f"C:/Users/tesse/Desktop/Files/Dropbox/0_Science/reps/envelope/test_samples/{name}.wav")
 amp = np.max(np.abs(W))
-W = 4 * W / amp
+W = W / amp
 X = np.arange(W.size)
 
 Xpos, Xneg = se.get_frontiers(W, 0)
@@ -49,7 +49,7 @@ E = se.get_frontiers(W, 1)
 m = min(Xpos.size, Xneg.size)
 Xavg = np.round((Xpos[0 : m] + Xneg[0 : m]) / 2).astype(np.int)
 
-avg_pcs, orig_pcs, norm_pcs = average_pc_waveform(Xavg, W)
+avg_pcs, orig_pcs, norm_pcs = average_pc_waveform(Xpos.astype(np.int), W)
 
 '''============================================================================'''
 '''                                    PLOT                                    '''
@@ -81,37 +81,54 @@ fig.update_yaxes(showline=False, showgrid=False, zeroline=False)
 XX, YY = to_plot(norm_pcs)
 fig.add_trace(
   go.Scatter(
-    name="Normalized Pseudo Cycles    ",
+    name="Normalized waveforms  ",
     x=XX,
     y=YY,
     mode="lines",
     # fill="tozeroy",
     # fillcolor="rgba(0,0,0,0.3)",
-    line=dict(width=1, color="rgba(235, 64, 52,0.2)",),
+    line=dict(width=1, color=transp_black,),
   )
 )
 
 fig.add_trace(
   go.Scatter(
-    name="Average Waveform    ",
+    name="Split    ",
+    showlegend=False,
+    x=[avg_pcs.size - 1, avg_pcs.size - 1],
+    y=[-0.7, 1.1],
+    mode="lines",
+    # fill="tozeroy",
+    # fillcolor="rgba(0,0,0,0.3)",
+    line=dict(width=1, color="blue",),
+  )
+)
+
+fig.add_trace(
+  go.Scatter(
+    name="Average waveform  ",
     # x=np.arange(W.size),
     y=avg_pcs,
-    mode="lines",
+    mode="lines+markers",
+    line_shape='spline',
     # fill="tozeroy",
     # fillcolor="rgba(0,0,0,0.6)",
-    line=dict(width=3, color="black",),
+    marker=dict(size=3),
+    line=dict(width=1, color="red",),
   )
 )
 
 fig.add_trace(
   go.Scatter(
-    name="Average Waveform (Transposed)    ",
+    name="Average waveform (shifted)  ",
     x=avg_pcs.size + np.arange(avg_pcs.size) - 1,
     y=avg_pcs,
-    mode="lines",
+    mode="lines+markers",
+    line_shape='spline',
     # fill="tozeroy",
     # fillcolor="rgba(0,0,0,0.6)",
-    line=dict(width=3, color="black", dash="dot"),
+    marker=dict(size=3),
+    line=dict(width=1, color="red", dash="dot"),
   )
 )
 
