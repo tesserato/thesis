@@ -5,7 +5,7 @@
 # Reviewer #2: This is an interesting research. It seems that the authors have already put this article publicly accessible at arXiv.org. The authors are suggested to consider and address the following issues:
 
 ## Writing needs to be refined.
-We extensively reviewed the text, rewriting many parts of it, besides restructuring the sections to improve flow and coherence.
+We extensively reviewed the text, rewriting parts of it, besides restructuring the sections to improve flow and coherence.
 
 ## Issues with the Highlights: maximum 85 characters, including spaces, per bullet point
 Highlights were rewritten to conform with the requirement of less than 85 characters.
@@ -14,16 +14,18 @@ Highlights were rewritten to conform with the requirement of less than 85 charac
 We revised the abstract, removing superfluous information and verbose phrasing in order to make it more succinct, resulting in a reduction from the original 349 words to 248 words in the revised version.
 
 ## Citation of references should be in order and no jump of reference numbers.
-This issue seems to be caused by the set of commands used to compile the TeX source, and we are sorry for the overlook. It was fixed in the revised version.
+This issue was caused by the set of commands used to compile the TeX source, and we are sorry for the overlook. It was fixed in the revised version.
 
 ## What's the Abscissa in the highlights (50k, 100k, etc.) and some figures?
-The abscissas refer to the index *i* of the samples of the discrete signal. We revised the legends of figures 3 to 6, 10 to 17, 21 and 22 to include this information, and also made this more explicit in the paragraph where the discrete version of the problem is introduced (page 5, line 108).
+The abscissas refer to the index *i* of the discrete signal's samples. We revised the legends of figures 3 to 6, 10 to 17, 21 and 22 to include this information, and also made this more explicit in the paragraph where the discrete version of the problem is introduced (page 5, line 109).
 
 ## Legends in some figures are confusing and hard to distinguish, such as in Fig 2: signal and Hilbert Envelope.
-We reworked all figures, color coding the different entities shown when deemed helpful, with careful attention to the impact in the readability of the legends. In the case of Fig. 2 in the original manuscript, now Fig. 3 in the revised version (page 4, line 90), we changed the color of the Hilbert envelope to red, and the line indicating the start of the noisy section to black, making both stand apart from the signal.
+We reworked all figures, color coding different entities when deemed helpful, with careful attention to the impact in the readability of the legends. In the case of Fig. 2 in the original manuscript, now Fig. 3 in the revised version (page 4, line 90), we changed the color of the Hilbert envelope to red, and the line indicating the start of the noisy section to black, making both stand apart from the signal.
+
+TODO
 
 ## Figure 3: the illustration of the carrier c and wave w does not comply with the common sense of envelope and modulation?
-We changed the legend of the figure (page 6, Fig 5, top of the page) and the text of the revised version (page 5, line 113) to make more explicit that the example was constructed from a known carrier and envelope.
+We changed the legend of the figure (page 6, Fig. 5, top of the page) and the text of the revised version (page 5, line 113) to make more explicit that the example was constructed from a known carrier and envelope.
 
 Besides, we added a paragraph in the revised version (page 6, line 119) calling attention to the differences between the representations found in the literature.
 
