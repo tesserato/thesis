@@ -22,20 +22,18 @@ The abscissas refer to the index *i* of the discrete signal's samples. We revise
 ## Legends in some figures are confusing and hard to distinguish, such as in Fig 2: signal and Hilbert Envelope.
 We reworked all figures, color coding different entities when deemed helpful, with careful attention to the impact in the readability of the legends. In the case of Fig. 2 in the original manuscript, now Fig. 3 in the revised version (page 4, line 90), we changed the color of the Hilbert envelope to red, and the line indicating the start of the noisy section to black, making both stand apart from the signal.
 
-TODO
-
 ## Figure 3: the illustration of the carrier c and wave w does not comply with the common sense of envelope and modulation?
-We changed the legend of the figure (page 6, Fig. 5, top of the page) and the text of the revised version (page 5, line 113) to make more explicit that the example was constructed from a known carrier and envelope.
+We changed the legend of the figure (page 6, Fig. 5, line 116, top of the page) and Equation 1 (page 5, line 110) to make more explicit that the example was constructed from a known carrier and envelope.
 
-Besides, we added a paragraph in the revised version (page 6, line 119) calling attention to the differences between the representations found in the literature.
+Besides, we added a paragraph in the revised version (page 6, line 123) calling attention to the differences between the representations found in the literature.
 
 
 ## Definition of the envelope is very vague and controversial. What's the relationship with the conventional amplitude modulation?
-We made more explicit that a general definition of the envelope of a digital signal is still an open question in the literature, adding recent citations that corroborate this.(page 4, line 74)
+We made more explicit that a general definition of envelope, especially in the case of broadband signals, is still an open question in the literature, adding recent citations to corroborate this.(page 4, line 76; page 5, line 100)
 
-In an effort to better define an envelope, we added a general definition for the envelope of a family of curves (page 13, line 307), that motivated a rewrite of the metric used to assess the general quality of envelopes. This metric is now based on the construction of a reference envelope from the approximation of this formal definition to the discrete case (page 13, line 313).
+In an effort to better define an envelope, we added a general definition for the envelope of a family of curves (page 13, line 311), that motivated a rewrite of the metric used to assess the general quality of envelopes. This metric is now based on the construction of a reference envelope from an approximation of this definition to a discrete acenario (page 13, line 310).
 
-We greatly extended the discussion of how the proposed method satisfies the 4 conditions necessary for the plausibility of the amplitude and frequency modulation of a signal, proposed by 
+Moreover, we greatly extended the discussion on how the proposed method satisfies the 4 conditions necessary for the plausibility of the amplitude and frequency modulation of a signal, proposed by 
 TODO \textcite{1996Loughlinamplitude} 
 , reinforcing the relationship with conventional amplitude modulation (page 12, line 261). 
 
