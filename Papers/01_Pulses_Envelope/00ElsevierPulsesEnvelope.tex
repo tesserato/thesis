@@ -172,12 +172,13 @@ The $ \odot $ operator in Equation \ref{eq:Envelope} stands for the Hadamard pro
 
 Fig. \ref{fig:Envelope} helps to illustrate a key concept: only at some local extrema the envelope can be inferred without prior knowledge of the underlying carrier.
 
-TODO
-% being, in fact, equal to the value of the instantaneous amplitude of the wave $ w_i $. That is, $ c_i = 1 $ at those points, rendering $ e_i = 1 w_i $.
+Consider the point $ w_i = c_i e_i $, with $ c_i $ as a local maximum of \textbf{c}, and assume $ c_i, e_i > 0 $. A point close to $ w_i $ can be written as $ w_i + \Delta w = (c_i - \Delta c) (e_i + \Delta e) $. We can assume $ \Delta e \approx 0 $, since the rate of change of the envelope is considerably smaller than that of the carrier. Making $ \Delta c > 0 $ guarantees the assumption that $ c_i $ is a local maximum.
 
-This realization that the envelope of a wave is defined only at some of the wave's local extrema is essential, as it can be used to generate a simplified representation of a signal, making the algorithm more efficient.
+Expanding this equation gives $ w_i + \Delta w = - \Delta{c} e_{i} + c_{i} e_{i} $, where $ c_i e_i = w_i $ and can be cancelled. Since $ \Delta c, e_i > 0 $, we conclude that $ \Delta w < 0 $ and $ w_i $ must  be a local maximum of \textbf{w}.
 
-Note that, in Fig. \ref{fig:Envelope}, the carrier, the original signal and even the envelope are representations of similar entities: signals in the same coordinate system. This is in line with \cite{2011CaetanoImproved,2011TurnerDemodulation,2017LyonsDigital}, but in contrast with some representations found in the literature of amplitude modulation of narrowband signals \cite[e.g.][]{1996Loughlinamplitude}, where the FM and AM of a signal are represented in different coordinate systems, commonly frequency versus time and amplitude versus time, respectively.
+This realization that the envelope is observable only at some of the wave's local extrema is important, as it can be used to generate a simplified representation of a signal, making the algorithm more efficient.
+
+Note that, in Fig. \ref{fig:Envelope}, the carrier, the original signal and even the envelope are representations of similar entities: signals in the same coordinate system. This is in line with \cite{2011CaetanoImproved,2011TurnerDemodulation,2017LyonsDigital}, but in contrast with some representations found in the literature of amplitude modulation \cite[e.g.][]{1996Loughlinamplitude}, where the FM and AM of a signal are represented in different coordinate systems, commonly frequency versus time and amplitude versus time, respectively.
 
 \section{Simplified Representation of a signal} \label{sec:representation}
 
