@@ -29,25 +29,22 @@ C = W / E
 '''============================================================================'''
 
 FONT = dict(
-    family="Arial",
+    family="Latin Modern Roman",
     color="black",
-    size=24
-    # size=13.3333
+    size=18
   )
 
 '''Plotting'''
 fig = make_subplots(
   rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.01,
-  subplot_titles=("<b>Extracted Envelope and Carrier Wave</b> (33<sup>rd</sup> key of a grand piano)", "<b>Extracted Superior and Inferior Frontiers</b> (33<sup>rd</sup> key of a grand piano)")
+  subplot_titles=("<b>Envelope and Carrier</b>", "<b>Frontiers</b> ")
 )
 fig.layout.template ="plotly_white" 
 fig.update_layout(
-  # xaxis_title="<b><i>i</i></b>",
-  # yaxis_title="<b>Amplitude</b>",
-  legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1),
-  margin=dict(l=0, r=0, b=0, t=0),
+  legend=dict(orientation='h', yanchor='top', xanchor='left', y=1.1, itemsizing='constant'),
+  margin=dict(l=0, r=0, b=0),
   font=FONT,
-  # title=dict(text="<b>Teste</b>", font=FONT)
+  title=dict(text="<b>Geometric Envelope Detection Example</b> (33<sup>rd</sup> key of a grand piano)", font=FONT)
 )
 # fig.layout.xaxis.title.font=FONT
 # fig.layout.yaxis.title.font=FONT
@@ -66,7 +63,11 @@ fig.update_xaxes(
   showgrid=False, 
   zeroline=False, 
   showticklabels=True, 
-  title=dict(text="<b><i>i</i></b>",font=FONT), 
+  title=dict(text="Sample <i>i</i>",font=FONT),
+        tickmode = 'linear',
+        tick0 = 0,
+        dtick = 20000,
+
   row=2, col=1
 )
 
@@ -76,33 +77,40 @@ fig.update_yaxes(
   zeroline=False,
   gridcolor='gray',
   tickvals=[ -3, -1, 1, 3],
-  title=dict(text="<b>Amplitude</b>", font=FONT),
+  title=dict(text="Amplitude", font=FONT),
   row=1, col=1
 )
 
 fig.update_yaxes(
   showline=False, 
   showgrid=False, 
-  zerolinewidth=1, 
+  zeroline=False,
   zerolinecolor="gray",
+  tickvals=[ -3, -1, 1, 3],
   showticklabels=False, 
-  title=dict(text="<b>Amplitude</b>",font=FONT), 
+  title=dict(text="Amplitude",font=FONT), 
   row=2, col=1
 )
 
 for i in fig['layout']['annotations']:
     i['font'] = FONT
-
-
+####################
+####################
+envelope_width = 3
+signal_width = 1
+signal_color = "rgba(0, 0, 0, 0.53)"
+carrier_color = "rgba(255, 21, 21, 0.44)"
+####################
+####################
 fig.add_trace(
   go.Scatter(
-    name="Original Signal   ",
+    name="Original Signal            ",
     # x=np.arange(W.size),
     y=W,
     mode="lines",
     # fill="tozeroy",
     # fillcolor="gray",
-    line=dict(width=1, color="rgba(0, 0, 0, 0.4)",),
+    line=dict(width=signal_width, color=signal_color,),
   ), row=1, col=1
 )
 
@@ -114,31 +122,32 @@ fig.add_trace(
     mode="lines",
     # fill="tozeroy",
     # fillcolor="rgba(0,0,0,0.3)",
-    line=dict(width=1, color="rgba(235, 64, 52, 0.3)",),
+    line=dict(width=signal_width, color=carrier_color,),
   ), row=1, col=1
 )
+
 
 fig.add_trace(
   go.Scatter(
     name="Envelope   ",
-    # x=E,
+    # line_shape='spline',
     y=E,
     mode="lines",
-    line=dict(width=2, color="black"),
+    line=dict(width=envelope_width, color="black"),
   ), row=1, col=1
 )
 
 '''Plot 2'''
 fig.add_trace(
   go.Scatter(
-    name="Original Signal      ",
+    name="Original Signal            ",
     showlegend = False,
     # x=np.arange(W.size),
     y=W,
     mode="lines",
     # fill="tozeroy",
-    # fillcolor="gray",
-    line=dict(width=1, color="rgba(0, 0, 0, 0.4)",),
+    # fillcolor=signal_color,
+    line=dict(width=signal_width, color=signal_color,),
   ), row=2, col=1
 )
 
@@ -147,8 +156,9 @@ fig.add_trace(
     name="Superior Frontier   ",
     x=Xpos,
     y=W[Xpos],
+    line_shape='spline',
     mode="lines",
-    line=dict(width=2, color="blue"),
+    line=dict(width=envelope_width, color="rgb(26, 44, 247)"),
     # visible = "legendonly"
   ), row=2, col=1
 )
@@ -158,8 +168,9 @@ fig.add_trace(
     name="Inferior Frontier   ",
     x=Xneg,
     y=W[Xneg],
+    line_shape='spline',
     mode="lines",
-    line=dict(width=2, color="red"),
+    line=dict(width=envelope_width, color="rgb(255, 25, 4)"),
     # visible = "legendonly"
   ), row=2, col=1
 )

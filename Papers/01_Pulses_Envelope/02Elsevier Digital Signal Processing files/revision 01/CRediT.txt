@@ -1,0 +1,4 @@
+Carlos Henrique Tarjano Santos: Conceptualization, Writing - Original Draft, Methodology, Investigation, Software, Visualization
+
+
+Valdecy Pereira: Writing - Review & Editing, Resources, Validation, Formal analysis, Data Curation, Supervision, Project administration
