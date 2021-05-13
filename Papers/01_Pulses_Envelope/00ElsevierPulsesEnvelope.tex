@@ -22,7 +22,7 @@
 \author{Valdecy Pereira}
 
 \begin{abstract} 
-Despite being an elusive concept, the temporal amplitude envelope of a signal is essential for its complete characterization, being the primary information-carrying medium in spoken voice and telecommunications, for example. Envelope detection techniques have applications in medicine, sound classification, sound synthesis, seismology, and speech recognition. Nevertheless, a general approach to envelope detection does not exist. Most methods involve manual intervention, in the form of filter design, smoothing, and other specific design choices based on prior knowledge of the signals under investigation. To address this problem, we propose an algorithm that uses characteristics of a signal to estimate its envelope, eliminating the necessity of parameter tuning. The method draws inspiration from geometric concepts: the discrete signal is mapped to a set of points in the Cartesian plane, where a new measure of discrete curvature is used to identify the samples that are part of the envelope. Due to its geometric nature, the method can optionally generate the superior and inferior envelopes of a given wave. The algorithm compares favorably with classic envelope detection techniques based on smoothing, filtering, and the Hilbert Transform, besides being physically plausible. We provide visualizations of the envelope extracted for various real-world signals with diverse characteristics, such as voice, spoken and sang, and pitched and unpitched musical instruments, and discuss some approaches to objectively assess the quality of the obtained envelopes. An optimized implementation is available via the Python Package Index (PyPI), while interactive visualizations and source code are available from the accompanying GitHub repository.
+Despite being an elusive concept, the temporal amplitude envelope of a signal is essential for its complete characterization, being the primary information-carrying medium in spoken voice and telecommunications, for example. Envelope detection techniques have applications in medicine, sound classification, sound synthesis, seismology, and speech recognition. Nevertheless, a general approach to envelope detection does not exist. Most methods involve manual intervention, in the form of filter design, smoothing, and other specific design choices based on prior knowledge of the signals under investigation. To address this problem, we propose an algorithm that uses characteristics of a signal to estimate its envelope, eliminating the necessity of parameter tuning. The method draws inspiration from geometric concepts: the discrete signal is mapped to a set of points in the Cartesian plane, where a new measure of discrete curvature is used to identify the samples that are part of the envelope. Due to its geometric nature, the method can optionally generate the superior and inferior envelopes of a given wave. The algorithm compares favorably with classic envelope detection techniques based on smoothing, filtering, and the Hilbert transform, besides being physically plausible. We provide visualizations of the envelope extracted for various real-world signals with diverse characteristics, such as voice, spoken and sang, and pitched and unpitched musical instruments, and discuss some approaches to objectively assess the quality of the obtained envelopes. An optimized implementation is available via the Python Package Index (PyPI), while interactive visualizations and source code are available from the accompanying GitHub repository.
 \end{abstract}
 
 \begin{keyword}
@@ -94,7 +94,7 @@ In Section \ref{sec:representation} we explore some simplifications to the task 
  
 Section \ref{sec:mapping} explores the geometric characteristics of envelope detection and formalizes how this classic DSP problem can be transformed into the geometric problem of finding the shape of a set of points.
  
-We next explore, in Section \ref{sec:curvature}, the concept of discrete curvature, used in Section \ref{sec:envelopedetection} to discriminate which samples of a discrete signal belong to the envelope.
+We next investigate, in Section \ref{sec:curvature}, the concept of discrete curvature, used in Section \ref{sec:envelopedetection} to discriminate which samples of a discrete signal belong to the envelope.
  
 Section \ref{sec:quality} discusses the difficulties in assessing the quality of an envelope, suggesting qualitative and quantitative approaches. It is also demonstrated that the method presented conforms to the four requirements for a physically plausible envelope proposed in \cite{1996Loughlinamplitude}. We also compare the presented algorithm with traditional envelope detection methods in terms of accuracy and processing time. 
 
@@ -117,12 +117,12 @@ This complex signal became known as the analytic signal, and has the form $ A(t)
 
 Despite its widespread use, and effectiveness in the context of narrowband signals, envelope detection techniques based on the Hilbert transform do not behave well for broadband signals \cite{2012DauSpeech, 2019Jiaempirical}, being even physically paradoxical in some cases \cite{1996Loughlinamplitude, 2014Yangnovel}.
 
-Fig. \ref{fig:AnalyticSignal} exemplifies the Hilbert envelope, for a pure sinusoid modulated by a polynomial, illustrating the difference in the smoothness of the envelope in the presence and absence of Gaussian white noise. It is readily noticeable from Fig. \ref{fig:AnalyticSignal} that, as soon as noise is introduced in the original signal, it is directly reflected on the envelope.
+Fig. \ref{fig:AnalyticSignal} exemplifies the Hilbert envelope, for a pure sinusoid modulated by a polynomial, illustrating the difference in the smoothness of the envelope in the presence and absence of Gaussian noise. It is readily noticeable from Fig. \ref{fig:AnalyticSignal} that, as soon as noise is introduced in the original signal, it is directly reflected on the envelope.
 
 \begin{figure}[ht!]
   \centering
     \includegraphics{images/01AnalyticSignal.pdf}
-  \caption{Envelope of a pure sinusoid with a local frequency of 20 cycles, modulated by a polynomial of degree 3, obtained by the Hilbert Transform approach. In the first half of the samples, the sinusoid is free of noise. In the second half Gaussian noise with a standard deviation of $ 1/10 $ of the maximum amplitude of the wave was added to the signal.}
+  \caption{Envelope of a pure sinusoid with a local frequency of 20 cycles, modulated by a polynomial of degree 3, obtained by the Hilbert transform approach. In the first half of the samples, the sinusoid is free of noise. In the second half, Gaussian noise was added to the signal.}
   \label{fig:AnalyticSignal}
 \end{figure}
 
@@ -553,7 +553,7 @@ Average & 0.0108 & 0.2819 & 0.2831 & 0.1182 \\
  
 We can see from Table \ref{table:Error_comparison} that the proposed method consistently outperforms the traditional approaches for all waves tested, yielding an error of less than 2\%, on average, of the error of the traditional methods. 
  
-The times taken for the algorithms to process each signal are shown in Table \ref{table:Time_comparison}. 
+The processing times of the algorithms, for each signal, are shown in Table \ref{table:Time_comparison}. 
 The Python source for the tests, as well as the samples used, are available at the repository dedicated to this work, in the file “Comparison of Envelope Algorithms.py”.
  
 The methods were performed as described in the beginning of this section, using the implementations available at the Scipy library, under the Signal processing module. The proposed algorithm, is on average, the second-fastest.
