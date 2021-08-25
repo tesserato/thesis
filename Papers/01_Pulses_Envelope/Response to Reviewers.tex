@@ -14,139 +14,39 @@
  
 \maketitle
  
-\section{Reviewer 2}
-This is an interesting research. It seems that the authors have already put this article publicly accessible at arXiv.org. The authors are suggested to consider and address the following issues:
+\section{Reviewer #4}
+The comments have been well address by the authors. The manuscript has also been well revised based on comments.
+
+
+\section{Reviewer #8} The revised manuscript was much better than the original one. According to previous comments, the writing style of this revised version was largely improved, and some key concepts were much clearer compared with the original one. Most of the previous comments were well addressed. This reviewer just has several minor comments.
+
+\subsection{The term 'benchmarking' always refers to the 'true value', or some 'gold standard' method that best estimates the true value. In the revised manuscript, section 7.2, the authors described two methods, which one was used as the 'benchmarking' for calculating the results listed in Table 1?}
+
+Only one method is described in section 7.2, the reference envelope. We changed the text to make this clear (line 320), and better defined this method, that was formalized in an equation (line 325). We also made clear that this is the method used as reference in Table 1 (line 331).
+
+\subsection{What's the main drawback of POST-processing(filtering) of Hilbert transform? Although the Table 1 has already shown the error of this method. The reviewer suggests the author give an intuitive explanation. For example, around Figure.4, can we say the POST- filtering of Hilbert transform mis-estimated the envelope in magnitude?}
+
+We can affirm that post filtering the result of the Hilbert transform will generally underestimate the envelope. This can be better understood in the frequency domain: By low pass filtering in the time domain, we are essentially zeroing frequency bins in the frequency domain above a certain frequency threshold and lowering the total energy of the transform result. 
+
+This procedure isn't intrinsically detrimental, however, in the sense that if the original result of the transform is smooth, those frequencies would already be absent, and the corresponding bins would be zero from the beginning. Filtering wouldn't change the original output of the transform.
+
+We changed the text to make this more intuitive (line 92).
+
+\subsection{The Figure.15 should be moved before Figure.13, since this Figure was mentioned earlier (line 294) than Figure.13 and Figure.14.}
+Despite being mentioned earlier (line 301 of the revised manuscript), Fig. 15 is better understood after the description of the envelope extraction algorithms it exemplifies, presented after Figs 13 and 14, in Section "7.3. Comparison with traditional algorithms". To avoid a major reorganization of the text, we therefore indicated in its first mention (line 301) that the figure is to be found in section "7.3. Comparison with traditional algorithms".
  
-\subsection{Writing needs to be refined.}
-We extensively reviewed the text, rewriting parts of it, besides restructuring the structure of the sections to improve flow and coherence.
- 
-\subsection{Issues with the Highlights: maximum 85 characters, including spaces, per bullet point}
-Highlights were rewritten to conform to the requirement of fewer than 85 characters.
- 
-\subsection{Abstract looks too long. Should be presented in a more concise way.}
-We revised the abstract, removing superfluous information and verbose phrasing to make it more succinct, resulting in a reduction from the original 349 words to 248 words in the revised version.
- 
-\subsection{Citation of references should be in order and no jump of reference numbers.}
-This issue was caused by the set of commands used to compile the TeX source, and we are sorry for the overlook. It was fixed in the revised version.
- 
-\subsection{What's the Abscissa in the highlights (50k, 100k, etc.) and some figures?}
-The abscissas refer to the index $i$ of the discrete signal's samples.
-We revised the highlights and the legends of Figs. 3 to 6, 10 to 17, 21 and 22 to include this information, and also made this more explicit in the paragraph where the discrete version of the problem is introduced (page 5, line 109).
- 
-\subsection{Legends in some figures are confusing and hard to distinguish, such as in Fig 2: signal and Hilbert Envelope.}
-We reworked all figures, color coding different entities when deemed helpful, with careful attention to the impact on readability.  All legends were also revised to be clearer.
-In the case of Fig. 2 in the original manuscript, now Fig. 3 in the revised version (page 4, line 90), we changed the color of the Hilbert envelope to red, and the line indicating the start of the noisy section to black, making both stand apart from the signal. The legend was completely reformulated in this case.
- 
-\subsection{Figure 3: the illustration of the carrier c and wave w does not comply with the common sense of envelope and modulation?}
-We changed the legend of Fig. 5 (page 6, line 116, top of the page) and Equation 1 (page 5, line 110) to make it more explicit that the example was constructed from a known carrier and envelope.
- 
-Besides, we added a paragraph in the revised version (page 6, line 123) calling attention to the different representations found in the literature.
- 
-\subsection{Definition of the envelope is very vague and controversial.}
- 
-We made it more explicit that a general definition of envelope, especially in the case of broadband signals, is still an open question in the literature, adding recent citations to corroborate this. (page 4, line 76; page 5, line 100)
- 
-A common intuitive definition is also given on page 4, line 76.
- 
-In an effort to better define an envelope, we added a general definition for the envelope of a family of curves (page 13, line 311), that motivated a rewrite of the metric used to assess the general quality of envelopes. This metric is now based on the construction of a reference envelope from an approximation of this definition to the discrete scenario (page 13, line 310).
- 
-In the context of the work, we improved the definition adopted, as seen in Equation 1 (page 5, line 110). We also formalized the characteristics of a carrier wave on page 5, line 102.  
- 
-\subsection{What's the relationship with the conventional amplitude modulation?}
-We greatly extended the discussion on how the proposed method satisfies the 4 conditions necessary for the physical plausibility of the amplitude and frequency modulation of a signal, proposed by \cite{1996Loughlinamplitude} (page 11, line 264, Theoretical guarantees).
- 
-As those conditions were postulated in the context of conventional amplitude modulation, this reinforces the relationship between the proposed algorithm and more traditional approaches.
- 
-\subsection{For the proposed "Equivalent Circle Approach", an acceptable mathematical background and justification is missing.}
- 
-We expanded the explanation for the Equivalent circle, justifying the assumption of the horizontal initial direction, and making the other assumptions explicit (page 9, line 201). We further comment on some properties of this approach on page 9, line 215
- 
-\subsection{It's quite doubtful about the assumption of $ w = e \odot c $?}
-We revised the explanation about this equation to make clear that, besides being assumed in \cite{2011TurnerDemodulation} (page 5, line 95), the relation holds by definition in our work (equation 1, page 5, line 110).
- 
-We also noted that the definition based on the analytic signal is common in classic AM-FM literature. (page 4, line 85)
- 
- 
-\subsection{P8: the authors claimed that “the algorithm here presented satisfies the four conditions presented”, however, no convincing evidence is provided. Please prove it mathematically.}
-We added mathematical proofs for each one of the four conditions. (page 11, line 264, Theoretical guarantees)
- 
-\subsection{How was the benchmarking carried out? Details on the implementation should be provided.}
-We explained the benchmarking more extensively, citing that the implementations used were from the signal processing module of the Scipy Python library, and also made the source code for the tests, as well as the used samples, available at the repository dedicated for the work. (page 15, line 350)
- 
-\section{Reviewer 4}
-This paper proposes a new method for envelope estimation by using the geometric properties of a discrete real signal. Using discrete curvatures to determine the envelope of a discrete signal is an interesting idea and results obtained by this proposed method seem to be acceptable. However, the reviewer cannot recommend the publication of the paper in its current form. The authors need to address the reviewers below and revise the paper accordingly:
- 
-\subsection{The description of the key concepts is not clear. The paragraphs of the current paper were poorly written and readers cannot follow them easily. The authors are suggested to revise the paper extensively to improve its readability.}
- 
-We revised the text extensively, to improve the overall readability and make the flow of ideas more linear. To that end, the overall structure of sections and subsections was substantially changed.
- 
-We also extended the definition of the basic concepts, adding Figures to better illustrate them.
- 
-We inserted a more intuitive explanation of the alpha shapes algorithm in page 8, line 171, complemented by Fig. 1 (page 3, top of the page)
- 
-The concept of convex hull received a similar treatment, with an additional explanation on page 2, line 25.
- 
-Fig. 2, where both concepts are illustrated, was improved, and two alpha shapes, with different alphas, are shown.
- 
-\subsection{The authors describe basic concepts of convex and concave hulls in an intuitive manner and show that “the idea is to identify the local extrema that tough the envelope”. But the reviewer cannot fully understand the logical connection between them. The authors are suggested to explain their idea in a more explicit manner.}
- 
-The general overview of the paper at the end of the introduction was improved (page 4, line 55). Besides, the flow of ideas was made more linear by the reorganization of the sections and subsections; the main steps were divided into sections, generally beginning with an explanation of what is to be developed ahead.
- 
-A section dedicated to how the signal is mapped to Cartesian coordinates(Section 4, page 6) and a section explaining how the envelope is identified (Section 6, page 10) were introduced.
- 
- 
-\subsection{The reviewer cannot understand why filtering is needed in the pre-processing of Hilbert transform. Clarify the reasoning and necessity.}
-We explained in the revised text that the results of the pure Hilbert transform retain part of the frequency content of the underlying wave, especially in the case of broadband signals, and added Fig. 4 (page 5, line 94) to exemplify this effect in the case of a real-world signal. We moved the filtering to the post-processing, however, and results for the Hilbert transform were improved substantially.
- 
-\subsection{Envelopes obtained by the proposed method seem to be good, but those obtained by other comparable methods, such as Hilbert transform, are not reasonable. The reviewer believes that results obtained by Hilbert transform should not be bad as shown by the authors.}
-Besides moving the filtering to the post-processing phase, we changed the cut-off frequency of the filter, which was fixed at 100 Hz, to 1/10 of the fundamental frequency of the original signal, improving the envelopes obtained by the Hilbert transform.
- 
-\subsubsection{Besides, its end effects are serious. Is it caused by the filtering, which is mentioned by the reviewer in comment 3?}
-The effects were worsened by filtering the wave before the transform. We changed the order of the operations, attenuating the effects in the revised version. Note that the effects are present even in unfiltered signals, such as the one in Fig. 3 (page 4, bottom of the page), being a characteristic of the Hilbert transform.
- 
-\subsubsection{Provide an explanation for the results in Figures 10, 11, and 12.}
-An explanation was added for each Figure:
-\begin{itemize}
-  \item Former Fig. 10, now Fig. 15 - page 14, line 335;
-  \item Former Fig. 11, now Fig. 16 - page 14, line 338;
-  \item Former Fig. 12, now Fig. 17 - page 15, line 340.
-\end{itemize}
- 
-\subsection{5. There are a lot of mistakes in the texts, please proofread the paper carefully. Some of them listed in the following:}
- 
-\subsubsection{a. Full name at the first time for the abbreviate: being particularly illustrative of the potential synergy between geometric and DSP approaches.}
-We inserted the full name and abbreviation for DSP in its first use in the first paragraph of the revised version (page 2, line 2), and did the same with other abbreviations, such as the terms amplitude modulation (AM), first appearing on page 5, line 98; frequency modulation (FM), in page 5, line 100 and Python Package Index (PyPI), at page 4, line 70
- 
-\subsubsection{b. Figure or table or equation should be illustrated:}
- 
-\begin{itemize}
-  \item From 3 and the discussion in the preceding chapter;
-  \item The algorithm follows directly from the definition in 5 after noting;
-  \item In 10 we illustrate the envelope extracted by the conventional algorithms;
-  \item The times taken for the algorithms compared here to process each wave are shown in 2;
-  \item Figure 14 shows the frequency-domain power spectrum for the wave and the carrier presented in 3.
-\end{itemize}
- 
-This issue arose from a misconception that those terms would be added during the latex compilation, discovered late in the process of elaborating the manuscript, which caused many of the faulty references to remain unnoticed. We took steps to ensure proper indication of figures, tables, equations, and algorithms in the revised version.
- 
-\subsubsection{c. Wrong equation, should be $ r_k = v_{k,x} / \sin(\theta_k) $ : From figure 6 is easy to see that $ r_k = v_{k,x}  \sin(\theta_k) $}
-We thank the reviewer for pointing out this error. This mistake was fixed in the revised version. It turned out to be a typo, in the sense that the following equation (equation 4, page 10, top of the page), derived in part from this one, was correct. We seized the opportunity to double-check all equations in the revised version.
- 
-\subsection{6. Figure 7 is shown in the manuscript, but there is no explanation on the main body for it. Please add an explanation in the revised paper.}
-We added an explanation to the former figure 7, now figure 12 (page 12) in the revised paper, on page 11, line 262.
- 
-\section{Reviewer 5}
- 
-\subsection{Once the carrier frequency is known the technique presented in this paper is a special kind of limited curvature interpolation technique.}
- 
-We apologize if we misunderstood the suggestion, but we think we addressed it when making clear that the wave in Fig. 5, page 6, was constructed from a previously known carrier wave and envelope; that is the only instance when the carrier frequency, being a sinusoid, is known.
- 
-\subsection{The author should improve the citation by referencing corresponding techniques, such as K-curve, and bounded curvature interpolation methods. It is interesting to investigate the application of such technique to signal envelope extraction.}
-The K-curves algorithm involves an iterative optimization problem that would add a considerable amount of time to the interpolation step, since the number of interpolation points is usually in the hundreds. Our main concern, in the interpolation step, is not so much about curvature, but rather about boundedness between the interpolated values.
- 
-As for the curvature estimation step, we tested interpolation and fitting methods during the development of an estimate of the curvature of a discrete curve. Some computational problems arose and motivated us to pursue local methods, culminating in the development of the equivalent circle approach.
- 
-We indicated in the revised version that k-curves might be an interesting option to use in the interpolation step, depending on the requisites for the extracted envelope.
+\subsection{Did the proposed algorithm require the known carrier c as a priori knowledge? This algorithm may not need this information. However, the author should clarify that in the manuscript.}
+
+A priori knowledge of the carrier c is not required. We feel that the misunderstanding in this regard is introduced shortly after the definition of the vectors c, e and w in equation 1, in the subsequent paragraph. We therefore reworked this paragraph to make this more apparent (line 115).
+
+
+\subsection{Line 216, did the author mean 'vk,y->0 => rk -> infinite'?}
+
+That was indeed what we intended, and we are sorry for the overlook. We corrected this error in line 223 of the revised version.
+
+
+
+\section{Reviewer #9} The authors have put great effort to revise the manuscript and addressed all comments from other reviewers. I don't have other comments to add.
  
 \bibliographystyle{unsrt}
 \bibliography{bibli}
