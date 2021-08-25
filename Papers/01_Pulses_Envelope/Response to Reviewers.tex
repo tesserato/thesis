@@ -2,7 +2,9 @@
 \usepackage[margin=0.5in]{geometry}
 \usepackage{amsmath}
 \usepackage{amsfonts} % \mathbb
-% \usepackage{amssymb}  % \therefore
+\usepackage[utf8]{inputenc}
+\usepackage [autostyle, english = american]{csquotes}
+\MakeOuterQuote{"}
 \usepackage{algorithm}
 \usepackage{algorithmic}
 % \usepackage{lineno,hyperref}
@@ -14,41 +16,41 @@
  
 \maketitle
  
-\section{Reviewer #4}
+\section{Reviewer 4}
 The comments have been well address by the authors. The manuscript has also been well revised based on comments.
 
 
-\section{Reviewer #8} The revised manuscript was much better than the original one. According to previous comments, the writing style of this revised version was largely improved, and some key concepts were much clearer compared with the original one. Most of the previous comments were well addressed. This reviewer just has several minor comments.
+\section{Reviewer 8} The revised manuscript was much better than the original one. According to previous comments, the writing style of this revised version was largely improved, and some key concepts were much clearer compared with the original one. Most of the previous comments were well addressed. This reviewer just has several minor comments.
 
 \subsection{The term 'benchmarking' always refers to the 'true value', or some 'gold standard' method that best estimates the true value. In the revised manuscript, section 7.2, the authors described two methods, which one was used as the 'benchmarking' for calculating the results listed in Table 1?}
 
-Only one method is described in section 7.2, the reference envelope. We changed the text to make this clear (line 320), and better defined this method, that was formalized in an equation (line 325). We also made clear that this is the method used as reference in Table 1 (line 331).
+Only one method is described in section 7.2, the reference envelope. We changed the text to make this clear (line 320), and better defined this method, that was formalized with the addition of equation 9 (line 325). We also made clear that this is the method used as reference in Table 1 (line 331).
 
 \subsection{What's the main drawback of POST-processing(filtering) of Hilbert transform? Although the Table 1 has already shown the error of this method. The reviewer suggests the author give an intuitive explanation. For example, around Figure.4, can we say the POST- filtering of Hilbert transform mis-estimated the envelope in magnitude?}
 
 We can affirm that post filtering the result of the Hilbert transform will generally underestimate the envelope. This can be better understood in the frequency domain: By low pass filtering in the time domain, we are essentially zeroing frequency bins in the frequency domain above a certain frequency threshold and lowering the total energy of the transform result. 
 
-This procedure isn't intrinsically detrimental, however, in the sense that if the original result of the transform is smooth, those frequencies would already be absent, and the corresponding bins would be zero from the beginning. Filtering wouldn't change the original output of the transform.
+This procedure isn't intrinsically detrimental to the Hilbert envelope, however, in the sense that if the original result of the transform is smooth, those frequencies would already be absent, and the corresponding bins would be zero from the beginning. Filtering wouldn't change the original output of the transform.
 
-We changed the text to make this more intuitive (line 92).
+We changed the text to add a more intuitive explanation, and mentioned this potential effect of low pass filtering (line 92).
 
 \subsection{The Figure.15 should be moved before Figure.13, since this Figure was mentioned earlier (line 294) than Figure.13 and Figure.14.}
-Despite being mentioned earlier (line 301 of the revised manuscript), Fig. 15 is better understood after the description of the envelope extraction algorithms it exemplifies, presented after Figs 13 and 14, in Section "7.3. Comparison with traditional algorithms". To avoid a major reorganization of the text, we therefore indicated in its first mention (line 301) that the figure is to be found in section "7.3. Comparison with traditional algorithms".
+Despite being mentioned earlier (line 301 of the revised manuscript), Fig. 15 is better understood after the description of the envelope extraction algorithms it exemplifies, presented after Figs 13 and 14, in Section 7.3. "Comparison with traditional algorithms". To avoid a major reorganization of the text, we therefore indicated in its first mention (line 301) that the figure is to be found in section 7.3. "Comparison with traditional algorithms".
  
 \subsection{Did the proposed algorithm require the known carrier c as a priori knowledge? This algorithm may not need this information. However, the author should clarify that in the manuscript.}
 
 A priori knowledge of the carrier c is not required. We feel that the misunderstanding in this regard is introduced shortly after the definition of the vectors c, e and w in equation 1, in the subsequent paragraph. We therefore reworked this paragraph to make this more apparent (line 115).
 
 
-\subsection{Line 216, did the author mean 'vk,y->0 => rk -> infinite'?}
+\subsection{Line 216, did the author mean 'vk,y$\to$0 $\implies$ rk $\to$ infinite'?}
 
 That was indeed what we intended, and we are sorry for the overlook. We corrected this error in line 223 of the revised version.
 
 
 
-\section{Reviewer #9} The authors have put great effort to revise the manuscript and addressed all comments from other reviewers. I don't have other comments to add.
+\section{Reviewer 9} The authors have put great effort to revise the manuscript and addressed all comments from other reviewers. I don't have other comments to add.
  
-\bibliographystyle{unsrt}
-\bibliography{bibli}
+% \bibliographystyle{unsrt}
+% \bibliography{bibli}
  
 \end{document}

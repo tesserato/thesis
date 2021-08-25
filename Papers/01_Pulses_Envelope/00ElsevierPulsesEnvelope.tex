@@ -130,7 +130,7 @@ Fig. \ref{fig:AnalyticSignal} exemplifies the Hilbert envelope, for a pure sinus
 As seen, the intuitive definition of an envelope describes it as a smooth curve; this smoothness requirement implies that the envelope should ideally be comprised of lower frequencies than the original signal.
 For real-world signals, such as the one of an alto singer sustaining a steady note, partially shown in Fig. \ref{fig:AnalyticSignalAlto}, the Hilbert transform alone provides a poor envelope, since it retains most of the frequencies of the underlying wave. 
 
-Applying a low pass filter, we can coerce the result of the Hilbert transform to comply with the smoothness requirement, by removing high frequencies from the original result. This will potentially lead to undershoots, proportional to the initial high frequency content of the transform removed without compensation.
+Applying a low pass filter, we can coerce the result of the Hilbert transform to comply with the smoothness requirement, by removing high frequencies from the original result. This will potentially lead to undershoots, proportional to the initial high-frequency content of the transform removed without compensation.
 %%%%%%%%%%%%%%%%%%%%%
 
 \begin{figure}[ht!]
@@ -166,9 +166,10 @@ The continuous definitions can be translated to this discrete scenario assuming 
 \end{split}
 \end{align}
 
-%%%%%%%%%%%%%%%%%%%%% TODO
+
 The $ \odot $ operator in Equation \ref{eq:Envelope} stands for the Hadamard product and denotes element-wise multiplication of two vectors. Fig. \ref{fig:Envelope} provides an example of the vectors just defined: \textbf{w} is obtained by element-wise multiplication between the carrier wave \textbf{c} and the envelope \textbf{e}.
 
+%%%%%%%%%%%%%%%%%%%%% TODO
 Equation \ref{eq:Envelope} connects the three vectors \textbf{e}, \textbf{w} and \textbf{c} in the sense that each one can be derived from the other two. In most real world scenarios, however, only the original signal \textbf{w} is known, and the envelope \textbf{e} is to be retrieved without a priori knowledge of the carrier wave \textbf{c}.
 %%%%%%%%%%%%%%%%%%%%% 
 
@@ -478,8 +479,8 @@ In \cite{1992BruceCurves,2019Jiaempirical}, the envelope is defined as the bound
   \caption{Envelope as the boundary of the region filled by a family of curves, for a family of sinusoids with the same frequency and amplitude, modulated by a polynomial.}
   \label{fig:RefEnvelopeTheory}
 \end{figure}
-
-In practical applications, one is generally interested in obtaining the envelope of a single known signal, seldom having access to a family of curves. By shifting this signal along its initial position, an approximation to a family of curves can be obtained, however, that can be used to construct a reference envelope. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% TODO
+In practical applications, one is generally interested in obtaining the envelope of a single known signal, seldom having access to a family of curves. By shifting this signal around its initial position, an approximation to a family of curves can be obtained, however, that can be used to construct a reference envelope. 
 
 Given a discrete signal $ \mathbf{w} $, the reference envelope $ \mathbf{r} = (r_0, r_1, \cdots, r_{n-1}) $ is formalized in equation \ref{eq:referenceenvelope}, where $ f $ is the predominant frequency of the original signal, as obtained by the maximum argument of the DFT of the original signal, and $ t $ its predominant period. Moreover, the value of the original signal $ \mathbf{w} $ outside the interval $ 0 \le i < n $ is assumed to be zero. 
 
@@ -506,6 +507,7 @@ Given a discrete signal $ \mathbf{w} $, the reference envelope $ \mathbf{r} = (r
 The envelope obtained is not smooth, being composed of a series of horizontal segments, as can be seen in Fig. \ref{fig:RefEnvelope}. However, those segments agree with the general contour of the wave, and overestimate and underestimate the envelope in equal measures. 
 
 Although lacking in applicability, both given its discontinuous shape and the high computational cost of its estimation, an envelope constructed in this way arises from a mathematically sound background, and can serve as a reference to infer the quality of more practical methods. This envelope is used in the comparisons presented in Table \ref{table:Error_comparison}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
 \subsection{Comparison with traditional algorithms}\label{sec:comparison}
  
